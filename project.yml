@@ -1,0 +1,42 @@
+name: Glia
+options:
+  bundleIdPrefix: ai.glia
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "-"
+    ENABLE_HARDENED_RUNTIME: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+    MTL_ENABLE_DEBUG_INFO: NO
+targets:
+  Glia:
+    type: application
+    platform: macOS
+    sources:
+      - path: Glia
+    info:
+      path: Glia/Resources/Info.plist
+      properties:
+        CFBundleName: Glia
+        CFBundleDisplayName: Glia
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "15.0"
+        NSHumanReadableCopyright: "MIT License"
+        LSApplicationCategoryType: public.app-category.productivity
+        NSSupportsAutomaticTermination: false
+        NSSupportsSuddenTermination: false
+    entitlements:
+      path: Glia/Resources/Glia.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.network.client: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.glia.app
+        COMBINE_HIDPI_IMAGES: YES
