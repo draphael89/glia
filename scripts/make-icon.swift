@@ -68,11 +68,11 @@ ctx.strokePath()
 // stars with glow
 for s in stars {
     let glow = CGGradient(colorsSpace: cs, colors: [
-        CGColor(red: s.c.0, green: s.c.1, blue: s.c.2, alpha: 0.55),
+        CGColor(red: s.c.0, green: s.c.1, blue: s.c.2, alpha: 0.42),
         CGColor(red: s.c.0, green: s.c.1, blue: s.c.2, alpha: 0.0),
     ] as CFArray, locations: [0, 1])!
-    ctx.drawRadialGradient(glow, startCenter: s.p, startRadius: s.r * 0.6,
-                           endCenter: s.p, endRadius: s.r * 2.6, options: [])
+    ctx.drawRadialGradient(glow, startCenter: s.p, startRadius: s.r * 0.7,
+                           endCenter: s.p, endRadius: s.r * 1.9, options: [])
     // body
     let body = CGGradient(colorsSpace: cs, colors: [
         CGColor(red: min(s.c.0 * 1.25, 1), green: min(s.c.1 * 1.25, 1), blue: min(s.c.2 * 1.25, 1), alpha: 1),

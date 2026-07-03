@@ -2,6 +2,8 @@
 
 **A native macOS window into your agent's brain — watch it learn in real time.**
 
+![Glia](docs/hero.png)
+
 Glia renders a [gbrain](https://github.com/garrytan/gbrain) knowledge base as a living
 constellation: every page a lit orb, every typed link a thread, laid out with a
 Barnes-Hut force engine and drawn by Metal. New knowledge blooms into a *stable*
@@ -57,6 +59,19 @@ GLIA_SNAPSHOT=/tmp/glia.png Glia.app/Contents/MacOS/Glia            # overview
 GLIA_SNAPSHOT_FOCUS=people/some-slug …                              # focus mode
 GLIA_SNAPSHOT_REPLAY=0.3 …                                          # replay state
 ```
+
+## Performance budget
+
+Measured on Apple Silicon, full brain (6,340 nodes / 1,782 links), MSAA 4×:
+
+| Metric | Budget | Measured |
+|---|---|---|
+| GPU frame time @1600×1000 | < 4 ms | **0.45 ms** |
+| Render loop when idle | 0 fps (on-demand) | 0 fps |
+| Full settle (cold layout) | < 2 s | ~1 s |
+
+The render loop pauses entirely when nothing animates — Glia sits at 0% GPU
+while you read.
 
 ## Not in v1 (on purpose)
 

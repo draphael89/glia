@@ -106,6 +106,14 @@ final class AppModel {
         positions = seeded
         sceneDirty()
 
+        // Live arrivals bloom exactly like replay births.
+        if animateInsertions && !placed.isEmpty {
+            let newborn = newGraph.nodes.enumerated()
+                .filter { placed[$0.element.id] == nil }
+                .map(\.offset)
+            replay.noteLiveBirths(indices: newborn)
+        }
+
         // Full settle on first load; gentle local settle for updates.
         let full = placed.isEmpty
         var config = LayoutEngine.Config()
@@ -347,8 +355,7 @@ final class AppModel {
         let target = p.flatMap { pick(atView: $0, viewport: viewport) }
         if target != hoveredIndex {
             hoveredIndex = target
-            NSCursor.pointingHand.set()
-            if target == nil { NSCursor.arrow.set() }
+            (target != nil ? NSCursor.pointingHand : NSCursor.arrow).set()
         }
     }
 

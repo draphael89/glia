@@ -76,6 +76,20 @@ final class ReplayController {
         }
     }
 
+    /// Live mode: bloom pages that just arrived from the backend poll.
+    func noteLiveBirths(indices: [Int]) {
+        guard !indices.isEmpty else { return }
+        let now = CACurrentMediaTime()
+        for i in indices { birthTimes[i] = now }
+        model?.setReplayRendering(true)
+        model?.replayChanged()
+        // wind the render loop back down once the blooms settle
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.2))
+            if !self.isPlaying && !self.isActive { self.model?.setReplayRendering(false) }
+        }
+    }
+
     private func markBirths(from: Date, to: Date) {
         guard let model else { return }
         let now = CACurrentMediaTime()

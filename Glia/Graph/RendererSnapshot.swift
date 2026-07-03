@@ -46,6 +46,8 @@ extension GraphRenderer {
         enc.endEncoding()
         cmd.commit()
         cmd.waitUntilCompleted()
+        let gpuMs = (cmd.gpuEndTime - cmd.gpuStartTime) * 1000
+        print(String(format: "glia: snapshot gpu %.2f ms (%dx%d)", gpuMs, w, h))
 
         // read back
         let bytesPerRow = w * 4

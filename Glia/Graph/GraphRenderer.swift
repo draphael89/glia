@@ -55,6 +55,8 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
     var camera = Camera()
     var scene = RenderScene()
     private let startTime = CACurrentMediaTime()
+    /// Last frame's GPU time in ms (drives the debug HUD + perf budget).
+    private(set) var lastGPUms: Double = 0
 
     /// Set by the view each frame; lets the app pause rendering when idle.
     var onFrame: ((Float) -> Void)?
@@ -157,6 +159,10 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
                     camera: zoomedCamera,
                     forceRebuild: false)
         enc.endEncoding()
+        cmd.addCompletedHandler { [weak self] buf in
+            let ms = (buf.gpuEndTime - buf.gpuStartTime) * 1000
+            Task { @MainActor in self?.lastGPUms = ms }
+        }
         cmd.present(drawable)
         cmd.commit()
     }

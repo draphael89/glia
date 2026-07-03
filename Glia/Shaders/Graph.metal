@@ -42,6 +42,31 @@ vertex BGOut bg_vertex(uint vid [[vertex_id]]) {
     return out;
 }
 
+static inline float hash21(float2 p) {
+    p = fract(p * float2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+// One parallax layer of world-anchored star dust. `depth` < 1 pans slower
+// than the graph — the brain floats in front of a deeper sky.
+static float starLayer(float2 fragPx, constant Uniforms& u,
+                       float depth, float cellPx, float seed) {
+    // world position of this fragment, at a layer that tracks the camera
+    // at `depth` speed and zooms at sqrt(zoom) so stars never blow up.
+    float layerZoom = max(sqrt(u.zoom) * 8.0, 0.001);
+    float2 world = (fragPx - u.viewport * 0.5) / layerZoom + u.center * depth;
+    float2 cell = floor(world / cellPx);
+    float h = hash21(cell + seed);
+    if (h > 0.22) return 0.0;                       // sparse
+    float2 starPos = (cell + float2(hash21(cell + seed + 1.7),
+                                    hash21(cell + seed + 4.2))) * cellPx;
+    float distPx = length(world - starPos) * layerZoom;
+    float twinkle = 0.75 + 0.25 * sin(u.time * (0.6 + h * 3.0) + h * 40.0);
+    float bright = (0.35 + 0.65 * hash21(cell + seed + 9.1)) * twinkle;
+    return bright * exp(-distPx * distPx * 0.9);
+}
+
 fragment float4 bg_fragment(BGOut in [[stage_in]],
                             constant Uniforms& u [[buffer(0)]]) {
     float2 p = in.uv - 0.5;
@@ -53,6 +78,14 @@ fragment float4 bg_fragment(BGOut in [[stage_in]],
     float3 col = mix(base, deep, smoothstep(0.15, 0.95, r));
     // whisper of violet bloom in the center
     col += float3(0.10, 0.08, 0.18) * exp(-r * r * 6.0) * 0.35;
+
+    // two parallax dust layers, one faint violet, one cool white
+    float2 fragPx = in.uv * u.viewport;
+    float far = starLayer(fragPx, u, 0.30, 26.0, 3.0);
+    float near = starLayer(fragPx, u, 0.55, 42.0, 11.0);
+    col += float3(0.55, 0.55, 0.72) * far * 0.14;
+    col += float3(0.70, 0.66, 0.92) * near * 0.20;
+
     return float4(col, 1.0);
 }
 

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import simd
 
@@ -48,8 +49,19 @@ struct Camera {
     // MARK: flights
 
     mutating func fly(to newCenter: SIMD2<Float>, zoom newZoom: Float? = nil) {
+        if Camera.reduceMotion {
+            center = newCenter
+            if let newZoom { zoom = min(max(newZoom, 0.05), 400) }
+            cancelFlight()
+            return
+        }
         targetCenter = newCenter
         if let newZoom { targetZoom = min(max(newZoom, 0.05), 400) }
+    }
+
+    /// Honors the system accessibility setting; flights become cuts.
+    static var reduceMotion: Bool {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
 
     mutating func fit(bounds: (lo: SIMD2<Float>, hi: SIMD2<Float>), viewport: SIMD2<Float>, padding: Float = 90) {

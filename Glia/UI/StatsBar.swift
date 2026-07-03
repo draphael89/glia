@@ -29,6 +29,15 @@ struct StatsBar: View {
 
             Spacer()
 
+            if ProcessInfo.processInfo.environment["GLIA_DEBUG_HUD"] != nil {
+                let _ = model.cameraTick
+                Text(String(format: "gpu %.2f ms · %d/%d drawn",
+                            model.renderer.lastGPUms,
+                            model.visibleCount, model.visibleEdgeCount))
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(model.renderer.lastGPUms > 4 ? .orange : .green)
+            }
+
             Button {
                 model.paletteVisible = true
             } label: {
