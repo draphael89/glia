@@ -180,7 +180,7 @@ final class AppModel {
             cam = GraphRenderer.fittingCamera(positions: pts,
                                               visible: [],
                                               size: size, padding: 160)
-            cam.zoom = min(cam.zoom, 24)
+            cam.zoom = min(cam.zoom, 10)
         }
         renderer.camera = cam   // label overlay reads the live camera
         cameraTick &+= 1
@@ -194,6 +194,23 @@ final class AppModel {
         ir.scale = 1
         let labels = ir.cgImage
 
+        // In focus snapshots, also composite the inspector so agent-driven
+        // review sees the full user-facing state.
+        var inspector: CGImage?
+        var inspectorSize = CGSize.zero
+        if selectedIndex != nil {
+            let panel = InspectorPanel(model: self)
+                .environment(\.colorScheme, .dark)
+                .background(Theme.background)
+            let pir = ImageRenderer(content: panel)
+            pir.scale = 1
+            pir.proposedSize = .init(width: 300, height: nil)
+            inspector = pir.cgImage
+            if let inspector {
+                inspectorSize = CGSize(width: inspector.width, height: inspector.height)
+            }
+        }
+
         let cs = CGColorSpace(name: CGColorSpace.sRGB)!
         if let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height),
                                bitsPerComponent: 8, bytesPerRow: 0, space: cs,
@@ -201,6 +218,12 @@ final class AppModel {
             let rect = CGRect(origin: .zero, size: size)
             ctx.draw(metal, in: rect)
             if let labels { ctx.draw(labels, in: rect) }
+            if let inspector {
+                ctx.draw(inspector, in: CGRect(x: size.width - inspectorSize.width - 14,
+                                               y: size.height - inspectorSize.height - 56,
+                                               width: inspectorSize.width,
+                                               height: inspectorSize.height))
+            }
             if let out = ctx.makeImage() {
                 GraphRenderer.writePNG(out, to: URL(fileURLWithPath: path))
                 print("glia: snapshot written to \(path)")
@@ -371,13 +394,30 @@ final class AppModel {
 
     func select(index: Int) {
         selectedIndex = index
-        renderer.camera.fly(to: positions[index], zoom: max(renderer.camera.zoom, 14))
+        renderer.camera.fly(to: positions[index], zoom: max(renderer.camera.zoom, 9))
         setContinuousRendering(true)
     }
 
     func clearFocus() {
         selectedIndex = nil
         paletteVisible = false
+    }
+
+    // MARK: page content
+
+    /// Markdown body for the selected node, when the page exists in the
+    /// on-disk mirror (default source; atoms/raw live only in the DB).
+    var selectedMarkdown: String? {
+        guard let node = selectedNode, node.source == "default" else { return nil }
+        let base = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".gbrain/source-default")
+        let url = base.appendingPathComponent(node.slug + ".md")
+        // guard against slug path escapes
+        guard url.standardizedFileURL.path.hasPrefix(base.path),
+              let data = try? Data(contentsOf: url, options: .mappedIfSafe),
+              data.count < 400_000,
+              let text = String(data: data, encoding: .utf8) else { return nil }
+        return text
     }
 
     // MARK: search

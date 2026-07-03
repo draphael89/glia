@@ -54,8 +54,12 @@ struct BrainGraph: Sendable {
         var adj = [[Int32]](repeating: [], count: nodes.count)
         var kept: [BrainLink] = []
         kept.reserveCapacity(links.count)
+        var seenPairs = Set<Int64>()
         for l in links {
             guard let s = byID[l.source], let t = byID[l.target], s != t else { continue }
+            // collapse duplicate link rows (same pair, any direction)
+            let key = Int64(min(s, t)) << 32 | Int64(max(s, t))
+            guard seenPairs.insert(key).inserted else { continue }
             kept.append(l)
             pairs.append((Int32(s), Int32(t)))
             deg[s] += 1; deg[t] += 1

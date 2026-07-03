@@ -53,6 +53,18 @@ struct InspectorPanel: View {
                 }
                 .font(.system(size: 11))
 
+                if let markdown = model.selectedMarkdown {
+                    Divider().opacity(0.4)
+                    Text("PAGE")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                        .kerning(0.8)
+                    scrollableUnlessSnapshot(maxHeight: 240) {
+                        MarkdownPreview(text: markdown)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+
                 let neighbors = model.graph.neighbors[index]
                 if !neighbors.isEmpty {
                     Divider().opacity(0.4)
@@ -60,7 +72,7 @@ struct InspectorPanel: View {
                         .font(.system(size: 9, weight: .semibold))
                         .foregroundStyle(.tertiary)
                         .kerning(0.8)
-                    ScrollView {
+                    scrollableUnlessSnapshot(maxHeight: 200) {
                         VStack(alignment: .leading, spacing: 2) {
                             ForEach(neighbors.prefix(40), id: \.self) { nb in
                                 let j = Int(nb)
@@ -83,7 +95,6 @@ struct InspectorPanel: View {
                             }
                         }
                     }
-                    .frame(maxHeight: 200)
                 }
 
                 if node.source == "default" && !node.slug.hasPrefix("atoms/") {
@@ -99,10 +110,23 @@ struct InspectorPanel: View {
                 }
             }
             .padding(14)
-            .frame(width: 264, alignment: .leading)
+            .frame(width: 300, alignment: .leading)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(.white.opacity(0.07)))
             .frame(maxHeight: .infinity, alignment: .top)
+        }
+    }
+
+    /// ScrollView content doesn't render under ImageRenderer, so snapshot
+    /// mode (agent verification) uses a flat, height-capped stack instead.
+    @ViewBuilder
+    private func scrollableUnlessSnapshot<Content: View>(
+        maxHeight: CGFloat, @ViewBuilder content: () -> Content
+    ) -> some View {
+        if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil {
+            content().frame(maxHeight: maxHeight * 1.6, alignment: .top).clipped()
+        } else {
+            ScrollView { content() }.frame(maxHeight: maxHeight)
         }
     }
 
