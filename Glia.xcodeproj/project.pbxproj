@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		36C53330F5F73F885C508916 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
@@ -41,6 +42,7 @@
 		B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorPanel.swift; sourceTree = "<group>"; };
 		BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainSource.swift; sourceTree = "<group>"; };
 		C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelOverlay.swift; sourceTree = "<group>"; };
 		D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RendererSnapshot.swift; sourceTree = "<group>"; };
 		EE7573CA91179240E09F1818 /* LayoutEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutEngine.swift; sourceTree = "<group>"; };
 		F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPanel.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				702448AC9BFAFC0D25C23143 /* ContentView.swift */,
 				F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */,
 				B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */,
+				D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */,
 				0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */,
 				C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */,
 			);
@@ -207,6 +210,7 @@
 				E0A64EE5016017AA1E8A479E /* GraphRenderer.swift in Sources */,
 				613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */,
 				A4C82F48BE41DED36C87550C /* InspectorPanel.swift in Sources */,
+				1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */,
 				B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */,
 				6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */,
 				EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */,

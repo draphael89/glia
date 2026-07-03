@@ -146,10 +146,14 @@ fragment float4 node_fragment(NodeOut in [[stage_in]],
 
     float aa = 1.5 / max(in.screenRadius, 1.0);   // px-accurate AA band
 
-    // disc body with a soft inner gradient (lit from upper-left)
+    // disc body with a soft inner gradient (lit from upper-left).
+    // Blend the lit term in away from the center — normalize() degenerates
+    // at r→0 and reads as a cone artifact otherwise.
     float body = 1.0 - smoothstep(1.0 - aa, 1.0 + aa, r);
     float2 lightDir = normalize(float2(-0.45, -0.6));
-    float lambert = 0.86 + 0.14 * saturate(dot(normalize(in.local + 1e-4), -lightDir));
+    float2 n2 = in.local / max(r, 1e-3);
+    float lit = 0.86 + 0.14 * saturate(dot(n2, -lightDir));
+    float lambert = mix(1.0, lit, smoothstep(0.08, 0.55, r));
     float3 fill = in.color.rgb * lambert;
 
     // rim light

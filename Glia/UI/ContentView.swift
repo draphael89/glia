@@ -8,6 +8,9 @@ struct ContentView: View {
             GraphView(model: model)
                 .ignoresSafeArea()
 
+            LabelOverlay(model: model)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 StatsBar(model: model)
                 Spacer()

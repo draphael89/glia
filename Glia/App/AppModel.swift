@@ -23,6 +23,8 @@ final class AppModel {
     var hoveredIndex: Int? { didSet { sceneDirty() } }
     var searchText = ""
     var paletteVisible = false
+    /// Bumped on any camera/scene change; the label overlay observes it.
+    private(set) var cameraTick = 0
 
     let renderer: GraphRenderer
     private weak var view: GraphMTKView?
@@ -154,15 +156,37 @@ final class AppModel {
                                               visible: renderer.scene.visible,
                                               size: size)
         if let sel = selectedIndex {
-            cam.center = positions[sel]
-            cam.zoom = max(cam.zoom * 3, 10)
-            cam.cancelFlight()
+            // Frame the selected node's neighborhood, not just the node.
+            var pts = [positions[sel]]
+            for nb in graph.neighbors[sel] { pts.append(positions[Int(nb)]) }
+            cam = GraphRenderer.fittingCamera(positions: pts,
+                                              visible: [],
+                                              size: size, padding: 160)
+            cam.zoom = min(cam.zoom, 24)
         }
-        if let image = renderer.snapshotImage(size: size, camera: cam) {
-            GraphRenderer.writePNG(image, to: URL(fileURLWithPath: path))
-            print("glia: snapshot written to \(path)")
-        } else {
-            print("glia: snapshot FAILED")
+        renderer.camera = cam   // label overlay reads the live camera
+        cameraTick &+= 1
+        guard let metal = renderer.snapshotImage(size: size, camera: cam) else {
+            print("glia: snapshot FAILED"); NSApp.terminate(nil); return
+        }
+        // Composite the native label layer on top so snapshots match the app.
+        let overlay = LabelOverlay(model: self)
+            .frame(width: size.width, height: size.height)
+        let ir = ImageRenderer(content: overlay)
+        ir.scale = 1
+        let labels = ir.cgImage
+
+        let cs = CGColorSpace(name: CGColorSpace.sRGB)!
+        if let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height),
+                               bitsPerComponent: 8, bytesPerRow: 0, space: cs,
+                               bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) {
+            let rect = CGRect(origin: .zero, size: size)
+            ctx.draw(metal, in: rect)
+            if let labels { ctx.draw(labels, in: rect) }
+            if let out = ctx.makeImage() {
+                GraphRenderer.writePNG(out, to: URL(fileURLWithPath: path))
+                print("glia: snapshot written to \(path)")
+            }
         }
         NSApp.terminate(nil)
     }
@@ -232,6 +256,7 @@ final class AppModel {
         renderer.scene = scene
         visibleCount = shown
         visibleEdgeCount = shownEdges
+        cameraTick &+= 1
         view?.requestDraw()
     }
 
@@ -244,13 +269,17 @@ final class AppModel {
     }
 
     private func frameTicked() {
+        cameraTick &+= 1
         // Called from the render loop; wind down to on-demand when idle.
         if !isSettling && !renderer.camera.isAnimating && selectedIndex == nil {
             setContinuousRendering(false)
         }
     }
 
-    func cameraChanged() { view?.requestDraw() }
+    func cameraChanged() {
+        cameraTick &+= 1
+        view?.requestDraw()
+    }
 
     func fitView() {
         guard !positions.isEmpty, let view else { return }
