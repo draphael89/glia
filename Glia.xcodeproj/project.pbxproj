@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
 		15A2139D7359787429A11F47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
 		1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
@@ -19,6 +20,7 @@
 		66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
 		75922CC31F49B472E751AEA2 /* BrainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93476D3743D2F64C976E58A9 /* BrainModel.swift */; };
 		88D6A7C4D7A5A3AC9A0E5ADA /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
+		9B0DB878257E7CBD0BFCA47A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
 		A4C82F48BE41DED36C87550C /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		A99F159FADE4DF154ECE6535 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
 		B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
@@ -45,10 +47,12 @@
 		8E6410EEDDB0B04037494BC8 /* Graph.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Graph.metal; sourceTree = "<group>"; };
 		93476D3743D2F64C976E58A9 /* BrainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainModel.swift; sourceTree = "<group>"; };
 		9BE0ACCDC396FF223B728D78 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Glia.entitlements; sourceTree = "<group>"; };
 		B1CBB8EDC3535D052739F152 /* ReplayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayController.swift; sourceTree = "<group>"; };
 		B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorPanel.swift; sourceTree = "<group>"; };
 		BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainSource.swift; sourceTree = "<group>"; };
+		C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intents.swift; sourceTree = "<group>"; };
 		C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelOverlay.swift; sourceTree = "<group>"; };
 		D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RendererSnapshot.swift; sourceTree = "<group>"; };
@@ -92,6 +96,7 @@
 			children = (
 				7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */,
 				458A95BC9832417693924F00 /* GliaApp.swift */,
+				C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */,
 				B1CBB8EDC3535D052739F152 /* ReplayController.swift */,
 			);
 			path = App;
@@ -136,6 +141,7 @@
 			children = (
 				93476D3743D2F64C976E58A9 /* BrainModel.swift */,
 				BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */,
+				A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -234,12 +240,14 @@
 				E0A64EE5016017AA1E8A479E /* GraphRenderer.swift in Sources */,
 				613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */,
 				A4C82F48BE41DED36C87550C /* InspectorPanel.swift in Sources */,
+				9B0DB878257E7CBD0BFCA47A /* Intents.swift in Sources */,
 				1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */,
 				B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */,
 				C66A8966D4A5034E795BB2DF /* MarkdownPreview.swift in Sources */,
 				6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */,
 				5B254889F8AC6039C546D58D /* ReplayBar.swift in Sources */,
 				66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */,
+				092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */,
 				EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */,
 				1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */,
 			);

@@ -48,6 +48,9 @@ final class AppModel {
 
     // MARK: init / lifecycle
 
+    /// Single app-lifetime instance, reachable from App Intents / URL routing.
+    static var shared: AppModel?
+
     init(source: BrainSource = JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)) {
         guard let renderer = GraphRenderer() else {
             fatalError("Glia requires a Metal-capable GPU")
@@ -56,6 +59,13 @@ final class AppModel {
         self.source = source
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
         replay.attach(model: self)
+        AppModel.shared = self
+    }
+
+    /// Deep-link entry: glia://node/<id> or Spotlight "node:<id>".
+    func open(nodeID: Int) {
+        guard let i = graph.indexByID[nodeID] else { return }
+        select(index: i)
     }
 
     func attach(view: GraphMTKView) {
@@ -89,6 +99,7 @@ final class AppModel {
         graph = newGraph
         createdDates = newGraph.nodes.map(\.createdDate)
         replay.recomputeRange()
+        SpotlightIndexer.reindex(graph: newGraph)
         if enabledSources.isEmpty { enabledSources = Set(newGraph.nodes.map(\.source)) }
         if enabledTypes.isEmpty { enabledTypes = Set(newGraph.nodes.map(\.type)) }
 

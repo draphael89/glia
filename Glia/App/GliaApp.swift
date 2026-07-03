@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreSpotlight
 
 @main
 struct GliaApp: App {
@@ -8,6 +9,17 @@ struct GliaApp: App {
         WindowGroup {
             ContentView(model: model)
                 .frame(minWidth: 860, minHeight: 560)
+                .onOpenURL { url in
+                    // glia://node/<id>
+                    guard url.scheme == "glia", url.host == "node",
+                          let id = Int(url.lastPathComponent) else { return }
+                    model.open(nodeID: id)
+                }
+                .onContinueUserActivity(CSSearchableItemActionType) { activity in
+                    guard let raw = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+                          raw.hasPrefix("node:"), let id = Int(raw.dropFirst(5)) else { return }
+                    model.open(nodeID: id)
+                }
         }
         .windowStyle(.hiddenTitleBar)
         .commands {
