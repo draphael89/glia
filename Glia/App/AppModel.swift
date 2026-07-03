@@ -318,8 +318,13 @@ final class AppModel {
             lo = simd_min(lo, positions[i]); hi = simd_max(hi, positions[i]); any = true
         }
         guard any else { return }
-        renderer.camera.fit(bounds: (lo, hi),
-                            viewport: SIMD2(Float(view.bounds.width), Float(view.bounds.height)))
+        // Optical center: leave room for the filter card (left) and header.
+        var cam = renderer.camera
+        cam.fit(bounds: (lo, hi),
+                viewport: SIMD2(Float(view.bounds.width), Float(view.bounds.height)),
+                padding: 110)
+        let insetShift = SIMD2<Float>(-92, -18) / cam.zoomTarget   // px -> world
+        renderer.camera.fly(to: cam.centerTarget - insetShift, zoom: cam.zoomTarget)
         setContinuousRendering(true)
     }
 

@@ -15,6 +15,9 @@ struct Camera {
     private var velZoom: Float = 0
 
     var isAnimating: Bool { targetCenter != nil || targetZoom != nil }
+    /// Where the camera is heading (== current values when at rest).
+    var centerTarget: SIMD2<Float> { targetCenter ?? center }
+    var zoomTarget: Float { targetZoom ?? zoom }
 
     // MARK: transforms
 

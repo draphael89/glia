@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		15A2139D7359787429A11F47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
 		1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
@@ -34,6 +35,7 @@
 		159286828D83AC196D640FBB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphRenderer.swift; sourceTree = "<group>"; };
 		366A8E14F544472EF37B9EE5 /* Glia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Glia.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		458A95BC9832417693924F00 /* GliaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaApp.swift; sourceTree = "<group>"; };
 		702448AC9BFAFC0D25C23143 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 		C1BEE33D0DC1725CC26DD91B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */,
 				A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */,
 				159286828D83AC196D640FBB /* Info.plist */,
 			);
@@ -154,6 +157,7 @@
 			buildConfigurationList = 3B18D38646D4FC338F70CB61 /* Build configuration list for PBXNativeTarget "Glia" */;
 			buildPhases = (
 				EBEDF3C658D8BE81CDC9C35A /* Sources */,
+				EE459D7F356F3EA9CD8827DC /* Resources */,
 			);
 			buildRules = (
 			);
@@ -198,6 +202,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EE459D7F356F3EA9CD8827DC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				15A2139D7359787429A11F47 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		EBEDF3C658D8BE81CDC9C35A /* Sources */ = {
