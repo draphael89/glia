@@ -27,9 +27,12 @@ final class AppModel {
     private(set) var cameraTick = 0
 
     let renderer: GraphRenderer
+    let replay = ReplayController()
     private weak var view: GraphMTKView?
     private let source: BrainSource
     private var updateTask: Task<Void, Never>?
+    /// Parsed once per graph — hot path for replay visibility.
+    private var createdDates: [Date?] = []
 
     var allSources: [String] { Array(Set(graph.nodes.map(\.source))).sorted() }
     var typeCounts: [(type: String, count: Int)] {
@@ -52,6 +55,7 @@ final class AppModel {
         self.renderer = renderer
         self.source = source
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
+        replay.attach(model: self)
     }
 
     func attach(view: GraphMTKView) {
@@ -83,6 +87,8 @@ final class AppModel {
     private func apply(graph newGraph: BrainGraph, animateInsertions: Bool) {
         let old = graph
         graph = newGraph
+        createdDates = newGraph.nodes.map(\.createdDate)
+        replay.recomputeRange()
         if enabledSources.isEmpty { enabledSources = Set(newGraph.nodes.map(\.source)) }
         if enabledTypes.isEmpty { enabledTypes = Set(newGraph.nodes.map(\.type)) }
 
@@ -144,12 +150,16 @@ final class AppModel {
 
     /// GLIA_SNAPSHOT=/path.png — render one settled frame and exit.
     /// GLIA_SNAPSHOT_FOCUS=<slug substring> — select that node first.
+    /// GLIA_SNAPSHOT_REPLAY=<0..1> — scrub the growth replay first.
     private func snapshotIfRequested() {
         guard let path = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] else { return }
         if let focus = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT_FOCUS"],
            let idx = graph.nodes.firstIndex(where: { $0.slug.contains(focus) }) {
             selectedIndex = idx
             sceneDirty()
+        }
+        if let f = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT_REPLAY"].flatMap(Double.init) {
+            replay.scrub(to: f)
         }
         let size = CGSize(width: 1600, height: 1000)
         var cam = GraphRenderer.fittingCamera(positions: positions,
@@ -215,20 +225,35 @@ final class AppModel {
             for nb in graph.neighbors[sel] { inFocus.insert(Int(nb)) }
         }
 
+        let replayCursor = replay.cursor
+        let now = CACurrentMediaTime()
         var shown = 0
         for i in 0..<n {
             let node = graph.nodes[i]
-            let vis = enabledSources.contains(node.source)
+            var vis = enabledSources.contains(node.source)
                 && enabledTypes.contains(node.type)
                 && (!hideOrphans || graph.degree[i] > 0)
+            if let replayCursor, let created = createdDates[i], created > replayCursor {
+                vis = false
+            }
             visible[i] = vis
             if vis { shown += 1 }
-            radii[i] = 1.6 + min(7.5, 1.35 * Float(graph.degree[i]).squareRoot())
+            var radius = 1.6 + min(7.5, 1.35 * Float(graph.degree[i]).squareRoot())
             colors[i] = Theme.color(type: node.type, source: node.source)
             var f: Float = 0
             if i == selectedIndex { f += 1 }
             if i == hoveredIndex { f += 2 }
             if !inFocus.isEmpty && !inFocus.contains(i) { f += 4 }
+            // birth bloom: pop in bright and settle over ~0.9s
+            if let birth = replay.birthTimes[i] {
+                let age = Float(now - birth)
+                if age < 0.9 {
+                    let t = 1 - age / 0.9
+                    radius *= 1 + 1.7 * t * t
+                    f += 8
+                }
+            }
+            radii[i] = radius
             flags[i] = f
         }
 
@@ -280,6 +305,9 @@ final class AppModel {
         cameraTick &+= 1
         view?.requestDraw()
     }
+
+    func replayChanged() { sceneDirty() }
+    func setReplayRendering(_ on: Bool) { setContinuousRendering(on) }
 
     func fitView() {
         guard !positions.isEmpty, let view else { return }

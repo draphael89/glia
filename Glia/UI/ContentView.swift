@@ -16,6 +16,8 @@ struct ContentView: View {
                 Spacer()
             }
 
+            ReplayBar(model: model)
+
             HStack(spacing: 0) {
                 FilterPanel(model: model)
                     .padding(.leading, 14)

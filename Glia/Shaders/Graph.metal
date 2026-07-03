@@ -161,9 +161,11 @@ fragment float4 node_fragment(NodeOut in [[stage_in]],
     fill += in.color.rgb * rim * 0.55 + float3(rim * 0.08);
 
     // outer glow halo
-    float glowSpan = selected ? 2.9 : 1.9;
+    bool newborn = (flags & 8) != 0;
+    float glowSpan = selected ? 2.9 : (newborn ? 2.6 : 1.9);
     float glow = exp(-max(r - 1.0, 0.0) * (4.5 / glowSpan));
     float glowAmp = selected ? 0.50 : (hovered ? 0.34 : 0.16);
+    if (newborn) glowAmp += 0.42;
     // gentle breathing on selection
     if (selected) glowAmp *= 0.9 + 0.1 * sin(u.time * 2.2);
 
