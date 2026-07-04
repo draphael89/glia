@@ -138,6 +138,13 @@ final class GraphMTKView: MTKView {
     override var acceptsFirstResponder: Bool { true }
 
     override func keyDown(with event: NSEvent) {
+        switch event.specialKey {
+        case .some(.leftArrow):  model.step(direction: SIMD2(-1, 0)); return
+        case .some(.rightArrow): model.step(direction: SIMD2(1, 0)); return
+        case .some(.upArrow):    model.step(direction: SIMD2(0, -1)); return
+        case .some(.downArrow):  model.step(direction: SIMD2(0, 1)); return
+        default: break
+        }
         switch event.charactersIgnoringModifiers {
         case "f": model.fitView()
         case " ": toggleQuickLook()                          // space

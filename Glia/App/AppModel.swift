@@ -546,6 +546,25 @@ final class AppModel {
         }
     }
 
+    /// Arrow-key traversal: hop from the selected node to the connected
+    /// neighbor whose direction best matches the pressed arrow. Pairs with
+    /// VoiceOver announcements for eyes-free graph walking.
+    func step(direction: SIMD2<Float>) {
+        guard let sel = selectedIndex else { return }
+        let origin = positions[sel]
+        var best: Int? = nil
+        var bestScore: Float = 0.25   // ignore neighbors >75° off-axis
+        for nb in graph.neighbors[sel] {
+            let j = Int(nb)
+            let d = positions[j] - origin
+            let len = simd_length(d)
+            guard len > 0.001 else { continue }
+            let score = simd_dot(d / len, direction)
+            if score > bestScore { bestScore = score; best = j }
+        }
+        if let best { select(index: best) }
+    }
+
     /// Keyboard zoom (⌘+ / ⌘− / ⌘0), anchored at the viewport center.
     func zoomStep(_ factor: Float) {
         guard let view else { return }

@@ -157,6 +157,22 @@ final class LabelTests: XCTestCase {
     }
 }
 
+final class TraversalMathTests: XCTestCase {
+    func testDirectionalScoringPrefersOnAxisNeighbor() {
+        // pure math mirror of AppModel.step: dot(normalized delta, direction)
+        let origin = SIMD2<Float>(0, 0)
+        let right = SIMD2<Float>(10, 1)
+        let up = SIMD2<Float>(0.5, -8)
+        let dir = SIMD2<Float>(1, 0)
+        func score(_ p: SIMD2<Float>) -> Float {
+            let d = p - origin
+            return simd_dot(d / simd_length(d), dir)
+        }
+        XCTAssertGreaterThan(score(right), 0.9)
+        XCTAssertLessThan(score(up), 0.25)
+    }
+}
+
 final class MarkdownTests: XCTestCase {
     func testFrontmatterStripped() {
         let s = "---\ntype: note\ntitle: X\n---\n\n# Hello\nBody"
