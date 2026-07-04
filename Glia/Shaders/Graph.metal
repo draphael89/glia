@@ -158,10 +158,13 @@ vertex NodeOut node_vertex(uint vid [[vertex_id]],
     float screenR = max(n.radius * u.zoom, 1.6);
     bool hovered = (int(n.flags) & 2) != 0;
     bool selected = (int(n.flags) & 1) != 0;
+    bool starred = (int(n.flags) & 32) != 0;
     if (hovered) screenR *= 1.18;
+    // starred nodes stay a legible beacon even in a distant overview
+    if (starred) screenR = max(screenR, 3.2);
 
     // glow apron: quad extends past the disc so the halo has room
-    float apron = selected ? 3.2 : 2.2;
+    float apron = (selected || starred) ? 3.2 : 2.2;
     float2 centerPx = (n.position - u.center) * u.zoom;
     float2 px = centerPx + corner * screenR * apron;
 
@@ -219,6 +222,18 @@ fragment float4 node_fragment(NodeOut in [[stage_in]],
     float alpha = in.color.a * body;
     float3 col = fill * alpha + in.color.rgb * glow * glowAmp * (1.0 - body) * in.color.a;
     float outAlpha = alpha + glow * glowAmp * (1.0 - body) * in.color.a;
+
+    // starred (identity collection): a warm-gold glow beacon + crisp rim so
+    // your curated "who I am" set is findable across the whole constellation,
+    // at any zoom. Glow reads even when the disc is a couple of pixels.
+    bool starred = (flags & 32) != 0;
+    if (starred) {
+        float3 gold = float3(1.0, 0.82, 0.35);
+        float ring = smoothstep(0.80, 0.98, r) * (1.0 - smoothstep(0.98, 1.06, r));
+        float goldGlow = exp(-max(r - 1.0, 0.0) * 2.4) * (1.0 - body);
+        col += gold * (ring * 0.7 + goldGlow * 0.6);
+        outAlpha += ring * 0.7 + goldGlow * 0.6;
+    }
 
     if (dimmed) { col *= (1.0 - u.dimStrength * 0.82); outAlpha *= (1.0 - u.dimStrength * 0.72); }
     return float4(col, outAlpha);          // premultiplied

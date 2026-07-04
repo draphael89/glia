@@ -63,7 +63,12 @@ final class AppModel {
             fatalError("Glia requires a Metal-capable GPU")
         }
         BrainLocation.startUp()
-        starredSlugs = Set(UserDefaults.standard.stringArray(forKey: "starredSlugs") ?? [])
+        var stars = Set(UserDefaults.standard.stringArray(forKey: "starredSlugs") ?? [])
+        // GLIA_STAR=slug1,slug2 — deterministic star seeding for snapshots/tests
+        if let s = ProcessInfo.processInfo.environment["GLIA_STAR"] {
+            stars.formUnion(s.split(separator: ",").map(String.init))
+        }
+        starredSlugs = stars
         self.renderer = renderer
         self.source = source ?? JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
@@ -429,6 +434,7 @@ final class AppModel {
                 }
             }
             if dust { radius = 0.9; f += 16 }
+            if !starredSlugs.isEmpty && starredSlugs.contains(graph.nodes[i].slug) { f += 32 }
             radii[i] = radius
             flags[i] = f
         }
@@ -651,6 +657,8 @@ final class AppModel {
         let slug = graph.nodes[index].slug
         if starredSlugs.contains(slug) { starredSlugs.remove(slug) } else { starredSlugs.insert(slug) }
         UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")
+        sceneDirty()   // reflect the star ring on the canvas immediately
+        view?.requestDraw()
     }
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
