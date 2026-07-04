@@ -23,6 +23,7 @@ final class AppModel {
     var hoveredIndex: Int? { didSet { sceneDirty() } }
     var searchText = ""
     var paletteVisible = false
+    var shortcutsVisible = false
     /// Bumped on any camera/scene change; the label overlay observes it.
     private(set) var cameraTick = 0
     /// Mirrors BrainLocation.demoMode as observable state.

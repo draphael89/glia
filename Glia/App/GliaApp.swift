@@ -77,6 +77,12 @@ struct GliaApp: App {
                     Button("Exit Demo") { model.exitDemo() }
                 }
             }
+            CommandGroup(replacing: .help) {
+                Button("Keyboard & Gestures") {
+                    model.shortcutsVisible = true
+                }
+                .keyboardShortcut("/", modifiers: .command)
+            }
         }
 
         MenuBarExtra {

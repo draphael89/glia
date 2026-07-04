@@ -45,6 +45,9 @@ struct ContentView: View {
             }
         }
         .animation(.easeOut(duration: 0.18), value: model.paletteVisible)
+        .sheet(isPresented: $model.shortcutsVisible) {
+            ShortcutsSheet()
+        }
         .background(Theme.background)
         .preferredColorScheme(.dark)
         .focusedSceneValue(\.appModel, model)
