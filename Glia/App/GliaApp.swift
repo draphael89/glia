@@ -52,6 +52,15 @@ struct GliaApp: App {
                     model.fitView()
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
+
+                Divider()
+
+                Button("Zoom In") { model.zoomStep(1.35) }
+                    .keyboardShortcut("+", modifiers: .command)
+                Button("Zoom Out") { model.zoomStep(1 / 1.35) }
+                    .keyboardShortcut("-", modifiers: .command)
+                Button("Actual Size") { model.fitView() }
+                    .keyboardShortcut("0", modifiers: .command)
             }
             CommandGroup(after: .newItem) {
                 Button("Choose Brain Folder…") {

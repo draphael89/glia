@@ -509,9 +509,23 @@ final class AppModel {
     func hover(atView p: SIMD2<Float>?, viewport: SIMD2<Float>) {
         let target = p.flatMap { pick(atView: $0, viewport: viewport) }
         if target != hoveredIndex {
+            // subtle trackpad detent when the cursor acquires a node —
+            // the graph pushes back like a physical object
+            if target != nil && !Camera.reduceMotion {
+                NSHapticFeedbackManager.defaultPerformer
+                    .perform(.alignment, performanceTime: .now)
+            }
             hoveredIndex = target
             (target != nil ? NSCursor.pointingHand : NSCursor.arrow).set()
         }
+    }
+
+    /// Keyboard zoom (⌘+ / ⌘− / ⌘0), anchored at the viewport center.
+    func zoomStep(_ factor: Float) {
+        guard let view else { return }
+        let viewport = SIMD2(Float(view.bounds.width), Float(view.bounds.height))
+        renderer.camera.zoom(by: factor, anchorView: viewport / 2, viewport: viewport)
+        cameraChanged()
     }
 
     func click(atView p: SIMD2<Float>, viewport: SIMD2<Float>) {
