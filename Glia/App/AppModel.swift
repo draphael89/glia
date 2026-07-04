@@ -317,8 +317,12 @@ final class AppModel {
             guard visible[si] && visible[ti] else { continue }
             edges.append((s, t))
             shownEdges += 1
-            let focused = inFocus.isEmpty || (inFocus.contains(si) && inFocus.contains(ti))
-            edgeColors.append(Theme.edgeColor(focused: focused))
+            if inFocus.isEmpty {
+                edgeColors.append(Theme.ambientEdge)
+            } else {
+                let focused = inFocus.contains(si) && inFocus.contains(ti)
+                edgeColors.append(Theme.edgeColor(focused: focused))
+            }
         }
 
         scene.visible = visible

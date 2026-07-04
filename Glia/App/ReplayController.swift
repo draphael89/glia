@@ -19,6 +19,11 @@ final class ReplayController {
     private weak var model: AppModel?
     /// One full replay lasts this long regardless of history span.
     private let playDuration: TimeInterval = 14
+    /// Creation dates sorted ascending — playback advances through EVENTS
+    /// at constant rate, so a back-loaded history doesn't mean a dead first
+    /// act and a frantic finale.
+    private var sortedDates: [Date] = []
+    private var playhead: Double = 0   // fractional index into sortedDates
 
     func attach(model: AppModel) { self.model = model }
 
@@ -33,8 +38,10 @@ final class ReplayController {
 
     func recomputeRange() {
         guard let model else { return }
-        let dates = model.graph.nodes.compactMap(\.createdDate)
-        guard let lo = dates.min(), let hi = dates.max(), lo < hi else { range = nil; return }
+        sortedDates = model.graph.nodes.compactMap(\.createdDate).sorted()
+        guard let lo = sortedDates.first, let hi = sortedDates.last, lo < hi else {
+            range = nil; return
+        }
         range = lo...hi
     }
 
@@ -53,20 +60,26 @@ final class ReplayController {
         }
         isPlaying = true
         model.setReplayRendering(true)
-        let step = range.upperBound.timeIntervalSince(range.lowerBound) / (playDuration * 30)
+        // align the playhead with wherever the cursor currently sits
+        if let current = cursor {
+            playhead = Double(sortedDates.firstIndex(where: { $0 > current }) ?? sortedDates.count)
+        }
+        let step = Double(sortedDates.count) / (playDuration * 30)
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick(step: step) }
         }
     }
 
-    private func tick(step: TimeInterval) {
-        guard let model, let range, let current = cursor else { return }
-        let next = min(current.addingTimeInterval(step), range.upperBound)
+    private func tick(step: Double) {
+        guard let model, let range, let current = cursor, !sortedDates.isEmpty else { return }
+        playhead = min(playhead + step, Double(sortedDates.count))
+        let idx = min(Int(playhead), sortedDates.count - 1)
+        let next = min(max(sortedDates[idx], current), range.upperBound)
         markBirths(from: current, to: next)
         cursor = next
         model.replayChanged()
-        if next >= range.upperBound {
+        if playhead >= Double(sortedDates.count) {
             pause()
             // hold the completed picture; keep blooms fading naturally
             Task { @MainActor in

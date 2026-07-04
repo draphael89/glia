@@ -191,6 +191,7 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
             enc.setRenderPipelineState(edgePipeline)
             enc.setVertexBuffer(edgeBuffer, offset: 0, index: 0)
             enc.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 1)
+            enc.setFragmentBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 0)
             enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4,
                                instanceCount: edgeCount)
         }

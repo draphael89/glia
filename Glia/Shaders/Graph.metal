@@ -110,8 +110,9 @@ vertex EdgeOut edge_vertex(uint vid [[vertex_id]],
     dir /= len;
     float2 normal = float2(-dir.y, dir.x);
 
-    // Width: hairline that breathes slightly with zoom, clamped for AA head-room.
-    float w = clamp(0.55 * sqrt(u.zoom), 0.6, 1.6);
+    // Width: hairline that breathes with zoom — thicker when you dive in
+    // (tangibility), clamped for AA head-room.
+    float w = clamp(0.55 * sqrt(u.zoom), 0.6, 2.4);
 
     // vid: 0..3 -> (a,-1) (a,+1) (b,-1) (b,+1), triangle strip
     bool atB = (vid >= 2);
@@ -125,9 +126,13 @@ vertex EdgeOut edge_vertex(uint vid [[vertex_id]],
     return out;
 }
 
-fragment float4 edge_fragment(EdgeOut in [[stage_in]]) {
+fragment float4 edge_fragment(EdgeOut in [[stage_in]],
+                              constant Uniforms& u [[buffer(0)]]) {
     float d = abs(in.across);
-    float alpha = in.color.a * saturate(1.0 - smoothstep(0.75, 1.0, d));
+    // Fade the web slightly at far zoom so clusters read as shapes,
+    // full presence once you dive toward a neighborhood.
+    float zoomFactor = mix(0.55, 1.0, smoothstep(0.4, 3.0, u.zoom));
+    float alpha = in.color.a * zoomFactor * saturate(1.0 - smoothstep(0.75, 1.0, d));
     return float4(in.color.rgb * alpha, alpha);   // premultiplied
 }
 

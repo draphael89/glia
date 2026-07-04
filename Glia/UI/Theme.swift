@@ -35,7 +35,10 @@ enum Theme {
 
     static func edgeColor(focused: Bool) -> SIMD4<Float> {
         focused
-            ? SIMD4(0.48, 0.52, 0.64, 0.42)
+            ? SIMD4(0.55, 0.52, 0.80, 0.50)   // violet-warmed in focus
             : SIMD4(0.48, 0.52, 0.64, 0.05)
     }
+
+    /// Edges when nothing is selected — the ambient web.
+    static let ambientEdge = SIMD4<Float>(0.48, 0.52, 0.64, 0.42)
 }
