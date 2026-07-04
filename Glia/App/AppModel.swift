@@ -386,12 +386,14 @@ final class AppModel {
             var dust = false
             var vis = typeOn
             if vis && hideOrphans && isOrphan { dust = true }
-            if let replayCursor, let created = createdDates[i], created > replayCursor {
-                vis = false; dust = false
-            }
             // The selected node is always fully visible, whatever the filters:
             // search must never fly the camera to nothing.
             if i == selectedIndex && typeOn { vis = true; dust = false }
+            // ...but time wins: during replay, nothing exists before its
+            // birth date — selection included.
+            if let replayCursor, let created = createdDates[i], created > replayCursor {
+                vis = false; dust = false
+            }
             visible[i] = vis
             if vis && !dust { shown += 1 }
             var radius = 1.6 + min(7.5, 1.35 * Float(graph.degree[i]).squareRoot())
