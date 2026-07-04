@@ -105,17 +105,23 @@ final class LayoutEngineTests: XCTestCase {
 final class LabelTests: XCTestCase {
     func testRepeatedDatePrefixCollapses() {
         XCTAssertEqual(
-            LabelOverlay.collapseRepeatedDatePrefix("2026 06 29 2026 06 29 Athena Kick-Off"),
+            "2026 06 29 2026 06 29 Athena Kick-Off".collapsedDatePrefix,
             "2026 06 29 Athena Kick-Off")
     }
 
     func testSingleDatePrefixUntouched() {
-        XCTAssertEqual(
-            LabelOverlay.collapseRepeatedDatePrefix("2026-06-06 — Daily Brief"),
-            "2026-06-06 — Daily Brief")
-        XCTAssertEqual(
-            LabelOverlay.collapseRepeatedDatePrefix("Athena Kick-Off"),
-            "Athena Kick-Off")
+        XCTAssertEqual("2026-06-06 — Daily Brief".collapsedDatePrefix,
+                       "2026-06-06 — Daily Brief")
+        XCTAssertEqual("Athena Kick-Off".collapsedDatePrefix, "Athena Kick-Off")
+    }
+
+    func testTableParsing() {
+        let table = "| # | claim | kind |\n|---|-------|------|\n| 1 | David likes X | preference |"
+        let rows = MarkdownPreview.parseTable(table)
+        XCTAssertEqual(rows.count, 2)
+        XCTAssertEqual(rows[0][1], "claim")
+        XCTAssertEqual(rows[1][1], "David likes X")
+        XCTAssertEqual(rows[1][2], "preference")
     }
 }
 

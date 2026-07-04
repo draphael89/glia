@@ -73,7 +73,7 @@ struct CommandPalette: View {
                 .fill(Theme.swatch(type: hit.node.type))
                 .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 1) {
-                Text(hit.node.title.isEmpty ? hit.node.slug : hit.node.title)
+                Text((hit.node.title.isEmpty ? hit.node.slug : hit.node.title).collapsedDatePrefix)
                     .font(.system(size: 12.5, weight: .medium))
                     .lineLimit(1)
                 Text(hit.node.slug)

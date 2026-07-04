@@ -72,6 +72,20 @@ struct BrainGraph: Sendable {
     }
 }
 
+extension String {
+    /// Some ingested titles carry a doubled date prefix
+    /// ("2026 06 29 2026 06 29 Athena Kick-Off") — collapse the repeat.
+    /// Presentation-only; the underlying data is untouched.
+    var collapsedDatePrefix: String {
+        let pattern = /^((20\d{2})[ \-\/](\d{2})[ \-\/](\d{2}))[ \-]+\1[ \-]*/
+        if let match = prefixMatch(of: pattern) {
+            return String(match.output.1) + " " +
+                self[match.range.upperBound...].trimmingCharacters(in: .whitespaces)
+        }
+        return self
+    }
+}
+
 enum BrainDates {
     // DateFormatter/ISO8601DateFormatter are documented thread-safe on
     // modern OS versions but aren't marked Sendable; parse via the

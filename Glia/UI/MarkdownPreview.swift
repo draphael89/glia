@@ -39,11 +39,7 @@ struct MarkdownPreview: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.black.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
         } else if block.hasPrefix("|") {
-            // tables render as monospace — a fact table stays scannable
-            Text(block)
-                .font(.system(size: 9.5, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .lineLimit(14)
+            TableBlock(rows: MarkdownPreview.parseTable(block))
         } else {
             let lines = block.split(separator: "\n", omittingEmptySubsequences: true)
             VStack(alignment: .leading, spacing: 2.5) {
@@ -72,11 +68,89 @@ struct MarkdownPreview: View {
         }
     }
 
+    /// Parse a markdown pipe table into header + data rows.
+    static func parseTable(_ block: String) -> [[String]] {
+        block.split(separator: "\n")
+            .map { line in
+                line.trimmingCharacters(in: CharacterSet(charactersIn: "| "))
+                    .components(separatedBy: "|")
+                    .map { $0.trimmingCharacters(in: .whitespaces) }
+            }
+            .filter { row in
+                // drop separator rows (---|---|---)
+                !row.allSatisfy { $0.allSatisfy { "-: ".contains($0) } }
+            }
+    }
+
     static func stripFrontmatter(_ s: String) -> String {
         guard s.hasPrefix("---") else { return s }
         let parts = s.components(separatedBy: "\n---")
         guard parts.count > 1 else { return s }
         return parts.dropFirst().joined(separator: "\n---")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+/// Native rendering for markdown tables. gbrain fact tables (claim/kind/
+/// confidence/…) become readable fact rows with chips; anything else falls
+/// back to a compact two-column layout. Never a monospace dump.
+private struct TableBlock: View {
+    let rows: [[String]]
+
+    var body: some View {
+        if rows.count > 1 {
+            let header = rows[0].map { $0.lowercased() }
+            let claimCol = header.firstIndex(of: "claim")
+            let kindCol = header.firstIndex(of: "kind")
+            let confCol = header.firstIndex(of: "confidence")
+
+            VStack(alignment: .leading, spacing: 7) {
+                ForEach(Array(rows.dropFirst().prefix(12).enumerated()), id: \.offset) { _, row in
+                    factRow(row, claimCol: claimCol, kindCol: kindCol, confCol: confCol)
+                }
+                if rows.count - 1 > 12 {
+                    Text("+ \(rows.count - 13) more")
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(.quaternary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func factRow(_ row: [String], claimCol: Int?, kindCol: Int?, confCol: Int?) -> some View {
+        // primary text: the claim column, else the longest cell
+        let primary = claimCol.flatMap { row.indices.contains($0) ? row[$0] : nil }
+            ?? row.max(by: { $0.count < $1.count }) ?? ""
+        if !primary.isEmpty {
+            HStack(alignment: .top, spacing: 6) {
+                Circle().fill(Theme.accent.opacity(0.65))
+                    .frame(width: 4, height: 4)
+                    .padding(.top, 5)
+                VStack(alignment: .leading, spacing: 2.5) {
+                    Text(primary)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                    HStack(spacing: 5) {
+                        if let k = kindCol, row.indices.contains(k), !row[k].isEmpty {
+                            miniChip(row[k])
+                        }
+                        if let c = confCol, row.indices.contains(c), !row[c].isEmpty {
+                            miniChip("conf \(row[c])")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func miniChip(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 8.5, weight: .medium))
+            .padding(.horizontal, 5).padding(.vertical, 1.5)
+            .background(.white.opacity(0.07), in: Capsule())
+            .foregroundStyle(.tertiary)
     }
 }
