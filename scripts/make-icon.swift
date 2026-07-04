@@ -1,9 +1,12 @@
-// Generates AppIcon.png (1024x1024): a small constellation blooming on
-// deep space, in Glia's palette. Run: swift scripts/make-icon.swift
+// Generates the AppIcon masters: a detailed 1024 constellation for large
+// sizes, and a simplified 256 variant for small sizes (a 7-star icon
+// downsampled to 16px is mush — HIG says simplify, not shrink).
+// Run: swift scripts/make-icon.swift [simple]
 import AppKit
 import CoreGraphics
 
-let size = 1024
+let simple = CommandLine.arguments.contains("simple")
+let size = simple ? 256 : 1024
 let cs = CGColorSpace(name: CGColorSpace.sRGB)!
 let ctx = CGContext(data: nil, width: size, height: size, bitsPerComponent: 8,
                     bytesPerRow: 0, space: cs,
@@ -40,30 +43,39 @@ let rose: (CGFloat, CGFloat, CGFloat) = (0.88, 0.35, 0.45)
 let gold: (CGFloat, CGFloat, CGFloat) = (0.90, 0.78, 0.31)
 let teal: (CGFloat, CGFloat, CGFloat) = (0.31, 0.76, 0.76)
 
-let stars: [Star] = [
-    Star(p: CGPoint(x: S * 0.47, y: S * 0.56), r: S * 0.088, c: violet),   // hub
-    Star(p: CGPoint(x: S * 0.27, y: S * 0.70), r: S * 0.052, c: green),
-    Star(p: CGPoint(x: S * 0.70, y: S * 0.71), r: S * 0.044, c: rose),
-    Star(p: CGPoint(x: S * 0.31, y: S * 0.36), r: S * 0.040, c: gold),
-    Star(p: CGPoint(x: S * 0.66, y: S * 0.33), r: S * 0.056, c: teal),
-    Star(p: CGPoint(x: S * 0.80, y: S * 0.52), r: S * 0.028, c: green),
-    Star(p: CGPoint(x: S * 0.19, y: S * 0.53), r: S * 0.026, c: rose),
-]
+let stars: [Star] = simple
+    ? [ // small sizes: hub + three satellites, larger and bolder
+        Star(p: CGPoint(x: S * 0.46, y: S * 0.54), r: S * 0.150, c: violet),
+        Star(p: CGPoint(x: S * 0.24, y: S * 0.72), r: S * 0.085, c: green),
+        Star(p: CGPoint(x: S * 0.72, y: S * 0.70), r: S * 0.075, c: rose),
+        Star(p: CGPoint(x: S * 0.62, y: S * 0.28), r: S * 0.090, c: teal),
+      ]
+    : [
+        Star(p: CGPoint(x: S * 0.47, y: S * 0.56), r: S * 0.088, c: violet),   // hub
+        Star(p: CGPoint(x: S * 0.27, y: S * 0.70), r: S * 0.052, c: green),
+        Star(p: CGPoint(x: S * 0.70, y: S * 0.71), r: S * 0.044, c: rose),
+        Star(p: CGPoint(x: S * 0.31, y: S * 0.36), r: S * 0.040, c: gold),
+        Star(p: CGPoint(x: S * 0.66, y: S * 0.33), r: S * 0.056, c: teal),
+        Star(p: CGPoint(x: S * 0.80, y: S * 0.52), r: S * 0.028, c: green),
+        Star(p: CGPoint(x: S * 0.19, y: S * 0.53), r: S * 0.026, c: rose),
+      ]
 
 // edges
-ctx.setLineWidth(S * 0.012)
+ctx.setLineWidth(S * (simple ? 0.030 : 0.012))
 ctx.setStrokeColor(CGColor(red: 0.62, green: 0.65, blue: 0.80, alpha: 0.42))
 for i in 1..<stars.count {
     ctx.move(to: stars[0].p)
     ctx.addLine(to: stars[i].p)
 }
 ctx.strokePath()
-ctx.setLineWidth(S * 0.008)
-ctx.setStrokeColor(CGColor(red: 0.62, green: 0.65, blue: 0.80, alpha: 0.22))
-ctx.move(to: stars[1].p); ctx.addLine(to: stars[6].p)
-ctx.move(to: stars[3].p); ctx.addLine(to: stars[4].p)
-ctx.move(to: stars[4].p); ctx.addLine(to: stars[5].p)
-ctx.strokePath()
+if !simple {
+    ctx.setLineWidth(S * 0.008)
+    ctx.setStrokeColor(CGColor(red: 0.62, green: 0.65, blue: 0.80, alpha: 0.22))
+    ctx.move(to: stars[1].p); ctx.addLine(to: stars[6].p)
+    ctx.move(to: stars[3].p); ctx.addLine(to: stars[4].p)
+    ctx.move(to: stars[4].p); ctx.addLine(to: stars[5].p)
+    ctx.strokePath()
+}
 
 // stars with glow
 for s in stars {
@@ -91,9 +103,10 @@ for s in stars {
 }
 
 let img = ctx.makeImage()!
+let name = simple ? "AppIconSimple256.png" : "AppIcon1024.png"
 let dest = CGImageDestinationCreateWithURL(
-    URL(fileURLWithPath: "Glia/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon1024.png") as CFURL,
+    URL(fileURLWithPath: "Glia/Resources/\(simple ? "IconMasters/" : "Assets.xcassets/AppIcon.appiconset/")\(name)") as CFURL,
     "public.png" as CFString, 1, nil)!
 CGImageDestinationAddImage(dest, img, nil)
 CGImageDestinationFinalize(dest)
-print("icon written")
+print("\(name) written")

@@ -28,7 +28,10 @@ map — your brain's geography stays where you learned it.
 
 ## Data
 
-Glia reads a JSON export of the brain (`~/.gbrain/viz/graph.json`):
+First launch with no data shows a friendly empty state: **Explore the Demo**
+(a bundled synthetic brain — try every feature immediately) or **Choose Brain
+Folder…** (⌘O; sandbox-safe security-scoped bookmark, remembered across
+launches). By default Glia reads a JSON export at `~/.gbrain/viz/graph.json`:
 
 ```json
 {
