@@ -1,5 +1,6 @@
 import SwiftUI
 import MetalKit
+import Quartz
 import simd
 
 /// The Metal canvas plus every trackpad/mouse gesture, wrapped for SwiftUI.
@@ -123,8 +124,46 @@ final class GraphMTKView: MTKView {
     override func keyDown(with event: NSEvent) {
         switch event.charactersIgnoringModifiers {
         case "f": model.fitView()
+        case " ": toggleQuickLook()                          // space
         case String(UnicodeScalar(27)): model.clearFocus()   // esc
         default: super.keyDown(with: event)
         }
+    }
+
+    // MARK: Quick Look (Space on a selected node)
+
+    private func toggleQuickLook() {
+        guard model.selectedFileURL != nil,
+              let panel = QLPreviewPanel.shared() else { return }
+        if panel.isVisible {
+            panel.orderOut(nil)
+        } else {
+            panel.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool { true }
+
+    override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        panel.dataSource = self
+        panel.delegate = self
+    }
+
+    override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        panel.dataSource = nil
+        panel.delegate = nil
+    }
+}
+
+// QLPreviewPanel drives these on the main thread; the protocols predate
+// Swift concurrency annotations.
+extension GraphMTKView: @preconcurrency QLPreviewPanelDataSource,
+                        @preconcurrency QLPreviewPanelDelegate {
+    func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
+        model.selectedFileURL == nil ? 0 : 1
+    }
+
+    func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> QLPreviewItem! {
+        model.selectedFileURL as NSURL?
     }
 }

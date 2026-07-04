@@ -551,6 +551,17 @@ final class AppModel {
 
     // MARK: page content
 
+    /// On-disk mirror file for the selected node, when one exists —
+    /// powers both the inspector preview and Quick Look (Space).
+    var selectedFileURL: URL? {
+        guard let node = selectedNode,
+              let base = BrainLocation.sourceMirror(for: node.source) else { return nil }
+        let url = base.appendingPathComponent(node.slug + ".md")
+        guard url.standardizedFileURL.path.hasPrefix(base.path),
+              FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return url
+    }
+
     /// Markdown body for the selected node, when the page exists in that
     /// source's on-disk mirror (atoms/raw live only in the DB).
     var selectedMarkdown: String? {
