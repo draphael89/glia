@@ -6,7 +6,10 @@ struct GliaApp: App {
     @State private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup {
+        // Window (not WindowGroup): Glia is single-window by design — the
+        // model owns one Metal view attachment, and a second window would
+        // silently steal it.
+        Window("Glia", id: "main") {
             ContentView(model: model)
                 .frame(minWidth: 860, minHeight: 560)
                 .onOpenURL { url in

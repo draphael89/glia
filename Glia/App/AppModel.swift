@@ -397,14 +397,21 @@ final class AppModel {
     private func setContinuousRendering(_ on: Bool) {
         view?.isPaused = !on
         view?.enableSetNeedsDisplay = !on
+        if on { view?.preferredFramesPerSecond = 120 }   // full rate for motion
         if !on { view?.requestDraw() }
     }
 
     private func frameTicked() {
         cameraTick &+= 1
-        // Called from the render loop; wind down to on-demand when idle.
-        if !isSettling && !renderer.camera.isAnimating && selectedIndex == nil {
-            setContinuousRendering(false)
+        // Called from the render loop; wind down when idle. Selection keeps
+        // a slow loop alive for the glow breathing — 24fps is plenty for a
+        // 2.2rad/s sine and an 80% energy cut vs. ProMotion rate.
+        if !isSettling && !renderer.camera.isAnimating && !replay.isPlaying {
+            if selectedIndex == nil {
+                setContinuousRendering(false)
+            } else if view?.preferredFramesPerSecond != 24 {
+                view?.preferredFramesPerSecond = 24
+            }
         }
     }
 

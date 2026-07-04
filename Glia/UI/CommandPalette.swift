@@ -43,6 +43,18 @@ struct CommandPalette: View {
                 .padding(.vertical, 12)
 
                 let hits = model.searchHits
+                if hits.isEmpty && model.searchText.trimmingCharacters(in: .whitespaces).count >= 2 {
+                    Divider().opacity(0.4)
+                    HStack(spacing: 7) {
+                        Image(systemName: "moon.zzz")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.quaternary)
+                        Text("Nothing in the brain matches “\(model.searchText)”")
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 14)
+                }
                 if !hits.isEmpty {
                     Divider().opacity(0.4)
                     if isSnapshot {
