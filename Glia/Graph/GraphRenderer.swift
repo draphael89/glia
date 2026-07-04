@@ -187,13 +187,24 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
         enc.setFragmentBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 0)
         enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
 
-        if let edgeBuffer, edgeCount > 0 {
+        // Edge LOD: edges are the dominant GPU cost at scale (~83% at 100k)
+        // because a dense web crisscrosses the whole viewport. When zoomed
+        // out over a huge graph the web is a near-uniform haze, so a
+        // representative prefix (edges are in ~spatially-random link order)
+        // looks identical for a fraction of the fill. Zoomed in, few edges
+        // are on screen and cost nothing, so draw them all.
+        var drawnEdges = edgeCount
+        if edgeCount > 30_000 && drawCamera.zoom < 3.0 {
+            let t = max(0, min(1, drawCamera.zoom / 3.0))   // 0 far … 1 near
+            drawnEdges = 30_000 + Int(Float(edgeCount - 30_000) * t)
+        }
+        if let edgeBuffer, drawnEdges > 0 {
             enc.setRenderPipelineState(edgePipeline)
             enc.setVertexBuffer(edgeBuffer, offset: 0, index: 0)
             enc.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 1)
             enc.setFragmentBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 0)
             enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4,
-                               instanceCount: edgeCount)
+                               instanceCount: drawnEdges)
         }
         if let nodeBuffer, nodeCount > 0 {
             enc.setRenderPipelineState(nodePipeline)

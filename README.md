@@ -76,9 +76,9 @@ across brain sizes (synthetic stress graphs, hub-and-spoke topology):
 
 | Brain size | GPU / frame | Interaction |
 |---|---|---|
-| 6.6k nodes (a real brain today) | ~0.9 ms | 120 fps |
+| 6.6k nodes (a real brain today) | ~0.6 ms | 120 fps |
 | 20k nodes (a year or two out) | ~2.8 ms | 120 fps |
-| 100k nodes (design ceiling) | ~36 ms | ~30 fps |
+| 100k nodes (design ceiling) | ~20 ms | ~50 fps |
 
 Two things keep this honest:
 
@@ -89,9 +89,11 @@ Two things keep this honest:
   longer for 100k, off the main thread — then positions persist, so you never
   pay it again.
 
-At every realistic size Glia is comfortably within the 120 Hz budget. The
-100k ceiling drops interaction to ~30 fps (ROP-bound overdraw in dense
-clusters) — usable, and the target for a future point-primitive renderer.
+At every realistic size Glia is comfortably within the 120 Hz budget. Edges
+dominate the cost at extreme scale (a dense web is ~80% of the fill), so
+they draw at a zoom-gated LOD — a representative subset when the whole graph
+is a distant haze, ramping to every edge as you dive into a neighborhood
+where each connection matters. That keeps even the 100k ceiling interactive.
 
 ## Not in v1 (on purpose)
 
