@@ -207,6 +207,7 @@ final class AppModel {
                 // Stable spatial memory extends across launches: come back
                 // to exactly where you were, not a re-fit.
                 if !self.restoreViewState() { self.fitView() }
+                self.viewStateReady = true
                 LayoutStore.save(graph: g, positions: final)
                 self.snapshotIfRequested()
                 // GLIA_AUTOPLAY_REPLAY=1: start the growth replay shortly
@@ -451,35 +452,49 @@ final class AppModel {
     // MARK: camera + interaction
 
     private func setContinuousRendering(_ on: Bool) {
-        view?.isPaused = !on
-        view?.enableSetNeedsDisplay = !on
-        if on { view?.preferredFramesPerSecond = 120 }   // full rate for motion
-        if !on { view?.requestDraw() }
+        guard let view else { return }
+        let currentlyOn = !view.isPaused
+        if on { view.preferredFramesPerSecond = 120 }    // full rate for motion
+        // Only act on TRANSITIONS. Re-pausing while already paused used to
+        // fire the "one last frame" kick every idle tick — pause → kick →
+        // draw → tick → pause → kick: an infinite ~80fps loop disguised
+        // as on-demand rendering.
+        guard on != currentlyOn else { return }
+        view.isPaused = !on
+        view.enableSetNeedsDisplay = !on
+        if !on { view.requestDraw() }   // flush the final state once
     }
 
     private func frameTicked() {
-        cameraTick &+= 1
-        // Called from the render loop; wind down when idle. Selection keeps
-        // a slow loop alive for the glow breathing — 24fps is plenty for a
-        // 2.2rad/s sine and an 80% energy cut vs. ProMotion rate.
-        if !isSettling && !renderer.camera.isAnimating && !replay.isPlaying {
-            saveViewState()
-            if selectedIndex == nil {
-                setContinuousRendering(false)
-            } else if view?.preferredFramesPerSecond != 24 {
-                view?.preferredFramesPerSecond = 24
-            }
+        let inMotion = isSettling || renderer.camera.isAnimating || replay.isPlaying
+        // Invalidate SwiftUI overlays only while something MOVES. Bumping
+        // every draw created a feedback loop (draw -> observable bump ->
+        // overlay invalidation -> window redraw -> draw) that kept the app
+        // rendering ~15fps forever and racing view-state saves.
+        if inMotion { cameraTick &+= 1 }
+        guard !inMotion else { return }
+        // idle transition: persist the viewpoint once, then wind down
+        if viewStateReady { saveViewState() }
+        if selectedIndex == nil {
+            setContinuousRendering(false)
+        } else if view?.preferredFramesPerSecond != 24 {
+            view?.preferredFramesPerSecond = 24
         }
     }
 
     // MARK: view-state persistence (camera + selection across launches)
 
     private var restoredOnce = false
+    /// Saves are armed only after the first settle has restored-or-fit the
+    /// camera — pre-settle draws must never persist the pristine state
+    /// (that race poisoned the store and defeated restore-vs-fit).
+    private var viewStateReady = false
 
     private func saveViewState() {
         // tooling runs (snapshots) and demo browsing don't own the viewpoint
         guard ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] == nil,
               !demoActive else { return }
+        Markers.drop("save.viewState zoom=\(renderer.camera.zoom)")
         let d = UserDefaults.standard
         let cam = renderer.camera
         d.set([Double(cam.center.x), Double(cam.center.y), Double(cam.zoom)],
