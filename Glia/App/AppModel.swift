@@ -163,6 +163,14 @@ final class AppModel {
                 self.fitView()
                 LayoutStore.save(graph: g, positions: final)
                 self.snapshotIfRequested()
+                // GLIA_AUTOPLAY_REPLAY=1: start the growth replay shortly
+                // after settling — used for hands-free demo recordings.
+                if ProcessInfo.processInfo.environment["GLIA_AUTOPLAY_REPLAY"] != nil {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(2.5))
+                        self.replay.play()
+                    }
+                }
             }
         }
     }

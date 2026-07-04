@@ -22,6 +22,8 @@ struct GliaApp: App {
                 }
         }
         .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 1280, height: 800)
+        .defaultPosition(.center)
         .commands {
             CommandGroup(after: .textEditing) {
                 Button("Search Brain…") {

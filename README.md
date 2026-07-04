@@ -2,7 +2,9 @@
 
 **A native macOS window into your agent's brain — watch it learn in real time.**
 
-![Glia](docs/hero.png)
+![Glia growth replay](docs/replay.gif)
+
+*Above: 6,300 pages of an agent's knowledge assembling itself over one month — the growth replay, captured live.*
 
 Glia renders a [gbrain](https://github.com/garrytan/gbrain) knowledge base as a living
 constellation: every page a lit orb, every typed link a thread, laid out with a
