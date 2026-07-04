@@ -1,0 +1,32 @@
+# Release train: tag vX.Y.Z -> signed, notarized DMG + Sparkle appcast.
+#
+# Required repository secrets before this can run (see docs/RELEASING.md):
+#   MACOS_CERT_P12 / MACOS_CERT_PASSWORD   Developer ID Application cert
+#   NOTARY_APPLE_ID / NOTARY_PASSWORD / NOTARY_TEAM_ID
+#   SPARKLE_ED_PRIVATE_KEY                 EdDSA key for appcast signing
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: brew install xcodegen create-dmg
+      - name: Generate + build
+        run: |
+          xcodegen generate
+          xcodebuild -project Glia.xcodeproj -scheme Glia \
+            -configuration Release build
+      # Signing, notarization (xcrun notarytool submit --wait), DMG assembly,
+      # Sparkle appcast generation, and GitHub Release upload are wired here
+      # once the secrets above exist. Kept as an explicit checklist so the
+      # first tagged release is a 10-minute task, not an archaeology project.
+      - name: Placeholder gate
+        run: |
+          echo "Release automation pending signing secrets — see docs/RELEASING.md"
+          exit 1
