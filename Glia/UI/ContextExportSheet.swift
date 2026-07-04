@@ -7,6 +7,10 @@ struct ContextExportSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var scope: ContextScope = .identity
+    private var scopeEmpty: Bool {
+        (scope == .selection && model.selectedIndex == nil)
+        || (scope == .collection && model.starredCount == 0)
+    }
     @State private var bundle: ContextBundle?
     @State private var building = false
     @State private var copied = false
@@ -34,18 +38,17 @@ struct ContextExportSheet: View {
 
             Picker("Scope", selection: $scope) {
                 ForEach(ContextScope.allCases) { s in
-                    Text(s.label).tag(s)
+                    Text(s == .collection ? "My collection (\(model.starredCount) starred)" : s.label)
+                        .tag(s)
                 }
             }
             .pickerStyle(.radioGroup)
-            .disabled(scope == .selection && model.selectedIndex == nil)
             .onChange(of: scope) { _, _ in bundle = nil; copied = false }
 
             if scope == .selection && model.selectedIndex == nil {
-                Label("Select a node first to export its neighborhood.",
-                      systemImage: "info.circle")
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.tertiary)
+                hint("Select a node first to export its neighborhood.")
+            } else if scope == .collection && model.starredCount == 0 {
+                hint("Star nodes (⌘D, or the ☆ in the inspector) to build your collection.")
             }
 
             Divider().opacity(0.4)
@@ -91,12 +94,18 @@ struct ContextExportSheet: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
-                .disabled(building || (scope == .selection && model.selectedIndex == nil))
+                .disabled(building || scopeEmpty)
             }
         }
         .padding(20)
         .frame(width: 380)
         .background(Theme.background)
+    }
+
+    private func hint(_ text: String) -> some View {
+        Label(text, systemImage: "info.circle")
+            .font(.system(size: 10.5))
+            .foregroundStyle(.tertiary)
     }
 
     private func stat(_ value: String, _ label: String) -> some View {

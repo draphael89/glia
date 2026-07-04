@@ -7,6 +7,7 @@ import AppKit
 /// the surface for *choosing and seeing* what goes in; downstream tools
 /// (MCP/skill) inject it.
 enum ContextScope: String, CaseIterable, Identifiable {
+    case collection  // the user's starred core-identity set (the "who I am")
     case selection   // the selected node + its connected neighborhood
     case identity    // curated identity pages (people/companies/concepts/originals/notes)
     case everything  // every page with an on-disk mirror file
@@ -14,6 +15,7 @@ enum ContextScope: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
+        case .collection: return "My collection (starred)"
         case .selection:  return "Selection + neighborhood"
         case .identity:   return "Identity (people, concepts, notes…)"
         case .everything: return "Everything on disk"

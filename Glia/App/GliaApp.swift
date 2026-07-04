@@ -78,6 +78,13 @@ struct GliaApp: App {
                 }
                 .keyboardShortcut("e", modifiers: [.command, .option])
 
+                Button(model.selectedIndex.map { model.isStarred($0) } == true
+                       ? "Remove from Collection" : "Add to Collection") {
+                    model.toggleStarSelected()
+                }
+                .keyboardShortcut("d", modifiers: .command)
+                .disabled(model.selectedIndex == nil)
+
                 if model.demoActive {
                     Button("Exit Demo") { model.exitDemo() }
                 }

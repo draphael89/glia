@@ -20,6 +20,16 @@ struct InspectorPanel: View {
                     }
                     Spacer()
                     Button {
+                        model.toggleStar(index)
+                    } label: {
+                        Image(systemName: model.isStarred(index) ? "star.fill" : "star")
+                            .font(.system(size: 11))
+                            .foregroundStyle(model.isStarred(index)
+                                             ? AnyShapeStyle(.yellow) : AnyShapeStyle(.tertiary))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Add to your identity collection (⌘D)")
+                    Button {
                         model.clearFocus()
                     } label: {
                         Image(systemName: "xmark")

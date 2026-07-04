@@ -161,6 +161,12 @@ final class LabelTests: XCTestCase {
         XCTAssertFalse(ContextBundle.identityTypes.contains("source"))
     }
 
+    func testContextScopesIncludeCollection() {
+        // collection is the first (default-preferred) scope for curated export
+        XCTAssertEqual(ContextScope.allCases.first, .collection)
+        XCTAssertEqual(ContextScope.collection.label, "My collection (starred)")
+    }
+
     func testTableParsing() {
         let table = "| # | claim | kind |\n|---|-------|------|\n| 1 | David likes X | preference |"
         let rows = MarkdownPreview.parseTable(table)

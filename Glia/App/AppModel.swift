@@ -25,6 +25,9 @@ final class AppModel {
     var paletteVisible = false
     var shortcutsVisible = false
     var contextExportVisible = false
+    /// Slugs the user has starred as core-identity — the curated "who I am"
+    /// set that becomes a Context Bundle scope. Persisted across launches.
+    private(set) var starredSlugs: Set<String> = []
     /// Bumped on any camera/scene change; the label overlay observes it.
     private(set) var cameraTick = 0
     /// Mirrors BrainLocation.demoMode as observable state.
@@ -60,6 +63,7 @@ final class AppModel {
             fatalError("Glia requires a Metal-capable GPU")
         }
         BrainLocation.startUp()
+        starredSlugs = Set(UserDefaults.standard.stringArray(forKey: "starredSlugs") ?? [])
         self.renderer = renderer
         self.source = source ?? JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
@@ -639,11 +643,29 @@ final class AppModel {
         if let best { select(index: best) }
     }
 
+    // MARK: identity collection (starred core-identity nodes)
+
+    func isStarred(_ index: Int) -> Bool { starredSlugs.contains(graph.nodes[index].slug) }
+
+    func toggleStar(_ index: Int) {
+        let slug = graph.nodes[index].slug
+        if starredSlugs.contains(slug) { starredSlugs.remove(slug) } else { starredSlugs.insert(slug) }
+        UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")
+    }
+
+    func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
+
+    var starredCount: Int { starredSlugs.count }
+
     // MARK: context bundle ("vault of mind" export)
 
     /// Nodes that would be included for a given scope, in a stable order.
     func contextNodes(_ scope: ContextScope) -> [BrainNode] {
         switch scope {
+        case .collection:
+            // starred order preserved by recency of update, stable set
+            return graph.nodes.filter { starredSlugs.contains($0.slug) }
+                .sorted { ($0.updatedDate ?? .distantPast) > ($1.updatedDate ?? .distantPast) }
         case .selection:
             guard let sel = selectedIndex else { return [] }
             var idxs = [sel] + graph.neighbors[sel].map { Int($0) }
@@ -670,6 +692,7 @@ final class AppModel {
     func buildContextBundle(_ scope: ContextScope) -> ContextBundle {
         let header: String
         switch scope {
+        case .collection: header = "Context — my collection"
         case .selection:  header = "Context — \(selectedNode?.displayTitle ?? "selection")"
         case .identity:   header = "Context — identity map"
         case .everything: header = "Context — full brain"
