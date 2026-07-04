@@ -520,6 +520,24 @@ final class AppModel {
         }
     }
 
+    /// File → Export Snapshot…: render the CURRENT view (camera, filters,
+    /// selection — exactly what's on screen) at 2x to a user-chosen PNG.
+    func exportSnapshot() {
+        guard let view else { return }
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.png]
+        panel.nameFieldStringValue = "Brain — \(Date.now.formatted(.iso8601.year().month().day())).png"
+        panel.message = "Export the current view as an image"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        var cam = renderer.camera
+        cam.cancelFlight()
+        cam.zoom *= 2   // 2x supersample of the live viewport
+        let size = CGSize(width: view.bounds.width * 2, height: view.bounds.height * 2)
+        if let image = renderer.snapshotImage(size: size, camera: cam) {
+            GraphRenderer.writePNG(image, to: url)
+        }
+    }
+
     /// Keyboard zoom (⌘+ / ⌘− / ⌘0), anchored at the viewport center.
     func zoomStep(_ factor: Float) {
         guard let view else { return }

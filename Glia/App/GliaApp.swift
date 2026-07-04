@@ -67,6 +67,11 @@ struct GliaApp: App {
                     model.chooseBrainFolder()
                 }
                 .keyboardShortcut("o", modifiers: .command)
+
+                Button("Export Snapshot…") {
+                    model.exportSnapshot()
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
             }
         }
 
