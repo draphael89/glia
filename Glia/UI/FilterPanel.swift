@@ -69,8 +69,7 @@ struct FilterPanel: View {
         }
         .padding(12)
         .frame(width: 172, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(.white.opacity(0.07)))
+        .panelBackground()
         .frame(maxHeight: .infinity, alignment: .top)
     }
 

@@ -5,6 +5,9 @@ import SwiftUI
 /// items, and code fences — enough to read a brain page comfortably.
 struct MarkdownPreview: View {
     let text: String
+    /// Titles already shown by the panel chrome — a leading H1 that
+    /// matches any of these is redundant and dropped.
+    var redundantHeadings: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
@@ -15,13 +18,24 @@ struct MarkdownPreview: View {
     }
 
     private var blocks: [String] {
-        MarkdownPreview.stripFrontmatter(text)
+        var out = MarkdownPreview.stripFrontmatter(text)
             .replacingOccurrences(of: "<!--- gbrain:facts:begin -->", with: "")
             .replacingOccurrences(of: "<!--- gbrain:facts:end -->", with: "")
             .components(separatedBy: "\n\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-            .prefix(40).map { String($0) }
+        if let first = out.first, first.hasPrefix("#") {
+            let heading = MarkdownPreview.normalize(
+                first.drop(while: { $0 == "#" }).trimmingCharacters(in: .whitespaces))
+            if redundantHeadings.contains(where: { MarkdownPreview.normalize($0) == heading }) {
+                out.removeFirst()
+            }
+        }
+        return Array(out.prefix(40))
+    }
+
+    static func normalize(_ s: String) -> String {
+        s.lowercased().filter { $0.isLetter || $0.isNumber }
     }
 
     @ViewBuilder

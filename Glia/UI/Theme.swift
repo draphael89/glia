@@ -41,4 +41,35 @@ enum Theme {
 
     /// Edges when nothing is selected — the ambient web.
     static let ambientEdge = SIMD4<Float>(0.48, 0.52, 0.64, 0.42)
+
+    /// Solid stand-in for .regularMaterial under Reduce Transparency.
+    static let opaquePanel = Color(red: 0.10, green: 0.11, blue: 0.15)
+}
+
+/// Floating-panel background: system material normally, solid under
+/// Reduce Transparency (materials auto-degrade, but an explicit opaque
+/// panel keeps contrast intentional rather than incidental).
+struct PanelBackground: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    var cornerRadius: CGFloat = 12
+
+    func body(content: Content) -> some View {
+        Group {
+            if reduceTransparency {
+                content.background(Theme.opaquePanel,
+                                   in: RoundedRectangle(cornerRadius: cornerRadius))
+            } else {
+                content.background(.regularMaterial,
+                                   in: RoundedRectangle(cornerRadius: cornerRadius))
+            }
+        }
+        .overlay(RoundedRectangle(cornerRadius: cornerRadius)
+            .strokeBorder(.white.opacity(0.07)))
+    }
+}
+
+extension View {
+    func panelBackground(cornerRadius: CGFloat = 12) -> some View {
+        modifier(PanelBackground(cornerRadius: cornerRadius))
+    }
 }

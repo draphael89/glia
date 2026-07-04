@@ -159,4 +159,14 @@ final class MarkdownTests: XCTestCase {
         let s = "# Just content"
         XCTAssertEqual(MarkdownPreview.stripFrontmatter(s), s)
     }
+
+    func testHeadingNormalization() {
+        // "# people-david" should be recognized as redundant with slug
+        // "people-david" and displayTitle "David" comparisons happen on
+        // normalized forms
+        XCTAssertEqual(MarkdownPreview.normalize("people-david"), "peopledavid")
+        XCTAssertEqual(MarkdownPreview.normalize("People David"), "peopledavid")
+        XCTAssertNotEqual(MarkdownPreview.normalize("Company — Fountain"),
+                          MarkdownPreview.normalize("Fountain"))
+    }
 }

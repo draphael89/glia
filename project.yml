@@ -35,24 +35,6 @@ targets:
       - path: Glia
     dependencies:
       - package: Sparkle
-    postBuildScripts:
-      # Sparkle ships Developer-ID-signed; an ad-hoc-signed app under
-      # hardened runtime fails dyld library validation on it ("different
-      # Team IDs"). Re-sign embedded frameworks with the app's identity.
-      - name: Re-sign embedded frameworks
-        script: |
-          FRAMEWORKS="$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH"
-          if [ -d "$FRAMEWORKS" ]; then
-            find "$FRAMEWORKS" -maxdepth 1 -name "*.framework" -print0 |
-              while IFS= read -r -d '' fw; do
-                codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:--}" \
-                  --preserve-metadata=entitlements "$fw"
-              done
-            codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:--}" \
-              --preserve-metadata=entitlements,identifier \
-              "$BUILT_PRODUCTS_DIR/$WRAPPER_NAME"
-          fi
-        basedOnDependencyAnalysis: false
     info:
       path: Glia/Resources/Info.plist
       properties:

@@ -68,8 +68,7 @@ struct ReplayBar: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 16).padding(.vertical, 10)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.white.opacity(0.08)))
+        .panelBackground(cornerRadius: 14)
         .shadow(color: .black.opacity(0.35), radius: 18, y: 8)
     }
 

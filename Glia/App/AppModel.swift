@@ -188,6 +188,10 @@ final class AppModel {
         if let f = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT_REPLAY"].flatMap(Double.init) {
             replay.scrub(to: f)
         }
+        if let q = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT_QUERY"] {
+            searchText = q
+            paletteVisible = true
+        }
         let size = CGSize(width: 1600, height: 1000)
         // snapshot framing matches the app: structure only, dust bleeds out
         var structureMask = renderer.scene.visible
@@ -220,6 +224,17 @@ final class AppModel {
         ir.scale = 1
         let labels = ir.cgImage
 
+        // Palette snapshot: composite the search UI over the canvas.
+        var palette: CGImage?
+        if paletteVisible {
+            let view = CommandPalette(model: self)
+                .environment(\.colorScheme, .dark)
+                .frame(width: size.width, height: size.height)
+            let pr = ImageRenderer(content: view)
+            pr.scale = 1
+            palette = pr.cgImage
+        }
+
         // In focus snapshots, also composite the inspector so agent-driven
         // review sees the full user-facing state.
         var inspector: CGImage?
@@ -249,6 +264,9 @@ final class AppModel {
                                                y: size.height - inspectorSize.height - 56,
                                                width: inspectorSize.width,
                                                height: inspectorSize.height))
+            }
+            if let palette {
+                ctx.draw(palette, in: rect)
             }
             if let out = ctx.makeImage() {
                 GraphRenderer.writePNG(out, to: URL(fileURLWithPath: path))

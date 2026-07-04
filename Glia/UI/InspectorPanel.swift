@@ -60,7 +60,8 @@ struct InspectorPanel: View {
                         .foregroundStyle(.tertiary)
                         .kerning(0.8)
                     scrollableUnlessSnapshot(maxHeight: 240) {
-                        MarkdownPreview(text: markdown)
+                        MarkdownPreview(text: markdown,
+                                        redundantHeadings: [node.slug, node.title, node.displayTitle])
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
@@ -111,8 +112,7 @@ struct InspectorPanel: View {
             }
             .padding(14)
             .frame(width: 300, alignment: .leading)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(.white.opacity(0.07)))
+            .panelBackground()
             .frame(maxHeight: .infinity, alignment: .top)
         }
     }

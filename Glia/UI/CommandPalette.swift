@@ -6,6 +6,10 @@ struct CommandPalette: View {
     @State private var highlighted = 0
     @FocusState private var fieldFocused: Bool
 
+    private var isSnapshot: Bool {
+        ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             // click-away scrim
@@ -18,14 +22,22 @@ struct CommandPalette: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13))
                         .foregroundStyle(.tertiary)
-                    TextField("Search the brain…", text: $model.searchText)
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 15))
-                        .focused($fieldFocused)
-                        .onSubmit { commit() }
-                        .onKeyPress(.downArrow) { move(1); return .handled }
-                        .onKeyPress(.upArrow) { move(-1); return .handled }
-                        .onKeyPress(.escape) { model.paletteVisible = false; return .handled }
+                    if isSnapshot {
+                        // AppKit-backed TextField can't render in ImageRenderer
+                        Text(model.searchText.isEmpty ? "Search the brain…" : model.searchText)
+                            .font(.system(size: 15))
+                            .foregroundStyle(model.searchText.isEmpty ? .tertiary : .primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        TextField("Search the brain…", text: $model.searchText)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 15))
+                            .focused($fieldFocused)
+                            .onSubmit { commit() }
+                            .onKeyPress(.downArrow) { move(1); return .handled }
+                            .onKeyPress(.upArrow) { move(-1); return .handled }
+                            .onKeyPress(.escape) { model.paletteVisible = false; return .handled }
+                    }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
@@ -33,30 +45,38 @@ struct CommandPalette: View {
                 let hits = model.searchHits
                 if !hits.isEmpty {
                     Divider().opacity(0.4)
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            VStack(spacing: 1) {
-                                ForEach(Array(hits.enumerated()), id: \.element.id) { i, hit in
-                                    row(hit: hit, isHighlighted: i == highlighted)
-                                        .id(i)
-                                        .onTapGesture {
-                                            highlighted = i
-                                            commit()
-                                        }
-                                }
+                    if isSnapshot {
+                        VStack(spacing: 1) {
+                            ForEach(Array(hits.prefix(9).enumerated()), id: \.element.id) { i, hit in
+                                row(hit: hit, isHighlighted: i == highlighted)
                             }
-                            .padding(6)
                         }
-                        .frame(maxHeight: 320)
-                        .onChange(of: highlighted) { _, new in
-                            withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(new) }
+                        .padding(6)
+                    } else {
+                        ScrollViewReader { proxy in
+                            ScrollView {
+                                VStack(spacing: 1) {
+                                    ForEach(Array(hits.enumerated()), id: \.element.id) { i, hit in
+                                        row(hit: hit, isHighlighted: i == highlighted)
+                                            .id(i)
+                                            .onTapGesture {
+                                                highlighted = i
+                                                commit()
+                                            }
+                                    }
+                                }
+                                .padding(6)
+                            }
+                            .frame(maxHeight: 320)
+                            .onChange(of: highlighted) { _, new in
+                                withAnimation(.easeOut(duration: 0.1)) { proxy.scrollTo(new) }
+                            }
                         }
                     }
                 }
             }
             .frame(width: 460)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.white.opacity(0.1)))
+            .panelBackground(cornerRadius: 14)
             .shadow(color: .black.opacity(0.4), radius: 30, y: 12)
             .padding(.top, 110)
             .onAppear {
