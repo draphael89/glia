@@ -19,6 +19,7 @@
 		17C4C1AB084343EC6862BD58 /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		181C577AD6CCC2CA4BC894E1 /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
 		1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176DBA550B7D01A412CDF3B0 /* GliaTests.swift */; };
+		1B867B7E64B189D47893C47C /* ContextBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573D70E7E28D542C0E4B9089 /* ContextBundle.swift */; };
 		1BFE28EE1CB2366973341C3D /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		1F7AB472E8ACDF9F26980F20 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
@@ -39,8 +40,10 @@
 		52F82ED38DCBFD27D0EEAB63 /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		56C2633DEBEF98E4873AD346 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
 		5864C244517E25EC26FA546A /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
+		59F802C4E0516B5CF799E6AB /* ContextExportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63E367716ED3BB10B5A586B /* ContextExportSheet.swift */; };
 		5B254889F8AC6039C546D58D /* ReplayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031F90C43E6019D333F1B38A /* ReplayBar.swift */; };
 		5CE127F3E0B40047FECF0757 /* Info-MAS.plist in Resources */ = {isa = PBXBuildFile; fileRef = CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */; };
+		606B278BE37C49C30F6EC0D5 /* ContextExportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63E367716ED3BB10B5A586B /* ContextExportSheet.swift */; };
 		613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
 		633266C24F2633467D52989A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
@@ -60,6 +63,7 @@
 		88D6A7C4D7A5A3AC9A0E5ADA /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
 		891EE6E3A70E4CA3D85EBBAA /* GliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458A95BC9832417693924F00 /* GliaApp.swift */; };
 		8A0F787727B08B0776F7B4D5 /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
+		90D7E92506D2085BC144B187 /* ContextBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573D70E7E28D542C0E4B9089 /* ContextBundle.swift */; };
 		93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
 		99BF6E584775B3783991EA3C /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 		9B0DB878257E7CBD0BFCA47A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
@@ -71,6 +75,7 @@
 		AB2EF948931E2B7A537578EC /* ShortcutsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E773F716D5EC45153CA7C2 /* ShortcutsSheet.swift */; };
 		AEC4717CA05ABBE7BADED1FB /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
+		B2BA7C985107547D55591E44 /* ContextExportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63E367716ED3BB10B5A586B /* ContextExportSheet.swift */; };
 		B2ECD2C27B65646911BE281A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
 		C3ECF855CC114C440B3F1DA8 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9FCA356CA4D0D23C9903DAC3 /* Sparkle */; };
 		C48F2BB81447646B967798C0 /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
@@ -95,6 +100,7 @@
 		ED9D943B1DCEBCD316B17B84 /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
 		EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 		F1ED6DACB5BDF0B5476CEA24 /* AppIconSimple256.png in Resources */ = {isa = PBXBuildFile; fileRef = C5EA75FBE53C9D3A485F5BDE /* AppIconSimple256.png */; };
+		F76067461B3CFE1BDA939ED3 /* ContextBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573D70E7E28D542C0E4B9089 /* ContextBundle.swift */; };
 		F9DCE9094CF1E5A0494F9134 /* ShortcutsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E773F716D5EC45153CA7C2 /* ShortcutsSheet.swift */; };
 		F9FA30618F944557FF5ECAC1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
 		FC0438368FB761B275F19CC6 /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
@@ -114,6 +120,7 @@
 		44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		458A95BC9832417693924F00 /* GliaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaApp.swift; sourceTree = "<group>"; };
 		507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DemoBrain.json; sourceTree = "<group>"; };
+		573D70E7E28D542C0E4B9089 /* ContextBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextBundle.swift; sourceTree = "<group>"; };
 		702448AC9BFAFC0D25C23143 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		8E4247F73BD76724775C0471 /* CommandPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPalette.swift; sourceTree = "<group>"; };
@@ -123,6 +130,7 @@
 		9BE0ACCDC396FF223B728D78 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Glia.entitlements; sourceTree = "<group>"; };
+		A63E367716ED3BB10B5A586B /* ContextExportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextExportSheet.swift; sourceTree = "<group>"; };
 		B1CBB8EDC3535D052739F152 /* ReplayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayController.swift; sourceTree = "<group>"; };
 		B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorPanel.swift; sourceTree = "<group>"; };
 		BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainSource.swift; sourceTree = "<group>"; };
@@ -186,6 +194,7 @@
 			children = (
 				8E4247F73BD76724775C0471 /* CommandPalette.swift */,
 				702448AC9BFAFC0D25C23143 /* ContentView.swift */,
+				A63E367716ED3BB10B5A586B /* ContextExportSheet.swift */,
 				F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */,
 				B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */,
 				D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */,
@@ -257,6 +266,7 @@
 				93DE22EDD72BDF074EB49168 /* BrainLocation.swift */,
 				93476D3743D2F64C976E58A9 /* BrainModel.swift */,
 				BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */,
+				573D70E7E28D542C0E4B9089 /* ContextBundle.swift */,
 				2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */,
 				A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */,
 			);
@@ -436,6 +446,8 @@
 				2A845914BC2418AB90C3B945 /* Camera.swift in Sources */,
 				1BFE28EE1CB2366973341C3D /* CommandPalette.swift in Sources */,
 				F9FA30618F944557FF5ECAC1 /* ContentView.swift in Sources */,
+				90D7E92506D2085BC144B187 /* ContextBundle.swift in Sources */,
+				59F802C4E0516B5CF799E6AB /* ContextExportSheet.swift in Sources */,
 				3E4E9F07648FE6F33BEED925 /* DebugMarkers.swift in Sources */,
 				654A77C43124F2F577F2776F /* FilterPanel.swift in Sources */,
 				1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */,
@@ -469,6 +481,8 @@
 				76209BFAE48E50CD1E4D06FA /* Camera.swift in Sources */,
 				DDECDA5F60625DB3E93C6A31 /* CommandPalette.swift in Sources */,
 				93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */,
+				1B867B7E64B189D47893C47C /* ContextBundle.swift in Sources */,
+				B2BA7C985107547D55591E44 /* ContextExportSheet.swift in Sources */,
 				68A9D8F0D51AE197DA28C616 /* DebugMarkers.swift in Sources */,
 				C48F2BB81447646B967798C0 /* FilterPanel.swift in Sources */,
 				891EE6E3A70E4CA3D85EBBAA /* GliaApp.swift in Sources */,
@@ -501,6 +515,8 @@
 				36C53330F5F73F885C508916 /* Camera.swift in Sources */,
 				A99F159FADE4DF154ECE6535 /* CommandPalette.swift in Sources */,
 				B2ECD2C27B65646911BE281A /* ContentView.swift in Sources */,
+				F76067461B3CFE1BDA939ED3 /* ContextBundle.swift in Sources */,
+				606B278BE37C49C30F6EC0D5 /* ContextExportSheet.swift in Sources */,
 				E102151E938FACB92FA11F1C /* DebugMarkers.swift in Sources */,
 				224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */,
 				CCB989C2E5295BBC3F041B10 /* GliaApp.swift in Sources */,

@@ -48,6 +48,9 @@ struct ContentView: View {
         .sheet(isPresented: $model.shortcutsVisible) {
             ShortcutsSheet()
         }
+        .sheet(isPresented: $model.contextExportVisible) {
+            ContextExportSheet(model: model)
+        }
         .background(Theme.background)
         .preferredColorScheme(.dark)
         .focusedSceneValue(\.appModel, model)

@@ -24,6 +24,7 @@ final class AppModel {
     var searchText = ""
     var paletteVisible = false
     var shortcutsVisible = false
+    var contextExportVisible = false
     /// Bumped on any camera/scene change; the label overlay observes it.
     private(set) var cameraTick = 0
     /// Mirrors BrainLocation.demoMode as observable state.
@@ -129,6 +130,17 @@ final class AppModel {
             let g = try await source.loadGraph()
             Markers.drop("loaded nodes=\(g.nodes.count)")
             apply(graph: g, animateInsertions: false)
+            // GLIA_EXPORT_CONTEXT=<scope>:<path> — headless bundle export for
+            // verification/automation (identity|everything|selection).
+            if let spec = ProcessInfo.processInfo.environment["GLIA_EXPORT_CONTEXT"],
+               let colon = spec.firstIndex(of: ":") {
+                let scope = ContextScope(rawValue: String(spec[..<colon])) ?? .identity
+                let path = String(spec[spec.index(after: colon)...])
+                let b = buildContextBundle(scope)
+                try? b.text.data(using: .utf8)?.write(to: URL(fileURLWithPath: path))
+                print("glia: context \(b.pageCount) pages, ~\(b.tokenEstimate) tokens -> \(path)")
+                exit(0)
+            }
         } catch {
             loadError = "Couldn't read the brain: \(error.localizedDescription)"
             // error state is a first-class screen — verifiable like the rest
@@ -625,6 +637,44 @@ final class AppModel {
             if score > bestScore { bestScore = score; best = j }
         }
         if let best { select(index: best) }
+    }
+
+    // MARK: context bundle ("vault of mind" export)
+
+    /// Nodes that would be included for a given scope, in a stable order.
+    func contextNodes(_ scope: ContextScope) -> [BrainNode] {
+        switch scope {
+        case .selection:
+            guard let sel = selectedIndex else { return [] }
+            var idxs = [sel] + graph.neighbors[sel].map { Int($0) }
+            idxs = Array(Set(idxs)).sorted()
+            return idxs.map { graph.nodes[$0] }
+        case .identity:
+            // Psyche map, not an ops dump: keep identity-content types, drop
+            // operational streams (briefs, action queues, status reports,
+            // raw provenance) — the "who I am", not "what happened today".
+            let opsPrefixes = ["briefs/", "actions/", "reports/", "sources/",
+                               "raw/", "orchestration/", "plans/", "atoms/"]
+            return graph.nodes
+                .filter { node in
+                    enabledSources.contains(node.source)
+                        && ContextBundle.identityTypes.contains(node.type)
+                        && !opsPrefixes.contains(where: { node.slug.hasPrefix($0) })
+                }
+                .sorted { ($0.updatedDate ?? .distantPast) > ($1.updatedDate ?? .distantPast) }
+        case .everything:
+            return graph.nodes.filter { enabledSources.contains($0.source) }
+        }
+    }
+
+    func buildContextBundle(_ scope: ContextScope) -> ContextBundle {
+        let header: String
+        switch scope {
+        case .selection:  header = "Context — \(selectedNode?.displayTitle ?? "selection")"
+        case .identity:   header = "Context — identity map"
+        case .everything: header = "Context — full brain"
+        }
+        return ContextBundle.build(nodes: contextNodes(scope), header: header)
     }
 
     /// Keyboard zoom (⌘+ / ⌘− / ⌘0), anchored at the viewport center.

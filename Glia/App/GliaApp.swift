@@ -73,6 +73,11 @@ struct GliaApp: App {
                 }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
 
+                Button("Export Context…") {
+                    model.contextExportVisible = true
+                }
+                .keyboardShortcut("e", modifiers: [.command, .option])
+
                 if model.demoActive {
                     Button("Exit Demo") { model.exitDemo() }
                 }

@@ -148,6 +148,19 @@ final class LabelTests: XCTestCase {
         XCTAssertFalse(UpdaterModel.shared.isEnabled)
     }
 
+    func testContextBundleTokenEstimate() {
+        let b = ContextBundle(text: String(repeating: "x", count: 4000), pageCount: 3)
+        XCTAssertEqual(b.tokenEstimate, 1000)
+        XCTAssertEqual(b.pageCount, 3)
+    }
+
+    func testIdentityTypesExcludeProvenance() {
+        XCTAssertTrue(ContextBundle.identityTypes.contains("person"))
+        XCTAssertTrue(ContextBundle.identityTypes.contains("concept"))
+        XCTAssertFalse(ContextBundle.identityTypes.contains("atom"))
+        XCTAssertFalse(ContextBundle.identityTypes.contains("source"))
+    }
+
     func testTableParsing() {
         let table = "| # | claim | kind |\n|---|-------|------|\n| 1 | David likes X | preference |"
         let rows = MarkdownPreview.parseTable(table)
