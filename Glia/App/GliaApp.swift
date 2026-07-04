@@ -25,6 +25,9 @@ struct GliaApp: App {
         .defaultSize(width: 1280, height: 800)
         .defaultPosition(.center)
         .commands {
+            CheckForUpdatesCommand()
+        }
+        .commands {
             CommandGroup(after: .textEditing) {
                 Button("Search Brain…") {
                     model.paletteVisible = true

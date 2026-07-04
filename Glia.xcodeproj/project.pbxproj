@@ -14,6 +14,7 @@
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		36C53330F5F73F885C508916 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
+		3CE30F2B32334AF12A099B0A /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C5217AC6542D60BF7FE1A167 /* Sparkle */; };
 		5864C244517E25EC26FA546A /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
 		5B254889F8AC6039C546D58D /* ReplayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031F90C43E6019D333F1B38A /* ReplayBar.swift */; };
 		613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
@@ -27,6 +28,7 @@
 		B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
 		B2ECD2C27B65646911BE281A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
 		C66A8966D4A5034E795BB2DF /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
+		CA30C3BFA7D174CAB6588450 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB83C16CD6450F1E3722346 /* Updater.swift */; };
 		CCB989C2E5295BBC3F041B10 /* GliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458A95BC9832417693924F00 /* GliaApp.swift */; };
 		E0A64EE5016017AA1E8A479E /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
 		E173EE5C7C520B67E11017C2 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
@@ -67,12 +69,24 @@
 		BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainSource.swift; sourceTree = "<group>"; };
 		C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intents.swift; sourceTree = "<group>"; };
 		C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		CAB83C16CD6450F1E3722346 /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 		D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelOverlay.swift; sourceTree = "<group>"; };
 		D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RendererSnapshot.swift; sourceTree = "<group>"; };
 		EE7573CA91179240E09F1818 /* LayoutEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutEngine.swift; sourceTree = "<group>"; };
 		F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPanel.swift; sourceTree = "<group>"; };
 		F2A59F416E75A12CAE71494A /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		126A375C40C0EB8E1C8EF297 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CE30F2B32334AF12A099B0A /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0FA3572A202D6C4DE3756DA2 /* Glia */ = {
@@ -111,6 +125,7 @@
 				458A95BC9832417693924F00 /* GliaApp.swift */,
 				C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */,
 				B1CBB8EDC3535D052739F152 /* ReplayController.swift */,
+				CAB83C16CD6450F1E3722346 /* Updater.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -190,6 +205,7 @@
 			buildPhases = (
 				EBEDF3C658D8BE81CDC9C35A /* Sources */,
 				EE459D7F356F3EA9CD8827DC /* Resources */,
+				126A375C40C0EB8E1C8EF297 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -197,6 +213,7 @@
 			);
 			name = Glia;
 			packageProductDependencies = (
+				C5217AC6542D60BF7FE1A167 /* Sparkle */,
 			);
 			productName = Glia;
 			productReference = 366A8E14F544472EF37B9EE5 /* Glia.app */;
@@ -246,6 +263,9 @@
 			);
 			mainGroup = 38553EA1F189F72F7D3C5C67;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				07CE97C415F2F48DF5FEDA33 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 254113BF1775CD583C76CC51 /* Products */;
 			projectDirPath = "";
@@ -303,6 +323,7 @@
 				092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */,
 				EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */,
 				1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */,
+				CA30C3BFA7D174CAB6588450 /* Updater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -541,6 +562,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		07CE97C415F2F48DF5FEDA33 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C5217AC6542D60BF7FE1A167 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 07CE97C415F2F48DF5FEDA33 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 99D0D3ED000A53D9DF0C1946 /* Project object */;
 }
