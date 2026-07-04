@@ -4,26 +4,26 @@
     "AppShortcuts" : [
       {
         "key" : "Search my brain in ${applicationName}",
-        "location" : {
-          "startingColumn" : 0,
-          "startingLine" : 31
-        },
         "appShortcutMetadata" : [
           {
-            "index" : 0,
-            "parameterTypes" : {
-
-            },
-            "title" : "Show Brain Page",
             "parameterDisplayRepresentations" : {
 
             },
-            "actionIdentifier" : "OpenBrainNodeIntent"
+            "title" : "Show Brain Page",
+            "actionIdentifier" : "OpenBrainNodeIntent",
+            "index" : 0,
+            "parameterTypes" : {
+
+            }
           }
         ],
         "values" : [
           "Search my brain in ${applicationName}"
-        ]
+        ],
+        "location" : {
+          "startingColumn" : 0,
+          "startingLine" : 31
+        }
       }
     ]
   },

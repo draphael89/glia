@@ -17,10 +17,9 @@ DMG="$DIST/Glia-$VERSION.dmg"
 echo "==> Building Release"
 xcodegen generate
 xcodebuild -project Glia.xcodeproj -scheme Glia -configuration Release build \
-  | grep -E "error|warning: .*deprecated|BUILD" | tail -3 || true
+  -derivedDataPath build/dd | grep -E "error|BUILD" | tail -2 || true
 
-APP=$(find "$HOME/Library/Developer/Xcode/DerivedData" \
-  -path "*/Build/Products/Release/Glia.app" -maxdepth 6 | head -1)
+APP=build/dd/Build/Products/Release/Glia.app
 [ -d "$APP" ] || { echo "Glia.app not found"; exit 1; }
 
 echo "==> Staging"

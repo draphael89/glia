@@ -32,6 +32,7 @@
 		6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
 		633266C24F2633467D52989A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
 		66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
+		68A9D8F0D51AE197DA28C616 /* DebugMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */; };
 		6EA580529F5FD9B990212F9A /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
 		70732BBF2229D050834737ED /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
 		7077C3C2B6946E2300569BE3 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
@@ -58,6 +59,7 @@
 		DDECDA5F60625DB3E93C6A31 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
 		DED696A6BB47C8829F75D91D /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
 		E0A64EE5016017AA1E8A479E /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
+		E102151E938FACB92FA11F1C /* DebugMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */; };
 		E173EE5C7C520B67E11017C2 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
 		E8F8B921A8556D2A042E2DD7 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		ED9D943B1DCEBCD316B17B84 /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
@@ -81,6 +83,7 @@
 		176DBA550B7D01A412CDF3B0 /* GliaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaTests.swift; sourceTree = "<group>"; };
 		25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphRenderer.swift; sourceTree = "<group>"; };
 		2689BA370C9469326798F89C /* Glia-MAS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Glia-MAS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMarkers.swift; sourceTree = "<group>"; };
 		366A8E14F544472EF37B9EE5 /* Glia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Glia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreview.swift; sourceTree = "<group>"; };
 		40865A66B86E8DB1158F85F5 /* GliaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GliaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -210,6 +213,7 @@
 				93DE22EDD72BDF074EB49168 /* BrainLocation.swift */,
 				93476D3743D2F64C976E58A9 /* BrainModel.swift */,
 				BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */,
+				2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */,
 				A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */,
 			);
 			path = Core;
@@ -381,6 +385,7 @@
 				76209BFAE48E50CD1E4D06FA /* Camera.swift in Sources */,
 				DDECDA5F60625DB3E93C6A31 /* CommandPalette.swift in Sources */,
 				93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */,
+				68A9D8F0D51AE197DA28C616 /* DebugMarkers.swift in Sources */,
 				C48F2BB81447646B967798C0 /* FilterPanel.swift in Sources */,
 				891EE6E3A70E4CA3D85EBBAA /* GliaApp.swift in Sources */,
 				181C577AD6CCC2CA4BC894E1 /* Graph.metal in Sources */,
@@ -411,6 +416,7 @@
 				36C53330F5F73F885C508916 /* Camera.swift in Sources */,
 				A99F159FADE4DF154ECE6535 /* CommandPalette.swift in Sources */,
 				B2ECD2C27B65646911BE281A /* ContentView.swift in Sources */,
+				E102151E938FACB92FA11F1C /* DebugMarkers.swift in Sources */,
 				224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */,
 				CCB989C2E5295BBC3F041B10 /* GliaApp.swift in Sources */,
 				5864C244517E25EC26FA546A /* Graph.metal in Sources */,

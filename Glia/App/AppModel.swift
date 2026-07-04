@@ -61,7 +61,16 @@ final class AppModel {
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
         replay.attach(model: self)
         AppModel.shared = self
+        // Snapshot mode must not depend on a window ever appearing (the
+        // accessory activation policy may keep SwiftUI from presenting one):
+        // drive the load → settle → render pipeline directly.
+        Markers.drop("model.init")
+        if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil {
+            start()
+        }
     }
+
+    private var started = false
 
     /// Re-point the app at the current BrainLocation (after folder choice
     /// or demo-mode toggle) and reload from scratch.
@@ -90,10 +99,12 @@ final class AppModel {
 
     func attach(view: GraphMTKView) {
         self.view = view
-        if graph.nodes.isEmpty { start() }
+        if graph.nodes.isEmpty && !started { start() }
     }
 
     func start() {
+        Markers.drop("start")
+        started = true
         updateTask?.cancel()
         Task { await initialLoad() }
         updateTask = Task { [source] in
@@ -104,8 +115,10 @@ final class AppModel {
     }
 
     private func initialLoad() async {
+        Markers.drop("initialLoad.begin")
         do {
             let g = try await source.loadGraph()
+            Markers.drop("loaded nodes=\(g.nodes.count)")
             apply(graph: g, animateInsertions: false)
         } catch {
             loadError = "Couldn't read the brain: \(error.localizedDescription)"
@@ -201,6 +214,7 @@ final class AppModel {
     /// GLIA_SNAPSHOT_FOCUS=<slug substring> — select that node first.
     /// GLIA_SNAPSHOT_REPLAY=<0..1> — scrub the growth replay first.
     private func snapshotIfRequested() {
+        Markers.drop("snapshot.begin")
         guard let path = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] else { return }
         if let focus = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT_FOCUS"],
            let idx = graph.nodes.firstIndex(where: { $0.slug.contains(focus) }) {
@@ -318,7 +332,9 @@ final class AppModel {
                 print("glia: snapshot written to \(path)")
             }
         }
-        NSApp.terminate(nil)
+        // Hard exit: NSApp.terminate can hang for accessory apps with no
+        // presented window, and snapshot runs are tooling, not sessions.
+        exit(0)
     }
 
     // MARK: scene production

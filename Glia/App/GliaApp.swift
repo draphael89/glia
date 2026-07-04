@@ -11,6 +11,7 @@ struct GliaApp: App {
         if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil {
             NSApplication.shared.setActivationPolicy(.accessory)
         }
+        Markers.drop("app.init")
     }
 
     var body: some Scene {
