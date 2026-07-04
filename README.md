@@ -71,16 +71,27 @@ GLIA_SNAPSHOT_REPLAY=0.3 …                                          # replay s
 
 ## Performance budget
 
-Measured on Apple Silicon, full brain (6,340 nodes / 1,782 links), MSAA 4×:
+Measured on Apple Silicon, MSAA 4×, GPU frame time at Retina (2880×1800),
+across brain sizes (synthetic stress graphs, hub-and-spoke topology):
 
-| Metric | Budget | Measured |
+| Brain size | GPU / frame | Interaction |
 |---|---|---|
-| GPU frame time @1600×1000 | < 4 ms | **0.45 ms** |
-| Render loop when idle | 0 fps (on-demand) | 0 fps |
-| Full settle (cold layout) | < 2 s | ~1 s |
+| 6.6k nodes (a real brain today) | ~0.9 ms | 120 fps |
+| 20k nodes (a year or two out) | ~2.8 ms | 120 fps |
+| 100k nodes (design ceiling) | ~36 ms | ~30 fps |
 
-The render loop pauses entirely when nothing animates — Glia sits at 0% GPU
-while you read.
+Two things keep this honest:
+
+- **The render loop is on-demand.** When nothing animates, Glia draws **0
+  frames** and sits at 0% GPU — so a static view of *any* size is free. The
+  numbers above are the cost *during* pan/zoom/settle only.
+- **Layout is a one-time background settle.** ~1 s for a few thousand nodes,
+  longer for 100k, off the main thread — then positions persist, so you never
+  pay it again.
+
+At every realistic size Glia is comfortably within the 120 Hz budget. The
+100k ceiling drops interaction to ~30 fps (ROP-bound overdraw in dense
+clusters) — usable, and the target for a future point-primitive renderer.
 
 ## Not in v1 (on purpose)
 
