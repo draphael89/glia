@@ -25,12 +25,18 @@ APP=$(find "$HOME/Library/Developer/Xcode/DerivedData" \
 
 echo "==> Staging"
 rm -rf "$DIST"; mkdir -p "$STAGE"
-cp -R "$APP" "$STAGE/"
+ditto "$APP" "$STAGE/Glia.app"          # ditto preserves signatures; cp -R may not
 ln -s /Applications "$STAGE/Applications"
 
 if [ -n "${SIGN_IDENTITY:-}" ]; then
-  echo "==> Signing"
+  echo "==> Signing (Developer ID)"
   codesign --force --deep --options runtime --sign "$SIGN_IDENTITY" "$STAGE/Glia.app"
+else
+  # Ad-hoc re-sign the WHOLE bundle so the app and its embedded frameworks
+  # (Sparkle ships Developer-ID-signed) share a team identity — otherwise
+  # dyld's library validation rejects the framework under hardened runtime.
+  echo "==> Signing (ad-hoc, local build)"
+  codesign --force --deep --sign - "$STAGE/Glia.app"
 fi
 
 echo "==> Creating DMG"
