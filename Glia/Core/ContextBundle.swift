@@ -58,11 +58,13 @@ struct ContextBundle {
         return ContextBundle(text: parts.joined(separator: "\n"), pageCount: count)
     }
 
+    @MainActor
     func copyToPasteboard() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
     }
 
+    @MainActor
     func save() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.plainText]
