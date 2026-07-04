@@ -59,25 +59,44 @@ extension FocusedValues {
     }
 }
 
+/// First-run / no-brain state: welcoming, and tells a new user exactly
+/// how to feed Glia — not just that something failed.
 struct ErrorCard: View {
     let message: String
     let retry: () -> Void
 
+    private var dataPath: String {
+        JSONFileBrainSource.defaultURL.path
+            .replacingOccurrences(of: NSHomeDirectory(), with: "~")
+    }
+
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Image(systemName: "brain.head.profile")
-                .font(.system(size: 34, weight: .light))
+                .font(.system(size: 38, weight: .light))
                 .foregroundStyle(Theme.accent)
-            Text(message)
+            Text("No brain here yet")
+                .font(.system(size: 17, weight: .semibold))
+            Text("Glia looks for a graph export at")
                 .font(.callout)
-                .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
-                .frame(maxWidth: 340)
+            Text(dataPath)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(Theme.accent)
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(.black.opacity(0.3), in: RoundedRectangle(cornerRadius: 7))
+                .textSelection(.enabled)
+            Text("Point a gbrain exporter there — or any JSON of\n{ nodes: [...], links: [...] } (shape in the README)")
+                .font(.system(size: 11.5))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: 400)
             Button("Try Again", action: retry)
                 .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
+                .padding(.top, 2)
         }
-        .padding(28)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .padding(32)
+        .panelBackground(cornerRadius: 16)
     }
 }

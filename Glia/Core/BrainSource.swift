@@ -21,7 +21,12 @@ final class JSONFileBrainSource: BrainSource {
     init(url: URL) { self.url = url }
 
     static var defaultURL: URL {
-        FileManager.default.homeDirectoryForCurrentUser
+        // GLIA_DATA overrides the export location (useful for demo data,
+        // testing, and non-default gbrain homes).
+        if let override = ProcessInfo.processInfo.environment["GLIA_DATA"] {
+            return URL(fileURLWithPath: (override as NSString).expandingTildeInPath)
+        }
+        return FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".gbrain/viz/graph.json")
     }
 

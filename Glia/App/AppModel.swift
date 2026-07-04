@@ -89,6 +89,8 @@ final class AppModel {
             apply(graph: g, animateInsertions: false)
         } catch {
             loadError = "Couldn't read the brain: \(error.localizedDescription)"
+            // error state is a first-class screen — verifiable like the rest
+            snapshotIfRequested()
         }
     }
 
@@ -224,6 +226,16 @@ final class AppModel {
         ir.scale = 1
         let labels = ir.cgImage
 
+        // Error-state snapshot: the empty-state card centered over the void.
+        var errorCard: CGImage?
+        if let loadError {
+            let view = ErrorCard(message: loadError, retry: {})
+                .environment(\.colorScheme, .dark)
+            let er = ImageRenderer(content: view)
+            er.scale = 1
+            errorCard = er.cgImage
+        }
+
         // Palette snapshot: composite the search UI over the canvas.
         var palette: CGImage?
         if paletteVisible {
@@ -267,6 +279,12 @@ final class AppModel {
             }
             if let palette {
                 ctx.draw(palette, in: rect)
+            }
+            if let errorCard {
+                let w = CGFloat(errorCard.width), h = CGFloat(errorCard.height)
+                ctx.draw(errorCard, in: CGRect(x: (size.width - w) / 2,
+                                               y: (size.height - h) / 2,
+                                               width: w, height: h))
             }
             if let out = ctx.makeImage() {
                 GraphRenderer.writePNG(out, to: URL(fileURLWithPath: path))
