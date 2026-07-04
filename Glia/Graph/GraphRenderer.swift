@@ -126,6 +126,20 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
                                       b: scene.positions[ti],
                                       color: scene.edgeColors[k]))
         }
+        // Deterministic shuffle so the edge-LOD prefix (draw first N when
+        // zoomed out) is an UNBIASED spatial sample. Real brains store edges
+        // in link-insertion order — grouped by import batch/source — so an
+        // unshuffled prefix would render a lopsided web. Seeded (not
+        // Int.random) so the drawn subset is stable frame-to-frame: no
+        // flicker as the cap engages/releases.
+        if edges.count > 30_000 {
+            var seed: UInt64 = 0x9E3779B97F4A7C15
+            func next() -> UInt64 { seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17; return seed }
+            for i in stride(from: edges.count - 1, to: 0, by: -1) {
+                let j = Int(next() % UInt64(i + 1))
+                edges.swapAt(i, j)
+            }
+        }
         edgeCount = edges.count
         edgeBuffer = edges.isEmpty ? nil :
             device.makeBuffer(bytes: edges, length: MemoryLayout<EdgeInstance>.stride * edges.count)
