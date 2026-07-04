@@ -3,7 +3,7 @@ import Foundation
 /// Unbuffered breadcrumbs for headless-pipeline diagnosis.
 /// Active only when GLIA_MARKERS names a file; zero cost otherwise.
 enum Markers {
-    nonisolated(unsafe) private static let path =
+    private static let path =
         ProcessInfo.processInfo.environment["GLIA_MARKERS"]
 
     static func drop(_ label: String) {
