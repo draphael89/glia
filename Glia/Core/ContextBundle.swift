@@ -34,6 +34,18 @@ struct ContextBundle {
     static let identityTypes: Set<String> =
         ["person", "company", "concept", "original", "note", "meeting"]
 
+    /// Injection priority for the identity map (lower = leads the context):
+    /// the self-page, then essays, then concepts/people, then the rest —
+    /// so "who I am" front-loads the core rather than the freshest note.
+    nonisolated static func identityRank(_ node: BrainNode) -> Int {
+        let s = node.slug.lowercased()
+        if s == "people-david" || s.hasSuffix("/david") { return 0 }   // the self-page
+        if node.type == "original" || s.hasPrefix("originals/") { return 1 }  // essays
+        if node.type == "concept" { return 2 }
+        if node.type == "person" || node.type == "company" { return 3 }
+        return 4
+    }
+
     /// Build a bundle from the given nodes, reading each page's markdown from
     /// its source mirror. Pages with no on-disk file (atoms/raw) are skipped.
     @MainActor

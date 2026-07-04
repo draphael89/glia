@@ -167,6 +167,20 @@ final class LabelTests: XCTestCase {
         XCTAssertEqual(ContextScope.collection.label, "My collection (starred)")
     }
 
+    func testIdentityRankFrontLoadsSelfThenEssays() {
+        func n(_ slug: String, _ type: String) -> BrainNode {
+            BrainNode(id: 1, slug: slug, type: type, source: "default",
+                      title: slug, created: "2026-06-01", updated: "2026-06-01T00:00:00Z")
+        }
+        let selfPage = ContextBundle.identityRank(n("people-david", "concept"))
+        let essay = ContextBundle.identityRank(n("originals/telos-is-velocity", "original"))
+        let concept = ContextBundle.identityRank(n("concepts/legibility", "concept"))
+        let note = ContextBundle.identityRank(n("notes/some-note", "note"))
+        XCTAssertLessThan(selfPage, essay)
+        XCTAssertLessThan(essay, concept)
+        XCTAssertLessThan(concept, note)
+    }
+
     func testTableParsing() {
         let table = "| # | claim | kind |\n|---|-------|------|\n| 1 | David likes X | preference |"
         let rows = MarkdownPreview.parseTable(table)

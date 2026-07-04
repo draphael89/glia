@@ -677,13 +677,19 @@ final class AppModel {
             // raw provenance) — the "who I am", not "what happened today".
             let opsPrefixes = ["briefs/", "actions/", "reports/", "sources/",
                                "raw/", "orchestration/", "plans/", "atoms/"]
-            return graph.nodes
-                .filter { node in
-                    enabledSources.contains(node.source)
-                        && ContextBundle.identityTypes.contains(node.type)
-                        && !opsPrefixes.contains(where: { node.slug.hasPrefix($0) })
-                }
-                .sorted { ($0.updatedDate ?? .distantPast) > ($1.updatedDate ?? .distantPast) }
+            let kept = graph.nodes.filter { node in
+                enabledSources.contains(node.source)
+                    && ContextBundle.identityTypes.contains(node.type)
+                    && !opsPrefixes.contains(where: { node.slug.hasPrefix($0) })
+            }
+            // Front-load the highest-signal identity so an injected "who I
+            // am" leads with the core: the self-page, then essays
+            // (originals), concepts, people, then the rest — recency within.
+            return kept.sorted { a, b in
+                let ra = ContextBundle.identityRank(a), rb = ContextBundle.identityRank(b)
+                if ra != rb { return ra < rb }
+                return (a.updatedDate ?? .distantPast) > (b.updatedDate ?? .distantPast)
+            }
         case .everything:
             return graph.nodes.filter { enabledSources.contains($0.source) }
         }
