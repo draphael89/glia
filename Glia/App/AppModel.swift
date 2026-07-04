@@ -29,7 +29,7 @@ final class AppModel {
     let renderer: GraphRenderer
     let replay = ReplayController()
     private weak var view: GraphMTKView?
-    private let source: BrainSource
+    private var source: BrainSource
     private var updateTask: Task<Void, Never>?
     /// Parsed once per graph — hot path for replay visibility.
     private var createdDates: [Date?] = []
@@ -51,15 +51,35 @@ final class AppModel {
     /// Single app-lifetime instance, reachable from App Intents / URL routing.
     static var shared: AppModel?
 
-    init(source: BrainSource = JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)) {
+    init(source: BrainSource? = nil) {
         guard let renderer = GraphRenderer() else {
             fatalError("Glia requires a Metal-capable GPU")
         }
+        BrainLocation.startUp()
         self.renderer = renderer
-        self.source = source
+        self.source = source ?? JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
         replay.attach(model: self)
         AppModel.shared = self
+    }
+
+    /// Re-point the app at the current BrainLocation (after folder choice
+    /// or demo-mode toggle) and reload from scratch.
+    func reloadFromLocation() {
+        loadError = nil
+        source = JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)
+        selectedIndex = nil
+        hoveredIndex = nil
+        start()
+    }
+
+    func exploreDemo() {
+        BrainLocation.enterDemoMode()
+        reloadFromLocation()
+    }
+
+    func chooseBrainFolder() {
+        if BrainLocation.chooseFolder() { reloadFromLocation() }
     }
 
     /// Deep-link entry: glia://node/<id> or Spotlight "node:<id>".
@@ -498,9 +518,7 @@ final class AppModel {
     /// source's on-disk mirror (atoms/raw live only in the DB).
     var selectedMarkdown: String? {
         guard let node = selectedNode,
-              node.source.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }) else { return nil }
-        let base = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".gbrain/source-\(node.source)")
+              let base = BrainLocation.sourceMirror(for: node.source) else { return nil }
         let url = base.appendingPathComponent(node.slug + ".md")
         // guard against slug path escapes
         guard url.standardizedFileURL.path.hasPrefix(base.path),

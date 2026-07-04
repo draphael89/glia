@@ -38,7 +38,10 @@ struct ContentView: View {
             }
 
             if let error = model.loadError {
-                ErrorCard(message: error) { model.start() }
+                ErrorCard(message: error,
+                          retry: { model.reloadFromLocation() },
+                          chooseFolder: { model.chooseBrainFolder() },
+                          exploreDemo: { model.exploreDemo() })
             }
         }
         .animation(.easeOut(duration: 0.18), value: model.paletteVisible)
@@ -64,6 +67,8 @@ extension FocusedValues {
 struct ErrorCard: View {
     let message: String
     let retry: () -> Void
+    var chooseFolder: () -> Void = {}
+    var exploreDemo: () -> Void = {}
 
     private var dataPath: String {
         JSONFileBrainSource.defaultURL.path
@@ -91,10 +96,16 @@ struct ErrorCard: View {
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.tertiary)
                 .frame(maxWidth: 400)
-            Button("Try Again", action: retry)
-                .buttonStyle(.borderedProminent)
-                .tint(Theme.accent)
-                .padding(.top, 2)
+            HStack(spacing: 10) {
+                Button("Choose Brain Folder…", action: chooseFolder)
+                    .buttonStyle(.borderedProminent)
+                    .tint(Theme.accent)
+                Button("Explore the Demo", action: exploreDemo)
+                    .buttonStyle(.bordered)
+                Button("Try Again", action: retry)
+                    .buttonStyle(.bordered)
+            }
+            .padding(.top, 2)
         }
         .padding(32)
         .panelBackground(cornerRadius: 16)

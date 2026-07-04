@@ -7,31 +7,60 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		039D5EFD9FC9FA52539AE9B7 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
+		07943B323C8A579C4C82681B /* BrainLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DE22EDD72BDF074EB49168 /* BrainLocation.swift */; };
 		092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
+		0C462087B06CC6D76AEC6344 /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
+		10BC1C11A7D43365CF96CDA6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 159286828D83AC196D640FBB /* Info.plist */; };
 		15A2139D7359787429A11F47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
 		1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
+		181C577AD6CCC2CA4BC894E1 /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
 		1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176DBA550B7D01A412CDF3B0 /* GliaTests.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
+		2A9E3AD917910E165B442600 /* BrainLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DE22EDD72BDF074EB49168 /* BrainLocation.swift */; };
+		36A7A08DD4E26F8DE8B1407C /* BrainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93476D3743D2F64C976E58A9 /* BrainModel.swift */; };
 		36C53330F5F73F885C508916 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
+		3CB3F20C1FD1C1C5A6B4ED96 /* ReplayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031F90C43E6019D333F1B38A /* ReplayBar.swift */; };
 		3CE30F2B32334AF12A099B0A /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C5217AC6542D60BF7FE1A167 /* Sparkle */; };
+		52F82ED38DCBFD27D0EEAB63 /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
+		56C2633DEBEF98E4873AD346 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
 		5864C244517E25EC26FA546A /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
 		5B254889F8AC6039C546D58D /* ReplayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031F90C43E6019D333F1B38A /* ReplayBar.swift */; };
+		5CE127F3E0B40047FECF0757 /* Info-MAS.plist in Resources */ = {isa = PBXBuildFile; fileRef = CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */; };
 		613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
+		633266C24F2633467D52989A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
 		66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
+		6EA580529F5FD9B990212F9A /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
+		70732BBF2229D050834737ED /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
+		7077C3C2B6946E2300569BE3 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
 		75922CC31F49B472E751AEA2 /* BrainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93476D3743D2F64C976E58A9 /* BrainModel.swift */; };
+		76209BFAE48E50CD1E4D06FA /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
+		78C5DC3EBEF0F639868BE5B6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
+		88501CC9F542FEDFF60DC880 /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
 		88D6A7C4D7A5A3AC9A0E5ADA /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
+		891EE6E3A70E4CA3D85EBBAA /* GliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458A95BC9832417693924F00 /* GliaApp.swift */; };
+		93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
 		9B0DB878257E7CBD0BFCA47A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
+		9F19ACAFEB88C5FB141DE852 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
 		A4C82F48BE41DED36C87550C /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		A99F159FADE4DF154ECE6535 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
+		AAA5E5A12E4BB284E708142A /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
 		B2ECD2C27B65646911BE281A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
+		C48F2BB81447646B967798C0 /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		C66A8966D4A5034E795BB2DF /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
+		C6CA3CCFCF061D81EB961488 /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 		CA30C3BFA7D174CAB6588450 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB83C16CD6450F1E3722346 /* Updater.swift */; };
 		CCB989C2E5295BBC3F041B10 /* GliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458A95BC9832417693924F00 /* GliaApp.swift */; };
+		DB980FA8210C971372356D8B /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
+		DDECDA5F60625DB3E93C6A31 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
+		DED696A6BB47C8829F75D91D /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
 		E0A64EE5016017AA1E8A479E /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
 		E173EE5C7C520B67E11017C2 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
+		E8F8B921A8556D2A042E2DD7 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
+		ED9D943B1DCEBCD316B17B84 /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
 		EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,16 +80,19 @@
 		159286828D83AC196D640FBB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		176DBA550B7D01A412CDF3B0 /* GliaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaTests.swift; sourceTree = "<group>"; };
 		25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphRenderer.swift; sourceTree = "<group>"; };
+		2689BA370C9469326798F89C /* Glia-MAS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Glia-MAS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		366A8E14F544472EF37B9EE5 /* Glia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Glia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreview.swift; sourceTree = "<group>"; };
 		40865A66B86E8DB1158F85F5 /* GliaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GliaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		458A95BC9832417693924F00 /* GliaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaApp.swift; sourceTree = "<group>"; };
+		507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DemoBrain.json; sourceTree = "<group>"; };
 		702448AC9BFAFC0D25C23143 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		8E4247F73BD76724775C0471 /* CommandPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPalette.swift; sourceTree = "<group>"; };
 		8E6410EEDDB0B04037494BC8 /* Graph.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Graph.metal; sourceTree = "<group>"; };
 		93476D3743D2F64C976E58A9 /* BrainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainModel.swift; sourceTree = "<group>"; };
+		93DE22EDD72BDF074EB49168 /* BrainLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainLocation.swift; sourceTree = "<group>"; };
 		9BE0ACCDC396FF223B728D78 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Glia.entitlements; sourceTree = "<group>"; };
@@ -70,11 +102,13 @@
 		C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intents.swift; sourceTree = "<group>"; };
 		C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CAB83C16CD6450F1E3722346 /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
+		CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-MAS.plist"; sourceTree = "<group>"; };
 		D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelOverlay.swift; sourceTree = "<group>"; };
 		D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RendererSnapshot.swift; sourceTree = "<group>"; };
 		EE7573CA91179240E09F1818 /* LayoutEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutEngine.swift; sourceTree = "<group>"; };
 		F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPanel.swift; sourceTree = "<group>"; };
 		F2A59F416E75A12CAE71494A /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
+		F7AD698CDD6E768ECA293E42 /* Glia-MAS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Glia-MAS.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +167,7 @@
 		254113BF1775CD583C76CC51 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				2689BA370C9469326798F89C /* Glia-MAS.app */,
 				366A8E14F544472EF37B9EE5 /* Glia.app */,
 				40865A66B86E8DB1158F85F5 /* GliaTests.xctest */,
 			);
@@ -160,7 +195,10 @@
 			isa = PBXGroup;
 			children = (
 				44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */,
+				507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */,
+				F7AD698CDD6E768ECA293E42 /* Glia-MAS.entitlements */,
 				A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */,
+				CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */,
 				159286828D83AC196D640FBB /* Info.plist */,
 			);
 			path = Resources;
@@ -169,6 +207,7 @@
 		D1892BB746155738F51D438C /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				93DE22EDD72BDF074EB49168 /* BrainLocation.swift */,
 				93476D3743D2F64C976E58A9 /* BrainModel.swift */,
 				BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */,
 				A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */,
@@ -199,6 +238,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0F0A882302211C480B6C957D /* Glia-MAS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E0BCA6DE0E2DAF7234FFD506 /* Build configuration list for PBXNativeTarget "Glia-MAS" */;
+			buildPhases = (
+				438867F688EAF8CDDB71564A /* Sources */,
+				A87D3F0325C6BBDF4D29289C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Glia-MAS";
+			packageProductDependencies = (
+			);
+			productName = "Glia-MAS";
+			productReference = 2689BA370C9469326798F89C /* Glia-MAS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		55B8F417D1CF2F53209C0DC3 /* Glia */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3B18D38646D4FC338F70CB61 /* Build configuration list for PBXNativeTarget "Glia" */;
@@ -246,6 +303,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					0F0A882302211C480B6C957D = {
+						ProvisioningStyle = Automatic;
+					};
 					55B8F417D1CF2F53209C0DC3 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -272,17 +332,30 @@
 			projectRoot = "";
 			targets = (
 				55B8F417D1CF2F53209C0DC3 /* Glia */,
+				0F0A882302211C480B6C957D /* Glia-MAS */,
 				BEF183FFFAAA7AA99B37191A /* GliaTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A87D3F0325C6BBDF4D29289C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78C5DC3EBEF0F639868BE5B6 /* Assets.xcassets in Resources */,
+				ED9D943B1DCEBCD316B17B84 /* DemoBrain.json in Resources */,
+				10BC1C11A7D43365CF96CDA6 /* Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EE459D7F356F3EA9CD8827DC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				15A2139D7359787429A11F47 /* Assets.xcassets in Resources */,
+				6EA580529F5FD9B990212F9A /* DemoBrain.json in Resources */,
+				5CE127F3E0B40047FECF0757 /* Info-MAS.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,11 +370,42 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		438867F688EAF8CDDB71564A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56C2633DEBEF98E4873AD346 /* AppModel.swift in Sources */,
+				2A9E3AD917910E165B442600 /* BrainLocation.swift in Sources */,
+				36A7A08DD4E26F8DE8B1407C /* BrainModel.swift in Sources */,
+				9F19ACAFEB88C5FB141DE852 /* BrainSource.swift in Sources */,
+				76209BFAE48E50CD1E4D06FA /* Camera.swift in Sources */,
+				DDECDA5F60625DB3E93C6A31 /* CommandPalette.swift in Sources */,
+				93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */,
+				C48F2BB81447646B967798C0 /* FilterPanel.swift in Sources */,
+				891EE6E3A70E4CA3D85EBBAA /* GliaApp.swift in Sources */,
+				181C577AD6CCC2CA4BC894E1 /* Graph.metal in Sources */,
+				88501CC9F542FEDFF60DC880 /* GraphRenderer.swift in Sources */,
+				E8F8B921A8556D2A042E2DD7 /* GraphView.swift in Sources */,
+				AAA5E5A12E4BB284E708142A /* InspectorPanel.swift in Sources */,
+				633266C24F2633467D52989A /* Intents.swift in Sources */,
+				52F82ED38DCBFD27D0EEAB63 /* LabelOverlay.swift in Sources */,
+				0C462087B06CC6D76AEC6344 /* LayoutEngine.swift in Sources */,
+				70732BBF2229D050834737ED /* MarkdownPreview.swift in Sources */,
+				DED696A6BB47C8829F75D91D /* RendererSnapshot.swift in Sources */,
+				3CB3F20C1FD1C1C5A6B4ED96 /* ReplayBar.swift in Sources */,
+				7077C3C2B6946E2300569BE3 /* ReplayController.swift in Sources */,
+				DB980FA8210C971372356D8B /* SpotlightIndexer.swift in Sources */,
+				C6CA3CCFCF061D81EB961488 /* StatsBar.swift in Sources */,
+				039D5EFD9FC9FA52539AE9B7 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EBEDF3C658D8BE81CDC9C35A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				88D6A7C4D7A5A3AC9A0E5ADA /* AppModel.swift in Sources */,
+				07943B323C8A579C4C82681B /* BrainLocation.swift in Sources */,
 				75922CC31F49B472E751AEA2 /* BrainModel.swift in Sources */,
 				E173EE5C7C520B67E11017C2 /* BrainSource.swift in Sources */,
 				36C53330F5F73F885C508916 /* Camera.swift in Sources */,
@@ -405,6 +509,24 @@
 			};
 			name = Debug;
 		};
+		6F118D2829780741CD1F941B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Glia/Resources/Glia-MAS.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Glia/Resources/Info-MAS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.app;
+				PRODUCT_NAME = Glia;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = MAS;
+			};
+			name = Debug;
+		};
 		76093CD5ED1DB75531A0F169 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -452,6 +574,24 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia";
+			};
+			name = Release;
+		};
+		C256567EA41509AC8CF17266 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Glia/Resources/Glia-MAS.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Glia/Resources/Info-MAS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.app;
+				PRODUCT_NAME = Glia;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = MAS;
 			};
 			name = Release;
 		};
@@ -557,6 +697,15 @@
 			buildConfigurations = (
 				76093CD5ED1DB75531A0F169 /* Debug */,
 				8F2E790EB69EDB8F31971297 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E0BCA6DE0E2DAF7234FFD506 /* Build configuration list for PBXNativeTarget "Glia-MAS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F118D2829780741CD1F941B /* Debug */,
+				C256567EA41509AC8CF17266 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

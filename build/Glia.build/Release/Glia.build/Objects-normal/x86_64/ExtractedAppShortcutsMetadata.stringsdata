@@ -1,0 +1,31 @@
+{
+  "source" : "\/Users\/david\/glia\/Glia\/App\/Intents.swift",
+  "tables" : {
+    "AppShortcuts" : [
+      {
+        "appShortcutMetadata" : [
+          {
+            "parameterTypes" : {
+
+            },
+            "actionIdentifier" : "OpenBrainNodeIntent",
+            "index" : 0,
+            "title" : "Show Brain Page",
+            "parameterDisplayRepresentations" : {
+
+            }
+          }
+        ],
+        "location" : {
+          "startingLine" : 31,
+          "startingColumn" : 0
+        },
+        "key" : "Search my brain in ${applicationName}",
+        "values" : [
+          "Search my brain in ${applicationName}"
+        ]
+      }
+    ]
+  },
+  "version" : 2
+}

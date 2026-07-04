@@ -28,7 +28,9 @@ struct GliaApp: App {
         .defaultSize(width: 1280, height: 800)
         .defaultPosition(.center)
         .commands {
+            #if !MAS
             CheckForUpdatesCommand()
+            #endif
         }
         .commands {
             CommandGroup(after: .textEditing) {
@@ -41,6 +43,12 @@ struct GliaApp: App {
                     model.fitView()
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
+            }
+            CommandGroup(after: .newItem) {
+                Button("Choose Brain Folder…") {
+                    model.chooseBrainFolder()
+                }
+                .keyboardShortcut("o", modifiers: .command)
             }
         }
 
