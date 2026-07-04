@@ -1,5 +1,9 @@
 # Glia
 
+[![CI](https://github.com/draphael89/glia/actions/workflows/ci.yml/badge.svg)](https://github.com/draphael89/glia/actions/workflows/ci.yml)
+&nbsp;![Platform](https://img.shields.io/badge/macOS-15%2B-blue)
+&nbsp;![License](https://img.shields.io/badge/license-MIT-green)
+
 **A native macOS window into your agent's brain — watch it learn in real time.**
 
 ![Glia growth replay](docs/replay.gif)
