@@ -181,6 +181,15 @@ fragment float4 node_fragment(NodeOut in [[stage_in]],
     bool selected = (flags & 1) != 0;
     bool hovered  = (flags & 2) != 0;
     bool dimmed   = (flags & 4) != 0;
+    bool dust     = (flags & 16) != 0;
+
+    if (dust) {
+        // dark-matter points: a soft speck, no glow, no lighting
+        float aaD = 1.5 / max(in.screenRadius, 1.0);
+        float body = 1.0 - smoothstep(1.0 - aaD, 1.0 + aaD, r);
+        float alpha = in.color.a * body * 0.13;
+        return float4(in.color.rgb * alpha * 0.8, alpha);
+    }
 
     float aa = 1.5 / max(in.screenRadius, 1.0);   // px-accurate AA band
 

@@ -35,6 +35,7 @@ struct LabelOverlay: View {
             }
 
             for i in 0..<n where scene.visible.isEmpty || scene.visible[i] {
+                if !scene.flags.isEmpty && (Int(scene.flags[i]) & 16) != 0 { continue }  // dust
                 let screenR = scene.radii[i] * cam.zoom
                 let dimmed = !scene.flags.isEmpty && (Int(scene.flags[i]) & 4) != 0
                 var priority: Float = -1

@@ -189,8 +189,15 @@ final class AppModel {
             replay.scrub(to: f)
         }
         let size = CGSize(width: 1600, height: 1000)
+        // snapshot framing matches the app: structure only, dust bleeds out
+        var structureMask = renderer.scene.visible
+        if !structureMask.isEmpty {
+            for i in 0..<structureMask.count where (Int(renderer.scene.flags[i]) & 16) != 0 {
+                structureMask[i] = false
+            }
+        }
         var cam = GraphRenderer.fittingCamera(positions: positions,
-                                              visible: renderer.scene.visible,
+                                              visible: structureMask,
                                               size: size)
         if let sel = selectedIndex {
             // Frame the selected node's neighborhood, not just the node.
@@ -280,14 +287,23 @@ final class AppModel {
         var shown = 0
         for i in 0..<n {
             let node = graph.nodes[i]
-            var vis = enabledSources.contains(node.source)
+            let typeOn = enabledSources.contains(node.source)
                 && enabledTypes.contains(node.type)
-                && (!hideOrphans || graph.degree[i] > 0)
+            let isOrphan = graph.degree[i] == 0
+            // Orphans under "hide unlinked" become DUST: barely-there points
+            // that keep the full corpus tangible — the brain's dark matter —
+            // without cluttering the structure.
+            var dust = false
+            var vis = typeOn
+            if vis && hideOrphans && isOrphan { dust = true }
             if let replayCursor, let created = createdDates[i], created > replayCursor {
-                vis = false
+                vis = false; dust = false
             }
+            // The selected node is always fully visible, whatever the filters:
+            // search must never fly the camera to nothing.
+            if i == selectedIndex && typeOn { vis = true; dust = false }
             visible[i] = vis
-            if vis { shown += 1 }
+            if vis && !dust { shown += 1 }
             var radius = 1.6 + min(7.5, 1.35 * Float(graph.degree[i]).squareRoot())
             colors[i] = Theme.color(type: node.type, source: node.source)
             var f: Float = 0
@@ -303,6 +319,7 @@ final class AppModel {
                     f += 8
                 }
             }
+            if dust { radius = 0.9; f += 16 }
             radii[i] = radius
             flags[i] = f
         }
@@ -368,7 +385,11 @@ final class AppModel {
         var lo = SIMD2<Float>(.greatestFiniteMagnitude, .greatestFiniteMagnitude)
         var hi = -lo
         var any = false
-        for i in 0..<positions.count where renderer.scene.visible.isEmpty || renderer.scene.visible[i] {
+        let vis = renderer.scene.visible
+        let flags = renderer.scene.flags
+        for i in 0..<positions.count where vis.isEmpty || vis[i] {
+            // frame the structure; the dust halo bleeds past the edges
+            if !flags.isEmpty && (Int(flags[i]) & 16) != 0 { continue }
             lo = simd_min(lo, positions[i]); hi = simd_max(hi, positions[i]); any = true
         }
         guard any else { return }
@@ -389,7 +410,9 @@ final class AppModel {
         var best: Int? = nil
         var bestDist = maxWorld
         let vis = renderer.scene.visible
+        let flags = renderer.scene.flags
         for i in 0..<positions.count where vis.isEmpty || vis[i] {
+            if !flags.isEmpty && (Int(flags[i]) & 16) != 0 { continue }   // dust isn't clickable
             let d = simd_length(positions[i] - world)
             let hitRadius = max(renderer.scene.radii[i], bestDist)
             if d < min(hitRadius, bestDist) { best = i; bestDist = d }
