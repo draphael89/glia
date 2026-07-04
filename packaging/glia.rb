@@ -5,10 +5,10 @@ cask "glia" do
   version "0.1.0"
   sha256 "REPLACE_WITH_DMG_SHA256"
 
-  url "https://github.com/REPLACE_OWNER/glia/releases/download/v#{version}/Glia-#{version}.dmg"
+  url "https://github.com/draphael89/glia/releases/download/v#{version}/Glia-#{version}.dmg"
   name "Glia"
   desc "Native macOS window into your gbrain — watch your agent's brain learn"
-  homepage "https://github.com/REPLACE_OWNER/glia"
+  homepage "https://github.com/draphael89/glia"
 
   auto_updates true
   depends_on macos: ">= :sequoia"

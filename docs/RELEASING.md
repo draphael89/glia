@@ -18,7 +18,7 @@ The whole train, in order. Steps 1–2 are one-time setup.
 Add to `project.yml` info properties (then `xcodegen generate`):
 
 ```yaml
-SUFeedURL: https://REPLACE_OWNER.github.io/glia/appcast.xml
+SUFeedURL: https://draphael89.github.io/glia/appcast.xml
 SUPublicEDKey: <public key from step 1.3>
 ```
 
