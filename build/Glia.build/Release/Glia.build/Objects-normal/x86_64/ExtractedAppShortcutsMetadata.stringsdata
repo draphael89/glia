@@ -3,24 +3,24 @@
   "tables" : {
     "AppShortcuts" : [
       {
+        "key" : "Search my brain in ${applicationName}",
+        "location" : {
+          "startingColumn" : 0,
+          "startingLine" : 31
+        },
         "appShortcutMetadata" : [
           {
+            "index" : 0,
             "parameterTypes" : {
 
             },
-            "actionIdentifier" : "OpenBrainNodeIntent",
-            "index" : 0,
             "title" : "Show Brain Page",
             "parameterDisplayRepresentations" : {
 
-            }
+            },
+            "actionIdentifier" : "OpenBrainNodeIntent"
           }
         ],
-        "location" : {
-          "startingLine" : 31,
-          "startingColumn" : 0
-        },
-        "key" : "Search my brain in ${applicationName}",
         "values" : [
           "Search my brain in ${applicationName}"
         ]

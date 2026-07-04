@@ -214,7 +214,14 @@ final class AppModel {
             searchText = q
             paletteVisible = true
         }
-        let size = CGSize(width: 1600, height: 1000)
+        // GLIA_SNAPSHOT_SIZE=2880x1800 for App Store screenshot resolution
+        var size = CGSize(width: 1600, height: 1000)
+        if let s = ProcessInfo.processInfo.environment["GLIA_SNAPSHOT_SIZE"] {
+            let parts = s.lowercased().split(separator: "x").compactMap { Double($0) }
+            if parts.count == 2, parts[0] >= 320, parts[1] >= 240 {
+                size = CGSize(width: parts[0], height: parts[1])
+            }
+        }
         // snapshot framing matches the app: structure only, dust bleeds out
         var structureMask = renderer.scene.visible
         if !structureMask.isEmpty {

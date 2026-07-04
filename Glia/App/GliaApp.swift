@@ -5,6 +5,14 @@ import CoreSpotlight
 struct GliaApp: App {
     @State private var model = AppModel()
 
+    init() {
+        // Snapshot runs are tooling, not sessions: stay out of the Dock and
+        // never steal focus from whatever the user is doing.
+        if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil {
+            NSApplication.shared.setActivationPolicy(.accessory)
+        }
+    }
+
     var body: some Scene {
         // Window (not WindowGroup): Glia is single-window by design — the
         // model owns one Metal view attachment, and a second window would
