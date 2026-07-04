@@ -13,6 +13,16 @@ settings:
     ENABLE_HARDENED_RUNTIME: YES
     SWIFT_STRICT_CONCURRENCY: complete
     MTL_ENABLE_DEBUG_INFO: NO
+schemes:
+  Glia:
+    build:
+      targets:
+        Glia: all
+    run:
+      config: Release
+    test:
+      config: Debug
+      targets: [GliaTests]
 targets:
   Glia:
     type: application
@@ -45,3 +55,16 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: ai.glia.app
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         COMBINE_HIDPI_IMAGES: YES
+  GliaTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: GliaTests
+    dependencies:
+      - target: Glia
+    settings:
+      base:
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia
+        BUNDLE_LOADER: $(TEST_HOST)
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: ai.glia.tests

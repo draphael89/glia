@@ -10,6 +10,7 @@
 		092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
 		15A2139D7359787429A11F47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
 		1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
+		1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176DBA550B7D01A412CDF3B0 /* GliaTests.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		36C53330F5F73F885C508916 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
@@ -32,13 +33,25 @@
 		EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		FC848D900F9EF28B45AFD158 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 99D0D3ED000A53D9DF0C1946 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55B8F417D1CF2F53209C0DC3;
+			remoteInfo = Glia;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		031F90C43E6019D333F1B38A /* ReplayBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayBar.swift; sourceTree = "<group>"; };
 		0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsBar.swift; sourceTree = "<group>"; };
 		159286828D83AC196D640FBB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		176DBA550B7D01A412CDF3B0 /* GliaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaTests.swift; sourceTree = "<group>"; };
 		25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphRenderer.swift; sourceTree = "<group>"; };
 		366A8E14F544472EF37B9EE5 /* Glia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Glia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreview.swift; sourceTree = "<group>"; };
+		40865A66B86E8DB1158F85F5 /* GliaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GliaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		458A95BC9832417693924F00 /* GliaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaApp.swift; sourceTree = "<group>"; };
 		702448AC9BFAFC0D25C23143 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -106,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				366A8E14F544472EF37B9EE5 /* Glia.app */,
+				40865A66B86E8DB1158F85F5 /* GliaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,6 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				0FA3572A202D6C4DE3756DA2 /* Glia */,
+				E6C6E6F58300D978741CF3B7 /* GliaTests */,
 				254113BF1775CD583C76CC51 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -158,6 +173,14 @@
 			path = Graph;
 			sourceTree = "<group>";
 		};
+		E6C6E6F58300D978741CF3B7 /* GliaTests */ = {
+			isa = PBXGroup;
+			children = (
+				176DBA550B7D01A412CDF3B0 /* GliaTests.swift */,
+			);
+			path = GliaTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -179,6 +202,24 @@
 			productReference = 366A8E14F544472EF37B9EE5 /* Glia.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BEF183FFFAAA7AA99B37191A /* GliaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 78CA4D708E8836773AE4AB04 /* Build configuration list for PBXNativeTarget "GliaTests" */;
+			buildPhases = (
+				206A4C41670606F9117B8ECC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				32958F3C1EA4A1F47087D331 /* PBXTargetDependency */,
+			);
+			name = GliaTests;
+			packageProductDependencies = (
+			);
+			productName = GliaTests;
+			productReference = 40865A66B86E8DB1158F85F5 /* GliaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -189,6 +230,9 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					55B8F417D1CF2F53209C0DC3 = {
+						ProvisioningStyle = Automatic;
+					};
+					BEF183FFFAAA7AA99B37191A = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -208,6 +252,7 @@
 			projectRoot = "";
 			targets = (
 				55B8F417D1CF2F53209C0DC3 /* Glia */,
+				BEF183FFFAAA7AA99B37191A /* GliaTests */,
 			);
 		};
 /* End PBXProject section */
@@ -224,6 +269,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		206A4C41670606F9117B8ECC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EBEDF3C658D8BE81CDC9C35A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -254,6 +307,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		32958F3C1EA4A1F47087D331 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55B8F417D1CF2F53209C0DC3 /* Glia */;
+			targetProxy = FC848D900F9EF28B45AFD158 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		5B44833A3B537977863979AA /* Debug */ = {
@@ -323,6 +384,23 @@
 			};
 			name = Debug;
 		};
+		76093CD5ED1DB75531A0F169 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia";
+			};
+			name = Debug;
+		};
 		833EABA8E3879FA58CDF5869 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -336,6 +414,23 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.app;
 				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		8F2E790EB69EDB8F31971297 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia";
 			};
 			name = Release;
 		};
@@ -432,6 +527,15 @@
 			buildConfigurations = (
 				FBD4D5B12C329D89E33F4EDC /* Debug */,
 				833EABA8E3879FA58CDF5869 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		78CA4D708E8836773AE4AB04 /* Build configuration list for PBXNativeTarget "GliaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76093CD5ED1DB75531A0F169 /* Debug */,
+				8F2E790EB69EDB8F31971297 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
