@@ -27,6 +27,12 @@ schemes:
     test:
       config: Debug
       targets: [GliaTests]
+  Glia-MAS:
+    build:
+      targets:
+        Glia-MAS: all
+    run:
+      config: Release
 targets:
   Glia:
     type: application

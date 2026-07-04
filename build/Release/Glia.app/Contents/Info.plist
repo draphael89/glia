@@ -59,6 +59,8 @@
 	<string>2650</string>
 	<key>DTXcodeBuild</key>
 	<string>17F42</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>LSMinimumSystemVersion</key>

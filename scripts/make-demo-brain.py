@@ -95,6 +95,9 @@ for i, name in enumerate(["Field Notes", "Lab Journal", "Reading List"]):
     nid = add(f"journal/{name.lower().replace(' ', '-')}", "original", name,
               START + timedelta(days=40 + i * 20), source="sandbox")
     side_ids.append(nid)
+    # anchor each journal to its keeper — keeps the constellation composed
+    # (disconnected components drift to the frame edges otherwise)
+    link(nid, people_ids[i * 2], "kept_by")
 for i in range(30):
     day = START + timedelta(days=random.randint(45, 160))
     nid = add(f"journal/entries/{day.isoformat()}-{i}", "note",

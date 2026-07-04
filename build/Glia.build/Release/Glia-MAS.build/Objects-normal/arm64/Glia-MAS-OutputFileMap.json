@@ -43,6 +43,11 @@
     "llvm-bc" : "/Users/david/glia/build/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/BrainSource.bc",
     "object" : "/Users/david/glia/build/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/BrainSource.o"
   },
+  "/Users/david/glia/Glia/Core/DebugMarkers.swift" : {
+    "index-unit-output-path" : "/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/DebugMarkers.o",
+    "llvm-bc" : "/Users/david/glia/build/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/DebugMarkers.bc",
+    "object" : "/Users/david/glia/build/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/DebugMarkers.o"
+  },
   "/Users/david/glia/Glia/Core/SpotlightIndexer.swift" : {
     "index-unit-output-path" : "/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/SpotlightIndexer.o",
     "llvm-bc" : "/Users/david/glia/build/Glia.build/Release/Glia-MAS.build/Objects-normal/arm64/SpotlightIndexer.bc",

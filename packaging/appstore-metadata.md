@@ -48,11 +48,11 @@ Glia is open source (MIT).
 knowledge graph,second brain,PKM,AI agent,memory,visualization,notes,mind map,zettelkasten
 
 ## Screenshots (2880×1800, in packaging/screenshots/)
-1. 1-demo-overview.png — the demo constellation
-2. 2-focus.png — focus mode + inspector dossier
+1. 1-demo-overview.png — the demo constellation (dust halo visible)
+2. 2-focus.png — focus mode + inspector dossier (Ada Lovelace)
 3. 3-replay.png — growth replay mid-flight
 4. 4-palette.png — ⌘K search
-5. 5-darkmatter.png — full brain with dust halo
+5. 5-focus-concept.png — concept neighborhood (Information Theory)
 
 ## Review notes (paste into App Review notes field)
 Glia visualizes a local knowledge-graph export. No account or server is

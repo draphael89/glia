@@ -15,6 +15,7 @@ xcodegen generate
 xcodebuild archive \
   -project Glia.xcodeproj \
   -scheme Glia-MAS \
+  -derivedDataPath build-mas/dd \
   -configuration Release \
   -archivePath "$ARCHIVE" \
   -allowProvisioningUpdates \
