@@ -64,8 +64,7 @@ struct LabelOverlay: View {
                 let p = cam.worldToView(model.positions[i], viewport: viewport)
                 let screenR = CGFloat(scene.radii[i] * cam.zoom)
 
-                var title = node.title.isEmpty ? String(node.slug.split(separator: "/").last ?? "") : node.title
-                title = title.collapsedDatePrefix
+                var title = node.displayTitle
                 if title.count > 34 { title = String(title.prefix(33)) + "…" }
 
                 let isFocusNode = i == model.selectedIndex || i == model.hoveredIndex

@@ -115,6 +115,28 @@ final class LabelTests: XCTestCase {
         XCTAssertEqual("Athena Kick-Off".collapsedDatePrefix, "Athena Kick-Off")
     }
 
+    func testDisplayTitleHumanizesSlugEchoes() {
+        func node(slug: String, title: String) -> BrainNode {
+            BrainNode(id: 1, slug: slug, type: "concept", source: "default",
+                      title: title, created: "2026-06-01", updated: "2026-06-01T00:00:00Z")
+        }
+        XCTAssertEqual(node(slug: "people-david", title: "people-david").displayTitle, "David")
+        XCTAssertEqual(node(slug: "granola-ingest-process", title: "").displayTitle,
+                       "Granola Ingest Process")
+        // real titles pass through untouched
+        XCTAssertEqual(node(slug: "companies/fountain", title: "Company — Fountain").displayTitle,
+                       "Company — Fountain")
+        // hash suffixes drop from date-slugged notes
+        XCTAssertEqual(node(slug: "2026-03-16-david-rob-i4ktq6df", title: "").displayTitle,
+                       "2026 03 16 David Rob")
+    }
+
+    @MainActor
+    func testUpdaterDisabledWithoutFeed() {
+        // No SUFeedURL in the test bundle's Info.plist -> updater must be off.
+        XCTAssertFalse(UpdaterModel.shared.isEnabled)
+    }
+
     func testTableParsing() {
         let table = "| # | claim | kind |\n|---|-------|------|\n| 1 | David likes X | preference |"
         let rows = MarkdownPreview.parseTable(table)

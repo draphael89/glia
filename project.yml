@@ -35,6 +35,24 @@ targets:
       - path: Glia
     dependencies:
       - package: Sparkle
+    postBuildScripts:
+      # Sparkle ships Developer-ID-signed; an ad-hoc-signed app under
+      # hardened runtime fails dyld library validation on it ("different
+      # Team IDs"). Re-sign embedded frameworks with the app's identity.
+      - name: Re-sign embedded frameworks
+        script: |
+          FRAMEWORKS="$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH"
+          if [ -d "$FRAMEWORKS" ]; then
+            find "$FRAMEWORKS" -maxdepth 1 -name "*.framework" -print0 |
+              while IFS= read -r -d '' fw; do
+                codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:--}" \
+                  --preserve-metadata=entitlements "$fw"
+              done
+            codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:--}" \
+              --preserve-metadata=entitlements,identifier \
+              "$BUILT_PRODUCTS_DIR/$WRAPPER_NAME"
+          fi
+        basedOnDependencyAnalysis: false
     info:
       path: Glia/Resources/Info.plist
       properties:
@@ -56,6 +74,12 @@ targets:
       properties:
         com.apple.security.app-sandbox: false
         com.apple.security.network.client: true
+        # Ad-hoc dev builds: Sparkle is Developer-ID-signed and an ad-hoc
+        # app has no Team ID to match, so hardened-runtime library
+        # validation rejects it. Developer ID releases re-sign the whole
+        # bundle under one team (make-dmg.sh), where validation passes —
+        # release signing may replace these entitlements without this key.
+        com.apple.security.cs.disable-library-validation: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.glia.app

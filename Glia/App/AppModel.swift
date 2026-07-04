@@ -451,12 +451,13 @@ final class AppModel {
 
     // MARK: page content
 
-    /// Markdown body for the selected node, when the page exists in the
-    /// on-disk mirror (default source; atoms/raw live only in the DB).
+    /// Markdown body for the selected node, when the page exists in that
+    /// source's on-disk mirror (atoms/raw live only in the DB).
     var selectedMarkdown: String? {
-        guard let node = selectedNode, node.source == "default" else { return nil }
+        guard let node = selectedNode,
+              node.source.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }) else { return nil }
         let base = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".gbrain/source-default")
+            .appendingPathComponent(".gbrain/source-\(node.source)")
         let url = base.appendingPathComponent(node.slug + ".md")
         // guard against slug path escapes
         guard url.standardizedFileURL.path.hasPrefix(base.path),

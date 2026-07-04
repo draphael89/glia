@@ -9,7 +9,7 @@ struct InspectorPanel: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text((node.title.isEmpty ? node.slug : node.title).collapsedDatePrefix)
+                        Text(node.displayTitle)
                             .font(.system(size: 14, weight: .semibold))
                             .lineLimit(3)
                         Text(node.slug)
@@ -84,7 +84,7 @@ struct InspectorPanel: View {
                                         Circle()
                                             .fill(Theme.swatch(type: neighbor.type))
                                             .frame(width: 5, height: 5)
-                                        Text((neighbor.title.isEmpty ? neighbor.slug : neighbor.title).collapsedDatePrefix)
+                                        Text(neighbor.displayTitle)
                                             .font(.system(size: 11))
                                             .lineLimit(1)
                                             .foregroundStyle(.secondary)

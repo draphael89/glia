@@ -206,6 +206,7 @@
 				EBEDF3C658D8BE81CDC9C35A /* Sources */,
 				EE459D7F356F3EA9CD8827DC /* Resources */,
 				126A375C40C0EB8E1C8EF297 /* Frameworks */,
+				D8284EDF7C37E28AF28E2042 /* Re-sign embedded frameworks */,
 			);
 			buildRules = (
 			);
@@ -287,6 +288,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D8284EDF7C37E28AF28E2042 /* Re-sign embedded frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Re-sign embedded frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "FRAMEWORKS=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH\"\nif [ -d \"$FRAMEWORKS\" ]; then\n  find \"$FRAMEWORKS\" -maxdepth 1 -name \"*.framework\" -print0 |\n    while IFS= read -r -d '' fw; do\n      codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \\\n        --preserve-metadata=entitlements \"$fw\"\n    done\n  codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \\\n    --preserve-metadata=entitlements,identifier \\\n    \"$BUILT_PRODUCTS_DIR/$WRAPPER_NAME\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		206A4C41670606F9117B8ECC /* Sources */ = {

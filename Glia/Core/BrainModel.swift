@@ -14,6 +14,33 @@ struct BrainNode: Identifiable, Hashable, Sendable, Codable {
 
     var createdDate: Date? { BrainDates.parseDay(created) }
     var updatedDate: Date? { BrainDates.parseISO(updated) }
+
+    /// Human-facing name. Pages whose title is missing or just echoes the
+    /// slug get a humanized form: "people-david" → "David",
+    /// "granola-ingest-process" → "Granola Ingest Process".
+    var displayTitle: String {
+        if !title.isEmpty && title != slug {
+            return title.collapsedDatePrefix
+        }
+        var tail = String(slug.split(separator: "/").last ?? "")
+        for prefix in ["people-", "projects-", "companies-", "clients-"]
+        where tail.hasPrefix(prefix) && tail.count > prefix.count {
+            tail = String(tail.dropFirst(prefix.count))
+        }
+        // date-slugged pages keep their date; hash suffixes drop
+        let words = tail.split(separator: "-").filter { part in
+            // drop 8-char base36 hash suffixes ("i4ktq6df"): digits don't
+            // count as lowercase, so test letter-case and digit separately
+            !(part.count == 8
+              && part.allSatisfy { ($0.isLetter && $0.isLowercase) || $0.isNumber }
+              && part.contains(where: \.isNumber)
+              && part.contains(where: \.isLetter))
+        }
+        return words.map { w -> String in
+            let s = String(w)
+            return s.allSatisfy(\.isNumber) ? s : s.prefix(1).uppercased() + s.dropFirst()
+        }.joined(separator: " ")
+    }
 }
 
 struct BrainLink: Hashable, Sendable, Codable {
