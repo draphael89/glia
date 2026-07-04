@@ -12,6 +12,24 @@ struct StatsBar: View {
                     .foregroundStyle(Theme.accent)
                 Text("Glia")
                     .font(.system(size: 13, weight: .semibold))
+                if model.demoActive {
+                    Button {
+                        model.exitDemo()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("DEMO")
+                                .font(.system(size: 9, weight: .bold))
+                                .kerning(0.5)
+                            Image(systemName: "xmark")
+                                .font(.system(size: 7, weight: .bold))
+                        }
+                        .padding(.horizontal, 7).padding(.vertical, 3)
+                        .background(Color.orange.opacity(0.22), in: Capsule())
+                        .foregroundStyle(.orange)
+                    }
+                    .buttonStyle(.plain)
+                    .help("You're exploring the sample brain — click to exit")
+                }
             }
 
             if !model.graph.nodes.isEmpty {

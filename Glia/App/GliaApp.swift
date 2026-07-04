@@ -72,6 +72,10 @@ struct GliaApp: App {
                     model.exportSnapshot()
                 }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
+
+                if model.demoActive {
+                    Button("Exit Demo") { model.exitDemo() }
+                }
             }
         }
 

@@ -25,6 +25,8 @@ final class AppModel {
     var paletteVisible = false
     /// Bumped on any camera/scene change; the label overlay observes it.
     private(set) var cameraTick = 0
+    /// Mirrors BrainLocation.demoMode as observable state.
+    private(set) var demoActive = false
 
     let renderer: GraphRenderer
     let replay = ReplayController()
@@ -76,6 +78,7 @@ final class AppModel {
     /// or demo-mode toggle) and reload from scratch.
     func reloadFromLocation() {
         loadError = nil
+        demoActive = BrainLocation.demoMode
         source = JSONFileBrainSource(url: JSONFileBrainSource.defaultURL)
         selectedIndex = nil
         hoveredIndex = nil
@@ -84,6 +87,11 @@ final class AppModel {
 
     func exploreDemo() {
         BrainLocation.enterDemoMode()
+        reloadFromLocation()
+    }
+
+    func exitDemo() {
+        BrainLocation.exitDemoMode()
         reloadFromLocation()
     }
 
