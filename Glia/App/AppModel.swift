@@ -204,7 +204,9 @@ final class AppModel {
                 self.isSettling = false
                 self.sceneDirty()
                 self.setContinuousRendering(false)
-                self.fitView()
+                // Stable spatial memory extends across launches: come back
+                // to exactly where you were, not a re-fit.
+                if !self.restoreViewState() { self.fitView() }
                 LayoutStore.save(graph: g, positions: final)
                 self.snapshotIfRequested()
                 // GLIA_AUTOPLAY_REPLAY=1: start the growth replay shortly
@@ -459,12 +461,45 @@ final class AppModel {
         // a slow loop alive for the glow breathing — 24fps is plenty for a
         // 2.2rad/s sine and an 80% energy cut vs. ProMotion rate.
         if !isSettling && !renderer.camera.isAnimating && !replay.isPlaying {
+            saveViewState()
             if selectedIndex == nil {
                 setContinuousRendering(false)
             } else if view?.preferredFramesPerSecond != 24 {
                 view?.preferredFramesPerSecond = 24
             }
         }
+    }
+
+    // MARK: view-state persistence (camera + selection across launches)
+
+    private var restoredOnce = false
+
+    private func saveViewState() {
+        // tooling runs (snapshots) and demo browsing don't own the viewpoint
+        guard ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] == nil,
+              !demoActive else { return }
+        let d = UserDefaults.standard
+        let cam = renderer.camera
+        d.set([Double(cam.center.x), Double(cam.center.y), Double(cam.zoom)],
+              forKey: "viewCamera")
+        d.set(selectedIndex.map { graph.nodes[$0].slug } ?? "", forKey: "viewSelection")
+    }
+
+    /// Returns true if a previous session's viewpoint was restored.
+    private func restoreViewState() -> Bool {
+        guard !restoredOnce else { return true }   // only on first settle
+        restoredOnce = true
+        guard !demoActive,
+              let arr = UserDefaults.standard.array(forKey: "viewCamera") as? [Double],
+              arr.count == 3, arr[2] > 0.04 else { return false }
+        renderer.camera.center = SIMD2(Float(arr[0]), Float(arr[1]))
+        renderer.camera.zoom = Float(arr[2])
+        if let slug = UserDefaults.standard.string(forKey: "viewSelection"), !slug.isEmpty,
+           let i = graph.nodes.firstIndex(where: { $0.slug == slug }) {
+            selectedIndex = i
+        }
+        cameraChanged()
+        return true
     }
 
     func cameraChanged() {
