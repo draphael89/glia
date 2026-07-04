@@ -34,7 +34,7 @@ struct MarkdownPreview: View {
         return Array(out.prefix(40))
     }
 
-    static func normalize(_ s: String) -> String {
+    nonisolated static func normalize(_ s: String) -> String {
         s.lowercased().filter { $0.isLetter || $0.isNumber }
     }
 
@@ -83,7 +83,7 @@ struct MarkdownPreview: View {
     }
 
     /// Parse a markdown pipe table into header + data rows.
-    static func parseTable(_ block: String) -> [[String]] {
+    nonisolated static func parseTable(_ block: String) -> [[String]] {
         block.split(separator: "\n")
             .map { line in
                 line.trimmingCharacters(in: CharacterSet(charactersIn: "| "))
@@ -96,7 +96,7 @@ struct MarkdownPreview: View {
             }
     }
 
-    static func stripFrontmatter(_ s: String) -> String {
+    nonisolated static func stripFrontmatter(_ s: String) -> String {
         guard s.hasPrefix("---") else { return s }
         let parts = s.components(separatedBy: "\n---")
         guard parts.count > 1 else { return s }
