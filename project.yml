@@ -111,16 +111,22 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         COMBINE_HIDPI_IMAGES: YES
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: MAS
+  # Hostless logic tests: compile the app sources (minus @main) straight into
+  # the test bundle and launch NOTHING. The tests are pure — graph math,
+  # layout, camera, string helpers — so they need no GUI, no window server,
+  # and no Metal device. Hosting them in the real app made CI crash on the
+  # headless runner (no Metal → fatalError at launch). This runs anywhere.
   GliaTests:
     type: bundle.unit-test
     platform: macOS
     sources:
       - path: GliaTests
+      - path: Glia
+        excludes:
+          - "App/GliaApp.swift"   # the @main entry — would double-define
     dependencies:
-      - target: Glia
+      - package: Sparkle
     settings:
       base:
-        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia
-        BUNDLE_LOADER: $(TEST_HOST)
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: ai.glia.tests

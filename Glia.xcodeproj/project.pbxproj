@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		039D5EFD9FC9FA52539AE9B7 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
+		042520996078D05D9B1DC73D /* ReplayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031F90C43E6019D333F1B38A /* ReplayBar.swift */; };
 		07943B323C8A579C4C82681B /* BrainLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DE22EDD72BDF074EB49168 /* BrainLocation.swift */; };
 		092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
 		0AA11788D01E4B7D9B01FFF0 /* AppIconSimple256.png in Resources */ = {isa = PBXBuildFile; fileRef = C5EA75FBE53C9D3A485F5BDE /* AppIconSimple256.png */; };
@@ -15,16 +16,26 @@
 		10BC1C11A7D43365CF96CDA6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 159286828D83AC196D640FBB /* Info.plist */; };
 		15A2139D7359787429A11F47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
 		1625B3B7B26B93DD4780EE6A /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
+		17C4C1AB084343EC6862BD58 /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		181C577AD6CCC2CA4BC894E1 /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
 		1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176DBA550B7D01A412CDF3B0 /* GliaTests.swift */; };
+		1BFE28EE1CB2366973341C3D /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
 		1CBFCE2799C8D2246BC0F288 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
+		1F7AB472E8ACDF9F26980F20 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
+		200DCCA781BEC9571A65D877 /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
 		224C128486F1553AA81FECDE /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
+		24B5AAC0AC2C5F649B41C809 /* BrainLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DE22EDD72BDF074EB49168 /* BrainLocation.swift */; };
+		2A845914BC2418AB90C3B945 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
 		2A9E3AD917910E165B442600 /* BrainLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DE22EDD72BDF074EB49168 /* BrainLocation.swift */; };
 		33D909059BF8AA46CA3B92FC /* AppIconSimple256.png in Resources */ = {isa = PBXBuildFile; fileRef = C5EA75FBE53C9D3A485F5BDE /* AppIconSimple256.png */; };
 		36A7A08DD4E26F8DE8B1407C /* BrainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93476D3743D2F64C976E58A9 /* BrainModel.swift */; };
 		36C53330F5F73F885C508916 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
 		3CB3F20C1FD1C1C5A6B4ED96 /* ReplayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031F90C43E6019D333F1B38A /* ReplayBar.swift */; };
 		3CE30F2B32334AF12A099B0A /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C5217AC6542D60BF7FE1A167 /* Sparkle */; };
+		3E4E9F07648FE6F33BEED925 /* DebugMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */; };
+		405F76D373DA1FBFA4857A16 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
+		47446AA6A0094161030CCD71 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
+		4960467D8C5C5EF2777D1F74 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		52F82ED38DCBFD27D0EEAB63 /* LabelOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */; };
 		56C2633DEBEF98E4873AD346 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
 		5864C244517E25EC26FA546A /* Graph.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8E6410EEDDB0B04037494BC8 /* Graph.metal */; };
@@ -33,6 +44,7 @@
 		613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
 		633266C24F2633467D52989A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
+		654A77C43124F2F577F2776F /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
 		68A9D8F0D51AE197DA28C616 /* DebugMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */; };
 		6939BFC63DFF94E98F99D24C /* ShortcutsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E773F716D5EC45153CA7C2 /* ShortcutsSheet.swift */; };
@@ -40,45 +52,53 @@
 		70732BBF2229D050834737ED /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
 		7077C3C2B6946E2300569BE3 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
 		75922CC31F49B472E751AEA2 /* BrainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93476D3743D2F64C976E58A9 /* BrainModel.swift */; };
+		759CE05E2CB905FA4C13FA29 /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
 		76209BFAE48E50CD1E4D06FA /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0ACCDC396FF223B728D78 /* Camera.swift */; };
 		78C5DC3EBEF0F639868BE5B6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */; };
+		842A46CC69032D3F94077B1B /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB83C16CD6450F1E3722346 /* Updater.swift */; };
 		88501CC9F542FEDFF60DC880 /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
 		88D6A7C4D7A5A3AC9A0E5ADA /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
 		891EE6E3A70E4CA3D85EBBAA /* GliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458A95BC9832417693924F00 /* GliaApp.swift */; };
+		8A0F787727B08B0776F7B4D5 /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
 		93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
+		99BF6E584775B3783991EA3C /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 		9B0DB878257E7CBD0BFCA47A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
+		9C4B792073F98AE5BA57C662 /* Info-MAS.plist in Resources */ = {isa = PBXBuildFile; fileRef = CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */; };
 		9F19ACAFEB88C5FB141DE852 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
 		A4C82F48BE41DED36C87550C /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		A99F159FADE4DF154ECE6535 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
 		AAA5E5A12E4BB284E708142A /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
+		AB2EF948931E2B7A537578EC /* ShortcutsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E773F716D5EC45153CA7C2 /* ShortcutsSheet.swift */; };
+		AEC4717CA05ABBE7BADED1FB /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		B2ADC9D511E94958438B5028 /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
 		B2ECD2C27B65646911BE281A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
+		C3ECF855CC114C440B3F1DA8 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9FCA356CA4D0D23C9903DAC3 /* Sparkle */; };
 		C48F2BB81447646B967798C0 /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		C66A8966D4A5034E795BB2DF /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
 		C6CA3CCFCF061D81EB961488 /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 		CA30C3BFA7D174CAB6588450 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB83C16CD6450F1E3722346 /* Updater.swift */; };
+		CAF261DFBD65B5603174CF68 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4F7F3E61CE3CBBFB088F1D /* AppModel.swift */; };
+		CC2306F08C56ACDEE6A9AB4A /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */; };
 		CCB989C2E5295BBC3F041B10 /* GliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458A95BC9832417693924F00 /* GliaApp.swift */; };
+		D24A18B86DDBA8A7D46F6146 /* BrainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93476D3743D2F64C976E58A9 /* BrainModel.swift */; };
+		D4563246847521F1B1EE8E6D /* LayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7573CA91179240E09F1818 /* LayoutEngine.swift */; };
 		DB980FA8210C971372356D8B /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
 		DDECDA5F60625DB3E93C6A31 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
 		DED696A6BB47C8829F75D91D /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
+		DF72372B654DD70822C0884C /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */; };
 		E0A64EE5016017AA1E8A479E /* GraphRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DB7EDF88D8EB8D367FFCAE /* GraphRenderer.swift */; };
 		E102151E938FACB92FA11F1C /* DebugMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB37AD2CECD4B6B070886E8 /* DebugMarkers.swift */; };
 		E173EE5C7C520B67E11017C2 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
+		E673274A2A114AAD6CCD860F /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */; };
+		E8C7A7037D4940459A1651FD /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
 		E8F8B921A8556D2A042E2DD7 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		ED9D943B1DCEBCD316B17B84 /* DemoBrain.json in Resources */ = {isa = PBXBuildFile; fileRef = 507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */; };
 		EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
+		F1ED6DACB5BDF0B5476CEA24 /* AppIconSimple256.png in Resources */ = {isa = PBXBuildFile; fileRef = C5EA75FBE53C9D3A485F5BDE /* AppIconSimple256.png */; };
 		F9DCE9094CF1E5A0494F9134 /* ShortcutsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E773F716D5EC45153CA7C2 /* ShortcutsSheet.swift */; };
+		F9FA30618F944557FF5ECAC1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
+		FC0438368FB761B275F19CC6 /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		FC848D900F9EF28B45AFD158 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 99D0D3ED000A53D9DF0C1946 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 55B8F417D1CF2F53209C0DC3;
-			remoteInfo = Glia;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		031F90C43E6019D333F1B38A /* ReplayBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayBar.swift; sourceTree = "<group>"; };
@@ -126,6 +146,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CE30F2B32334AF12A099B0A /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E96856ABEA5DA416DBC4D924 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3ECF855CC114C440B3F1DA8 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,14 +329,16 @@
 			buildConfigurationList = 78CA4D708E8836773AE4AB04 /* Build configuration list for PBXNativeTarget "GliaTests" */;
 			buildPhases = (
 				206A4C41670606F9117B8ECC /* Sources */,
+				6E5AB5CF23131DF1976A3688 /* Resources */,
+				E96856ABEA5DA416DBC4D924 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				32958F3C1EA4A1F47087D331 /* PBXTargetDependency */,
 			);
 			name = GliaTests;
 			packageProductDependencies = (
+				9FCA356CA4D0D23C9903DAC3 /* Sparkle */,
 			);
 			productName = GliaTests;
 			productReference = 40865A66B86E8DB1158F85F5 /* GliaTests.xctest */;
@@ -359,6 +389,17 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6E5AB5CF23131DF1976A3688 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1ED6DACB5BDF0B5476CEA24 /* AppIconSimple256.png in Resources */,
+				405F76D373DA1FBFA4857A16 /* Assets.xcassets in Resources */,
+				759CE05E2CB905FA4C13FA29 /* DemoBrain.json in Resources */,
+				9C4B792073F98AE5BA57C662 /* Info-MAS.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A87D3F0325C6BBDF4D29289C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -388,7 +429,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAF261DFBD65B5603174CF68 /* AppModel.swift in Sources */,
+				24B5AAC0AC2C5F649B41C809 /* BrainLocation.swift in Sources */,
+				D24A18B86DDBA8A7D46F6146 /* BrainModel.swift in Sources */,
+				47446AA6A0094161030CCD71 /* BrainSource.swift in Sources */,
+				2A845914BC2418AB90C3B945 /* Camera.swift in Sources */,
+				1BFE28EE1CB2366973341C3D /* CommandPalette.swift in Sources */,
+				F9FA30618F944557FF5ECAC1 /* ContentView.swift in Sources */,
+				3E4E9F07648FE6F33BEED925 /* DebugMarkers.swift in Sources */,
+				654A77C43124F2F577F2776F /* FilterPanel.swift in Sources */,
 				1AD59C53E6B57F226E7A3FAA /* GliaTests.swift in Sources */,
+				200DCCA781BEC9571A65D877 /* Graph.metal in Sources */,
+				8A0F787727B08B0776F7B4D5 /* GraphRenderer.swift in Sources */,
+				4960467D8C5C5EF2777D1F74 /* GraphView.swift in Sources */,
+				AEC4717CA05ABBE7BADED1FB /* InspectorPanel.swift in Sources */,
+				1F7AB472E8ACDF9F26980F20 /* Intents.swift in Sources */,
+				17C4C1AB084343EC6862BD58 /* LabelOverlay.swift in Sources */,
+				D4563246847521F1B1EE8E6D /* LayoutEngine.swift in Sources */,
+				CC2306F08C56ACDEE6A9AB4A /* MarkdownPreview.swift in Sources */,
+				FC0438368FB761B275F19CC6 /* RendererSnapshot.swift in Sources */,
+				042520996078D05D9B1DC73D /* ReplayBar.swift in Sources */,
+				E8C7A7037D4940459A1651FD /* ReplayController.swift in Sources */,
+				AB2EF948931E2B7A537578EC /* ShortcutsSheet.swift in Sources */,
+				E673274A2A114AAD6CCD860F /* SpotlightIndexer.swift in Sources */,
+				99BF6E584775B3783991EA3C /* StatsBar.swift in Sources */,
+				DF72372B654DD70822C0884C /* Theme.swift in Sources */,
+				842A46CC69032D3F94077B1B /* Updater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -458,14 +524,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		32958F3C1EA4A1F47087D331 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 55B8F417D1CF2F53209C0DC3 /* Glia */;
-			targetProxy = FC848D900F9EF28B45AFD158 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		5B44833A3B537977863979AA /* Debug */ = {
@@ -559,6 +617,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Glia/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -566,7 +625,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.tests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia";
 			};
 			name = Debug;
 		};
@@ -592,6 +650,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Glia/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -599,7 +658,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ai.glia.tests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Glia.app/Contents/MacOS/Glia";
 			};
 			name = Release;
 		};
@@ -750,6 +808,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9FCA356CA4D0D23C9903DAC3 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 07CE97C415F2F48DF5FEDA33 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		C5217AC6542D60BF7FE1A167 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 07CE97C415F2F48DF5FEDA33 /* XCRemoteSwiftPackageReference "Sparkle" */;

@@ -1,6 +1,7 @@
 import XCTest
 import simd
-@testable import Glia
+// Hostless test bundle: app sources are compiled directly into this target
+// (see project.yml), so there is no separate Glia module to import.
 
 final class BrainGraphTests: XCTestCase {
     private func node(_ id: Int, _ slug: String) -> BrainNode {
