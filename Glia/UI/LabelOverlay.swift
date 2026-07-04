@@ -64,6 +64,7 @@ struct LabelOverlay: View {
                 let screenR = CGFloat(scene.radii[i] * cam.zoom)
 
                 var title = node.title.isEmpty ? String(node.slug.split(separator: "/").last ?? "") : node.title
+                title = Self.collapseRepeatedDatePrefix(title)
                 if title.count > 34 { title = String(title.prefix(33)) + "…" }
 
                 let isFocusNode = i == model.selectedIndex || i == model.hoveredIndex
@@ -94,5 +95,17 @@ struct LabelOverlay: View {
             }
         }
         .allowsHitTesting(false)
+    }
+
+    /// Some ingested titles carry a doubled date prefix
+    /// ("2026 06 29 2026 06 29 Athena Kick-Off") — collapse the repeat.
+    /// Data stays untouched; this is presentation only.
+    nonisolated static func collapseRepeatedDatePrefix(_ title: String) -> String {
+        let pattern = /^((20\d{2})[ \-\/](\d{2})[ \-\/](\d{2}))[ \-]+\1[ \-]*/
+        if let match = title.prefixMatch(of: pattern) {
+            return String(match.output.1) + " " + title[match.range.upperBound...]
+                .trimmingCharacters(in: .whitespaces)
+        }
+        return title
     }
 }

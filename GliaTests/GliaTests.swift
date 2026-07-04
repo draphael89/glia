@@ -102,6 +102,23 @@ final class LayoutEngineTests: XCTestCase {
     }
 }
 
+final class LabelTests: XCTestCase {
+    func testRepeatedDatePrefixCollapses() {
+        XCTAssertEqual(
+            LabelOverlay.collapseRepeatedDatePrefix("2026 06 29 2026 06 29 Athena Kick-Off"),
+            "2026 06 29 Athena Kick-Off")
+    }
+
+    func testSingleDatePrefixUntouched() {
+        XCTAssertEqual(
+            LabelOverlay.collapseRepeatedDatePrefix("2026-06-06 — Daily Brief"),
+            "2026-06-06 — Daily Brief")
+        XCTAssertEqual(
+            LabelOverlay.collapseRepeatedDatePrefix("Athena Kick-Off"),
+            "Athena Kick-Off")
+    }
+}
+
 final class MarkdownTests: XCTestCase {
     func testFrontmatterStripped() {
         let s = "---\ntype: note\ntitle: X\n---\n\n# Hello\nBody"
