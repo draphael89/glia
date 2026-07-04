@@ -73,7 +73,10 @@ struct GliaApp: App {
         MenuBarExtra {
             MenuBarContent(model: model)
         } label: {
+            // pulses when a fresh brain snapshot lands — the "it's alive"
+            // heartbeat you can see without opening the window
             Image(systemName: "brain.head.profile")
+                .symbolEffect(.bounce, value: model.graph.generatedAt)
         }
         .menuBarExtraStyle(.menu)
     }

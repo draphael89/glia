@@ -132,6 +132,16 @@ final class LabelTests: XCTestCase {
     }
 
     @MainActor
+    func testSourceMirrorRejectsPathEscapes() {
+        // slug/source strings come from external data — traversal must fail
+        XCTAssertNil(BrainLocation.sourceMirror(for: "../evil"))
+        XCTAssertNil(BrainLocation.sourceMirror(for: "a/b"))
+        XCTAssertNil(BrainLocation.sourceMirror(for: "ea; rm -rf"))
+        XCTAssertNotNil(BrainLocation.sourceMirror(for: "default"))
+        XCTAssertNotNil(BrainLocation.sourceMirror(for: "ea"))
+    }
+
+    @MainActor
     func testUpdaterDisabledWithoutFeed() {
         // No SUFeedURL in the test bundle's Info.plist -> updater must be off.
         XCTAssertFalse(UpdaterModel.shared.isEnabled)
