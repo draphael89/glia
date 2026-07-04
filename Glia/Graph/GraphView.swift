@@ -42,6 +42,22 @@ final class GraphMTKView: MTKView {
         isPaused = true
         enableSetNeedsDisplay = true
         layer?.isOpaque = true
+
+        // VoiceOver: the canvas is one element describing the brain;
+        // selection changes are announced (see announceSelection).
+        setAccessibilityElement(true)
+        setAccessibilityRole(.group)
+        setAccessibilityLabel("Brain graph")
+    }
+
+    /// Called by AppModel when the selection changes — VoiceOver users
+    /// hear what the camera flew to.
+    func announceSelection(_ summary: String?) {
+        setAccessibilityValue(summary ?? "nothing selected")
+        guard let summary else { return }
+        NSAccessibility.post(element: self, notification: .announcementRequested,
+                             userInfo: [.announcement: summary,
+                                        .priority: NSAccessibilityPriorityLevel.high.rawValue])
     }
 
     @available(*, unavailable)

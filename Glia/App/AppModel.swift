@@ -568,6 +568,9 @@ final class AppModel {
         selectedIndex = index
         renderer.camera.fly(to: positions[index], zoom: max(renderer.camera.zoom, 9))
         setContinuousRendering(true)
+        let node = graph.nodes[index]
+        view?.announceSelection(
+            "\(node.displayTitle), \(node.type), \(graph.degree[index]) connections")
     }
 
     func clearFocus() {
