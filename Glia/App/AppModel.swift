@@ -490,13 +490,22 @@ final class AppModel {
     /// (that race poisoned the store and defeated restore-vs-fit).
     private var viewStateReady = false
 
+    private var lastSavedView: (SIMD2<Float>, Float, Int?)?
+
     private func saveViewState() {
         // tooling runs (snapshots) and demo browsing don't own the viewpoint
         guard ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] == nil,
               !demoActive else { return }
-        Markers.drop("save.viewState zoom=\(renderer.camera.zoom)")
-        let d = UserDefaults.standard
         let cam = renderer.camera
+        // dirty-check: the selection-breathing loop draws at 24fps — without
+        // this it would write UserDefaults 24×/sec for as long as you read
+        if let last = lastSavedView,
+           last.0 == cam.center, last.1 == cam.zoom, last.2 == selectedIndex {
+            return
+        }
+        lastSavedView = (cam.center, cam.zoom, selectedIndex)
+        Markers.drop("save.viewState zoom=\(cam.zoom)")
+        let d = UserDefaults.standard
         d.set([Double(cam.center.x), Double(cam.center.y), Double(cam.zoom)],
               forKey: "viewCamera")
         d.set(selectedIndex.map { graph.nodes[$0].slug } ?? "", forKey: "viewSelection")
