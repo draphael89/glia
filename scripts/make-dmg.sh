@@ -1,12 +1,24 @@
 #!/bin/bash
 # Build a distributable Glia DMG.
 #
-# Unsigned by default (local/dev). For release, export:
-#   SIGN_IDENTITY="Developer ID Application: ..."   codesign identity
-#   NOTARY_PROFILE="glia-notary"                    notarytool keychain profile
-# and the script signs, notarizes, and staples.
+# Zero-config: auto-detects a "Developer ID Application" cert in the keychain.
+#   - Found + NOTARY_PROFILE set  -> signed, notarized, stapled (shippable)
+#   - Found, no NOTARY_PROFILE    -> Developer-ID-signed (notarize separately)
+#   - None                        -> ad-hoc signed (local/dev only)
+# One-time notary setup:
+#   xcrun notarytool store-credentials glia-notary --apple-id <id> \
+#     --team-id <TEAMID> --password <app-specific-password>
+# Then: NOTARY_PROFILE=glia-notary scripts/make-dmg.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+# Auto-detect Developer ID unless one was passed explicitly.
+# (|| true so "no cert found" doesn't trip set -e / pipefail — ad-hoc is valid.)
+if [ -z "${SIGN_IDENTITY:-}" ]; then
+  SIGN_IDENTITY=$( { security find-identity -v -p codesigning 2>/dev/null \
+    | grep "Developer ID Application" | head -1 \
+    | sed -E 's/.*"(Developer ID Application: [^"]+)".*/\1/'; } || true )
+fi
 
 VERSION=$(grep -A1 'CFBundleShortVersionString' Glia/Resources/Info.plist | tail -1 \
   | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
@@ -27,14 +39,22 @@ rm -rf "$DIST"; mkdir -p "$STAGE"
 ditto "$APP" "$STAGE/Glia.app"          # ditto preserves signatures; cp -R may not
 ln -s /Applications "$STAGE/Applications"
 
-if [ -n "${SIGN_IDENTITY:-}" ]; then
-  echo "==> Signing (Developer ID)"
-  codesign --force --deep --options runtime --sign "$SIGN_IDENTITY" "$STAGE/Glia.app"
+if [ -n "$SIGN_IDENTITY" ]; then
+  echo "==> Signing (Developer ID): $SIGN_IDENTITY"
+  # Inside-out (Apple guidance; --deep is discouraged for Developer ID):
+  # nested frameworks first, then the app with hardened runtime.
+  find "$STAGE/Glia.app/Contents/Frameworks" -name "*.framework" -maxdepth 1 -print0 2>/dev/null |
+    while IFS= read -r -d '' fw; do
+      codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$fw"
+    done
+  codesign --force --options runtime --timestamp \
+    --entitlements Glia/Resources/Glia.entitlements \
+    --sign "$SIGN_IDENTITY" "$STAGE/Glia.app"
 else
   # Ad-hoc re-sign the WHOLE bundle so the app and its embedded frameworks
   # (Sparkle ships Developer-ID-signed) share a team identity — otherwise
   # dyld's library validation rejects the framework under hardened runtime.
-  echo "==> Signing (ad-hoc, local build)"
+  echo "==> Signing (ad-hoc, local/dev only — not distributable)"
   codesign --force --deep --sign - "$STAGE/Glia.app"
 fi
 
@@ -42,10 +62,18 @@ echo "==> Creating DMG"
 hdiutil create -volname "Glia" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
 rm -rf "$STAGE"
 
-if [ -n "${SIGN_IDENTITY:-}" ] && [ -n "${NOTARY_PROFILE:-}" ]; then
-  echo "==> Notarizing"
-  xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
-  xcrun stapler staple "$DMG"
+if [ -n "$SIGN_IDENTITY" ]; then
+  codesign --force --sign "$SIGN_IDENTITY" "$DMG"   # sign the container too
+  if [ -n "${NOTARY_PROFILE:-}" ]; then
+    echo "==> Notarizing (this can take a few minutes)…"
+    xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
+    xcrun stapler staple "$DMG"
+    echo "==> Notarized + stapled — ready for public release."
+  else
+    echo "==> Developer-ID signed. Set NOTARY_PROFILE to also notarize."
+  fi
+else
+  echo "==> Ad-hoc build (Gatekeeper will warn on other Macs)."
 fi
 
 echo "==> Done: $DMG ($(du -h "$DMG" | cut -f1))"
