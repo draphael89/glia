@@ -17,6 +17,35 @@ map — your brain's geography stays where you learned it.
 
 > Status: early. Built native-first in Swift 6 / SwiftUI / Metal. No web views.
 
+## Why Glia exists: inject *who you are*, not just what's relevant
+
+Seeing your brain is the hook. The thesis is bigger. As context windows grow, the
+binding constraint on an agent shifts from *retrieval* (the pages relevant to your
+question) to *identity* (who you are — your values, worldview, how you work). Glia
+is the surface for **curating** that identity; the [`glia-context` MCP](mcp/) is how
+it gets **injected** into any agent at the start of a session.
+
+```
+Glia.app  →  ~/.glia/psyche.md  →  glia-context MCP  →  any agent
+(see + curate)   (your curated mind)   (injects identity + relevance)
+```
+
+We didn't just assert this — we [measured it](experiments/psyche-injection/), then
+tried to break our own result. Under judges **blind** to how each answer was made
+(49 independent judgments across 4 conditions), the honest finding:
+
+- **Injecting who-you-are makes an agent measurably sharper — as a *complement* to
+  what's relevant, not a replacement.** Combining identity + retrieval wins the
+  blind ranking and beats retrieval-alone 71%, holding in 6 of 7 tasks.
+- **Retrieval buys specificity; identity buys insight.** On neutral technical tasks
+  every condition ties — the lift is specific to identity-shaped work, not a global
+  "try harder."
+- A first, non-blind run overclaimed (psyche *alone* dominates); that didn't survive
+  blind judging. The correction is kept in the repo — [read the arc](experiments/psyche-injection/FINDINGS.md).
+
+Star the pages that are the truest map of you (⌘D), export the psyche, and prime any
+agent with it. See [`mcp/`](mcp/) to install the server (`cd mcp && ./install.sh`).
+
 ## Install
 
 **Build from source** (works today — requires Xcode 16+):
