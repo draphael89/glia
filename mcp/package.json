@@ -1,0 +1,21 @@
+{
+  "name": "glia-context-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that primes an LLM with WHO YOU ARE (your psyche) plus WHAT'S RELEVANT (gbrain retrieval) — the mind-injection layer for Glia.",
+  "type": "module",
+  "bin": { "glia-context-mcp": "dist/index.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "node --test dist/*.test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  },
+  "license": "MIT"
+}
