@@ -9,31 +9,53 @@ This is the operational layer behind [Glia](../). Glia is where you *see and
 curate* your mind; `glia-context` is where that map gets *injected* into an
 agent's context. The split is deliberate: Glia exports, this injects.
 
-## Why (the thesis, now measured)
+## Why (the thesis, measured — and corrected)
 
 gbrain is great at **relevance retrieval** — the pages that bear on your
 question. This server adds a distinct lever: **identity injection** — a map of
-who you are, independent of the question. A [blind-judged experiment](../experiments/psyche-injection)
-found identity injection beats relevance retrieval and wins on *insight*, not
-just personal fit — and that identity is the high-density signal (piling on
-naive retrieval can dilute it). So `prime_context` front-loads the psyche and
-budgets it first: if the window is tight, who-you-are survives.
+who you are, independent of the question.
+
+A [blind-judged experiment](../experiments/psyche-injection) tested it, then
+tried to break its own result. The honest finding (v2): identity is a real
+signal, but a **complement** to relevance, not a replacement. Injecting *both*
+wins — the combination beats relevance-alone 71% of the time under judges blind
+to the psyche. The mechanism is clean: **retrieval buys specificity and
+actionability; identity buys insight**. And on neutral technical tasks all arms
+tie — identity helps *specifically* on tasks that are about you, it isn't a
+global "try harder" effect. (An earlier non-blind run overclaimed that psyche
+*alone* dominates and retrieval *dilutes* it; that didn't survive blind judging.
+See [FINDINGS.md](../experiments/psyche-injection/FINDINGS.md).)
+
+So `prime_context` defaults to `both`: it front-loads a **concentrated identity
+core** (capped — identity is high-density, a small dose carries the insight
+lift) and hands the larger share of the budget to retrieval, so the answer
+stays grounded.
 
 ## Tools
 
 | Tool | What it does |
 |---|---|
-| `prime_context` | The headline. Given the session's task, returns a context block: **who you are** (front-loaded) + **relevant gbrain pages**. `mode`: `psyche` / `context` / `both` (default). Call it first. |
+| `prime_context` | The headline. Given the session's task, returns a context block: a concentrated **who you are** core + **relevant gbrain pages**. `mode`: `psyche` / `context` / `both` (default — the recipe v2 proved). Call it first. |
 | `who_am_i` | Just the psyche map — who you are, values, essays. |
 | `recall` | Pure relevance retrieval from gbrain for a query. |
 
 ## Setup
 
+One command — builds and registers with Claude Code:
+
 ```bash
-cd mcp && npm install && npm run build
+cd mcp && ./install.sh
 ```
 
-Register with an MCP client (e.g. Claude Code) — add to your MCP config:
+Or manually:
+
+```bash
+cd mcp && npm install && npm run build
+claude mcp add glia-context node "$(pwd)/dist/index.js"     # Claude Code
+```
+
+For **Hermes** or any other MCP client, add a stdio server pointing at the
+built entrypoint:
 
 ```json
 {
