@@ -18,10 +18,15 @@ export interface PrimeResult {
  * The core of the thesis: build the injection that primes the model with WHO
  * YOU ARE (psyche) and, optionally, WHAT'S RELEVANT (gbrain context).
  *
- * Psyche is FRONT-LOADED and budgeted first — the pilot eval found identity
- * is the high-density signal and that piling on operational retrieval can
- * dilute it, so if the window is tight the identity survives and context is
- * what gets trimmed.
+ * Budgeting reflects the v2 (blind-judge) finding: identity and relevance are
+ * COMPLEMENTS, not substitutes. Retrieval is what makes an answer specific and
+ * actionable; identity is what makes it insightful. The winning arm carried
+ * both. And identity is high-density — a concentrated dose already tops the
+ * insight dimension, so it doesn't need the whole file. So in `both` mode we
+ * front-load a CAPPED identity core (enough to convey who you are) and hand the
+ * larger remainder to retrieval, so the answer stays grounded. (v1's
+ * "retrieval dilutes identity" did not survive blind judging — see
+ * experiments/psyche-injection/FINDINGS.md.)
  */
 export async function primeContext(
   task: string,
@@ -35,8 +40,9 @@ export async function primeContext(
   if (mode === "psyche" || mode === "both") {
     const p = await loadPsyche();
     psycheSource = p.source;
-    // psyche gets the lion's share; identity is the finding's high-value signal
-    const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.6);
+    // Identity is high-density: a concentrated core carries the insight lift.
+    // Cap it at 40% of budget in `both` mode so retrieval keeps room to ground.
+    const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
     psycheText = truncateToTokens(p.text, psycheBudget);
   }
 

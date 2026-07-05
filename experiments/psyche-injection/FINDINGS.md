@@ -1,7 +1,24 @@
-# Findings — pilot run
+# Findings
+
+> **v2 update (read this first).** The v1 headline below — *"psyche alone beats
+> everything; retrieval dilutes identity"* — **did not survive blind judging.**
+> We ran the isolation experiment v1 itself called for (judges blind to the
+> psyche, personal-fit dimension removed, objective scoring on neutral
+> controls). Under those conditions the durable finding is different and, we
+> think, better: **identity is a real signal, but a *complement* to relevance,
+> not a replacement.** The combined arm wins; psyche-alone falls to third. Full
+> corrected story in [§ v2](#v2--the-honest-run-blind-judges--objective-controls)
+> below and [REPORT-v2.md](REPORT-v2.md). v1 is kept intact for the arc — the
+> correction is the point.
+
+---
+
+# v1 — Findings (pilot run, non-blind)
 
 Narrative reading of [REPORT.md](REPORT.md) (raw numbers). Small-n pilot
 (6 tasks × 4 arms × 3 blind judges); directional, not definitive.
+
+**Superseded in part by v2 — see the banner above.**
 
 ## 1. Identity beats relevance — decisively, and on *usefulness* not just fit
 
@@ -66,3 +83,89 @@ harder" effect can be isolated from judge preference.
 The leverage thesis behind building the brain holds: the highest-value thing
 to inject was not the freshest relevant page — it was a faithful map of the
 mind.
+
+---
+
+# v2 — the honest run (blind judges + objective controls)
+
+This is the experiment v1 §3 named as "the #1 next experiment." Same four arms
+(naked / context / psyche / both), but three changes that remove the ways v1
+could have fooled us:
+
+1. **Judges blind to the psyche.** They rank answers on general quality with no
+   knowledge of how each was produced — so they cannot reward the recognizable
+   voice.
+2. **No "personal fit" dimension.** The rubric is specificity / actionability /
+   correctness / insight. Nothing pays out merely for sounding personal.
+3. **Objective scoring on neutral controls.** Two tasks where identity is
+   irrelevant (CAP-theorem question; longest-common-subsequence implementation)
+   are graded pass/fail against a fixed 5-point rubric, the LCS one verified by
+   running each answer's code against a brute-force reference.
+
+9 tasks (7 identity-shaped + 2 controls) × 4 arms × 2 blind judges. Full numbers
+in [REPORT-v2.md](REPORT-v2.md).
+
+## 1. The reversal: psyche-alone dominance was an artifact
+
+Blind Borda on identity-shaped tasks: **best 34, context 25, psyche 15, naked
+10.** The combined arm wins; **psyche-alone falls to third, below context-alone.**
+Head-to-head, blind: `context` beats `psyche` **71%**; `best` beats `psyche`
+**79%**; `best` beats `context` **71%**.
+
+v1's striking "psyche beats best 80%" was mostly **judges rewarding a voice they
+could see, plus a rubric dimension that paid for it.** Remove both and it
+inverts. We take the hit and keep v1 in the repo: a result worth your name is
+one you've tried, in public, to kill.
+
+*(Length is not the confound: mean answer length is ~2,210–2,275 chars across
+all four arms. Blind judges are rewarding content, not verbosity.)*
+
+## 2. The durable, sharper finding: identity is a complement
+
+Adding the psyche **on top of** retrieval measurably helps — `best` beats
+`context` 71% and tops the Borda. The rubric says exactly why:
+
+| arm | specificity | actionability | correctness | insight |
+|---|---|---|---|---|
+| naked   | 7.0 | 8.1 | 8.2 | 6.8 |
+| context | 8.6 | 8.4 | 8.5 | 8.1 |
+| psyche  | 7.4 | 7.2 | 8.2 | **8.8** |
+| best    | **8.6** | 8.3 | **8.6** | **9.0** |
+
+**Retrieval buys specificity and actionability; identity buys insight.** Psyche
+alone is thin on specificity (7.4) — it knows the *person*, not the *problem*.
+Grounding fixes that. Insight is the column identity owns (psyche 8.8 tops the
+grounding-free arms; `best` tops it outright at 9.0). The winning recipe is
+*both*, and that's now the default the `glia-context` MCP ships.
+
+Per-task, the picture is consistent: `context` wins the four grounded
+decision/planning/writing tasks, `best` wins two, and `psyche`-alone wins only
+the single pure-identity-expression essay (t5). Identity carries a task exactly
+when the task *is* the identity.
+
+## 3. The clean part: identity is not a global "try harder" effect
+
+v1 §3's live worry was that priming with a person just makes the model work
+harder at everything, faking a lift even on neutral tasks. **Resolved.** On the
+two objectively-scored controls, **every arm — including the naked prompt —
+scores 100%** (all rubric points, LCS verified by execution). A dead heat at
+the ceiling. Identity gives *nothing* on tasks that aren't about the person —
+which is what tells you its lift on the tasks that *are* about the person is
+real and **specific**, not a diffuse effort bump. The confound v1 couldn't rule
+out, v2 rules out.
+
+## Bottom line (v2)
+
+- **Core intuition: still supported, and now on the honest test.** Injecting who
+  you are makes an agent measurably sharper under blind judging — its specific
+  contribution is *insight*.
+- **But it's a complement, not a replacement.** Retrieval grounds; identity
+  elevates. Inject **both**. v1's "curate identity *instead of* context" was too
+  strong; "curate identity *on top of* context" is what holds.
+- **Mechanism isolated.** The lift is specific to identity-shaped work, not a
+  global effect — neutral controls tie at ceiling.
+- **Still a pilot** (n=7 identity tasks, 2 judges). The harness scales; next run
+  widens the judge panel and crosses model families to tighten the intervals.
+
+The leverage thesis survives in its honest form: a faithful map of the mind is
+worth injecting — alongside, not instead of, what's relevant to the question.

@@ -119,6 +119,7 @@
 		40865A66B86E8DB1158F85F5 /* GliaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GliaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		458A95BC9832417693924F00 /* GliaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GliaApp.swift; sourceTree = "<group>"; };
+		4F403176C3F586D0D4EB17D6 /* Glia-Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Glia-Release.entitlements"; sourceTree = "<group>"; };
 		507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DemoBrain.json; sourceTree = "<group>"; };
 		573D70E7E28D542C0E4B9089 /* ContextBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextBundle.swift; sourceTree = "<group>"; };
 		702448AC9BFAFC0D25C23143 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -252,6 +253,7 @@
 				44A37F8DB29FAD03F6AFB5AB /* Assets.xcassets */,
 				507D4AAF9E73DEC69E71CF24 /* DemoBrain.json */,
 				F7AD698CDD6E768ECA293E42 /* Glia-MAS.entitlements */,
+				4F403176C3F586D0D4EB17D6 /* Glia-Release.entitlements */,
 				A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */,
 				CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */,
 				159286828D83AC196D640FBB /* Info.plist */,

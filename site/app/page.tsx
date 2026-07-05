@@ -1,12 +1,12 @@
-import { pilot, armColor } from "./results";
+import { v2, v1, armColor, armLabel } from "./results";
 
 const REPO = "https://github.com/draphael89/glia";
 
-function BordaChart() {
-  const max = Math.max(...pilot.borda.map((b) => b.score));
+function BordaChart({ data }: { data: { arm: string; score: number }[] }) {
+  const max = Math.max(...data.map((b) => b.score));
   return (
     <div>
-      {pilot.borda.map((b) => (
+      {data.map((b) => (
         <div className="bar-row" key={b.arm}>
           <div className="bar-label">{b.arm}</div>
           <div className="bar-track">
@@ -17,7 +17,7 @@ function BordaChart() {
               {b.score}
             </div>
           </div>
-          <div className="muted" style={{ width: 110 }}>{b.label}</div>
+          <div className="muted" style={{ width: 120 }}>{armLabel[b.arm]}</div>
         </div>
       ))}
     </div>
@@ -37,8 +37,9 @@ export default function Home() {
           </h1>
           <p className="lead" style={{ marginTop: 22 }}>
             As context windows grow, the binding constraint shifts from retrieval to identity.
-            We measured it: injecting a map of your mind beats injecting the pages relevant to
-            your question — and wins on <em>insight</em>, not just personal fit.
+            We measured it — and then we tried to break our own result. What survived: a map of
+            <em> who you are</em> makes an agent measurably sharper, but as a <strong>complement</strong> to
+            what&apos;s relevant, not a replacement for it.
           </p>
           <div className="flow" style={{ marginTop: 34 }}>
             <a className="btn" href={`${REPO}/tree/main/experiments/psyche-injection`}>Read the experiment</a>
@@ -47,64 +48,88 @@ export default function Home() {
         </div>
       </section>
 
+      {/* The arc */}
+      <section>
+        <div className="wrap">
+          <h2>How we know</h2>
+          <h3>We got a dramatic result. So we distrusted it.</h3>
+          <p>
+            In the first run, judges could see each answer and scored a &ldquo;personal fit&rdquo;
+            dimension. <span className="accent">Psyche-alone</span> looked dominant — it even beat
+            relevance-<em>plus</em>-psyche. A headline that good is a warning. Two things could have
+            faked it: judges rewarding the recognizable <em>voice</em>, and a rubric that paid out for
+            sounding personal.
+          </p>
+          <p>
+            So we ran <strong>v2</strong>: judges <strong>blind</strong> to how each answer was made,
+            the personal-fit dimension deleted, and two neutral technical tasks scored objectively
+            against a fixed rubric. The honest test. Here&apos;s what held up.
+          </p>
+        </div>
+      </section>
+
       {/* The result */}
       <section>
         <div className="wrap">
-          <h2>The headline result</h2>
+          <h2>The honest result (v2, blind)</h2>
           <div className="grid2" style={{ marginBottom: 30 }}>
             <div className="card">
-              <div className="stat accent">100%</div>
+              <div className="stat gold">71%</div>
               <div className="stat-label">
-                psyche-primed answers beat a naked prompt, judged blind
+                adding <span className="accent">who you are</span> to what&apos;s relevant beats
+                relevance alone, judged blind
               </div>
             </div>
             <div className="card">
-              <div className="stat accent">93%</div>
+              <div className="stat gold">1st</div>
               <div className="stat-label">
-                psyche beats gbrain-style relevance retrieval on identity-shaped tasks
+                <span style={{ color: armColor.best }}>both</span> tops the blind Borda ranking
+                <em> and</em> every rubric dimension
               </div>
             </div>
           </div>
           <h3>Blind-judge Borda score</h3>
           <p className="muted">
-            {pilot.tasks} tasks · 4 conditions each · {pilot.judgesPerTask} independent judges per task,
-            each blind to how the answers were made.
+            {v2.identityTasks} identity-shaped tasks · 4 conditions each · {v2.judgments} independent
+            judgments, each blind to how the answers were made.
           </p>
           <div className="card" style={{ marginTop: 16 }}>
-            <BordaChart />
+            <BordaChart data={v2.borda} />
           </div>
+          <p className="muted" style={{ marginTop: 14 }}>
+            <span style={{ color: armColor.best }}>Both</span> wins. <span style={{ color: armColor.context }}>Relevance</span> alone
+            comes second and beats <span style={{ color: armColor.psyche }}>psyche</span> alone 71% of the time.
+            Identity is not a substitute for grounding — it&apos;s what you add <em>on top</em>.
+          </p>
         </div>
       </section>
 
-      {/* The surprise */}
+      {/* The mechanism */}
       <section>
         <div className="wrap">
-          <h2>The surprise</h2>
-          <h3>More context isn&apos;t better. Identity is the high-density signal.</h3>
+          <h2>What identity actually buys you</h2>
+          <h3>Retrieval brings the facts. Identity brings the insight.</h3>
           <p>
-            We expected <span style={{ color: armColor.best }}>both</span> (relevance + psyche) to
-            win. It didn&apos;t. <span className="accent">Psyche alone</span> beat the combination
-            80% of the time — the retrieved operational pages <em>diluted</em> the concentrated
-            identity signal.
-          </p>
-          <p>
-            The lesson isn&apos;t &ldquo;add more context.&rdquo; It&apos;s <strong>curate who you
-            are</strong>. That&apos;s what Glia is for.
+            The rubric tells you exactly why <span style={{ color: armColor.best }}>both</span> wins.
+            Retrieved context is what makes an answer <span className="accent">specific</span> and
+            <span className="accent"> actionable</span>. The psyche is what makes it
+            <span className="gold"> insightful</span> — it tops that column among the ungrounded arms
+            and, combined with retrieval, tops it outright (9.0).
           </p>
           <div className="card" style={{ marginTop: 20 }}>
             <table>
               <thead>
                 <tr>
                   <th>arm</th>
-                  {pilot.rubric.dims.map((d) => <th key={d}>{d}</th>)}
+                  {v2.rubric.dims.map((d) => <th key={d}>{d}</th>)}
                 </tr>
               </thead>
               <tbody>
-                {pilot.rubric.rows.map((r) => (
+                {v2.rubric.rows.map((r) => (
                   <tr key={r.arm}>
                     <td style={{ color: armColor[r.arm], fontWeight: 600 }}>{r.arm}</td>
                     {r.vals.map((v, i) => (
-                      <td key={i} className={v === Math.max(...pilot.rubric.rows.map((x) => x.vals[i])) ? "gold" : ""}>
+                      <td key={i} className={v === Math.max(...v2.rubric.rows.map((x) => x.vals[i])) ? "gold" : ""}>
                         {v.toFixed(1)}
                       </td>
                     ))}
@@ -114,8 +139,54 @@ export default function Home() {
             </table>
           </div>
           <p className="muted" style={{ marginTop: 12 }}>
-            Rubric averages (1–10). Psyche wins on <span className="accent">insight</span> (9.3),
-            not merely personal fit — the model does better <em>work</em> when it knows who it&apos;s for.
+            Blind rubric averages (1–10). <span style={{ color: armColor.psyche }}>Psyche</span> alone
+            is thin on specificity — it knows the person, not the problem. Grounding fixes that; identity
+            is what&apos;s left to add.
+          </p>
+        </div>
+      </section>
+
+      {/* The control */}
+      <section>
+        <div className="wrap">
+          <h2>The clean part</h2>
+          <h3>Identity doesn&apos;t just make the model &ldquo;try harder.&rdquo;</h3>
+          <p>
+            The obvious objection to any priming result: maybe telling the model about a person just
+            makes it work harder at <em>everything</em>. So we included two neutral technical tasks —
+            a CAP-theorem question and a longest-common-subsequence implementation — where identity is
+            irrelevant, and scored them objectively against a fixed rubric.
+          </p>
+          <div className="card" style={{ marginTop: 8, textAlign: "center" }}>
+            <div className="stat" style={{ color: armColor.best }}>{v2.controlsPassRate}%</div>
+            <div className="stat-label">
+              every arm — including the naked prompt — passes every rubric point on the neutral controls
+            </div>
+          </div>
+          <p className="muted" style={{ marginTop: 16 }}>
+            A dead heat at the ceiling. Identity gives you nothing on tasks that aren&apos;t about you —
+            which is exactly what tells you its lift on the tasks that <em>are</em> about you is real,
+            and specific, not a global effort bump.
+          </p>
+        </div>
+      </section>
+
+      {/* The retraction */}
+      <section>
+        <div className="wrap">
+          <h2>What we retracted</h2>
+          <h3>&ldquo;Psyche alone beats everything&rdquo; did not survive blind judging.</h3>
+          <p>
+            Our first run said psyche-alone beat the combination 80% of the time, and that adding
+            retrieval <em>diluted</em> identity. Under blind judges with the personal-fit dimension
+            removed, that reversed: <span style={{ color: armColor.psyche }}>psyche</span> alone dropped
+            to third, and <span style={{ color: armColor.best }}>both</span> won. The v1 dominance was
+            mostly judges rewarding a voice they could see.
+          </p>
+          <p className="muted">
+            We&apos;re leaving both runs in the repo. The correction is the point: a result you put your
+            name on should be one you&apos;ve tried, in public, to kill. This is a small-n pilot — the
+            harness is built to scale, and the next run widens the judge panel and crosses model families.
           </p>
         </div>
       </section>
@@ -124,13 +195,13 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>The stack</h2>
-          <h3>See your mind. Curate it. Inject it anywhere.</h3>
+          <h3>See your mind. Curate it. Inject it — alongside what&apos;s relevant.</h3>
           <div className="flow" style={{ margin: "24px 0" }}>
             <div className="flow-node"><strong>Glia.app</strong><br /><span className="muted">see + curate your brain</span></div>
             <span className="flow-arrow">→</span>
             <div className="flow-node"><strong className="mono">~/.glia/psyche.md</strong><br /><span className="muted">your curated mind</span></div>
             <span className="flow-arrow">→</span>
-            <div className="flow-node"><strong>glia-context MCP</strong><br /><span className="muted">injects it at session start</span></div>
+            <div className="flow-node"><strong>glia-context MCP</strong><br /><span className="muted">injects identity + relevance</span></div>
           </div>
           <div className="grid2" style={{ marginTop: 10 }}>
             <div className="card">
@@ -145,25 +216,11 @@ export default function Home() {
               <h3 style={{ fontSize: 18 }}>glia-context MCP</h3>
               <p className="muted">
                 An MCP server any agent can call. <span className="mono">prime_context</span> folds
-                in who you are + what&apos;s relevant, front-loading identity. The beseech-the-god layer.
+                who you are <em>together with</em> what&apos;s relevant — grounding for specificity,
+                identity for insight. The recipe v2 proved.
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Honesty */}
-      <section>
-        <div className="wrap">
-          <h2>What we&apos;re not sure of yet</h2>
-          <p>
-            This is a signal-finding pilot, not a benchmark. On a purely technical control (where
-            identity is irrelevant), psyche still won — partly judge bias toward the voice, partly
-            (the winning answers suggest) the model simply <em>trying harder</em> when it knows who
-            it&apos;s working for. Separating those is the next experiment: judges blind to the
-            psyche, plus objective correctness scoring. The harness is built to scale.
-          </p>
-          <p className="muted">Full methodology, threats to validity, and reproduction steps in the repo.</p>
         </div>
       </section>
 
@@ -171,9 +228,9 @@ export default function Home() {
       <section style={{ borderBottom: "none", textAlign: "center" }}>
         <div className="wrap">
           <h3 style={{ fontSize: 26 }}>Make your mind observable.</h3>
-          <p className="muted" style={{ maxWidth: 520, margin: "0 auto 26px" }}>
+          <p className="muted" style={{ maxWidth: 540, margin: "0 auto 26px" }}>
             Glia is open source, MIT, native Swift + Metal. Build it, point it at your brain, and
-            prime any agent with who you are.
+            prime any agent with who you are — on top of what it needs to know.
           </p>
           <div className="flow" style={{ justifyContent: "center" }}>
             <a className="btn" href={REPO}>Get Glia ↗</a>
