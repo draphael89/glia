@@ -230,6 +230,13 @@ final class AppModel {
                 if !self.restoreViewState() { self.fitView() }
                 self.viewStateReady = true
                 LayoutStore.save(graph: g, positions: final)
+                // Seed the MCP psyche once if it doesn't exist yet, so the
+                // injection layer works even before the user syncs manually.
+                let psycheFile = FileManager.default.homeDirectoryForCurrentUser
+                    .appendingPathComponent(".glia/psyche.md")
+                if !FileManager.default.fileExists(atPath: psycheFile.path) {
+                    self.syncPsycheToMCP()
+                }
                 self.snapshotIfRequested()
                 // GLIA_AUTOPLAY_REPLAY=1: start the growth replay shortly
                 // after settling — used for hands-free demo recordings.
@@ -659,6 +666,25 @@ final class AppModel {
         UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")
         sceneDirty()   // reflect the star ring on the canvas immediately
         view?.requestDraw()
+        syncPsycheToMCP()   // keep the injection layer current with the collection
+    }
+
+    /// Write the canonical psyche map that the glia-context MCP server injects
+    /// (`~/.glia/psyche.md`). Uses the starred collection when you have one,
+    /// else the identity map. This is what closes the loop: curate here →
+    /// inject anywhere. Silent + best-effort; never blocks the UI.
+    @discardableResult
+    func syncPsycheToMCP() -> Int {
+        guard !demoActive else { return 0 }
+        let scope: ContextScope = starredSlugs.isEmpty ? .identity : .collection
+        let bundle = buildContextBundle(scope)
+        guard bundle.pageCount > 0 else { return 0 }
+        let dir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".glia", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent("psyche.md")
+        try? bundle.text.data(using: .utf8)?.write(to: url, options: .atomic)
+        return bundle.pageCount
     }
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }

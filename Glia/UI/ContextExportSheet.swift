@@ -14,6 +14,7 @@ struct ContextExportSheet: View {
     @State private var bundle: ContextBundle?
     @State private var building = false
     @State private var copied = false
+    @State private var synced = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -77,6 +78,16 @@ struct ContextExportSheet: View {
                     }
                     .buttonStyle(.bordered)
                 }
+                Button {
+                    synced = model.syncPsycheToMCP()
+                } label: {
+                    Label(synced > 0 ? "Synced \(synced) pages to MCP" : "Sync to glia-context MCP",
+                          systemImage: synced > 0 ? "checkmark.circle" : "arrow.triangle.2.circlepath")
+                        .font(.system(size: 11))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.accent)
+                .help("Write ~/.glia/psyche.md so any agent using the glia-context MCP injects this")
             } else {
                 Button {
                     building = true

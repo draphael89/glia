@@ -78,6 +78,12 @@ struct GliaApp: App {
                 }
                 .keyboardShortcut("e", modifiers: [.command, .option])
 
+                Button("Sync Psyche to MCP") {
+                    model.syncPsycheToMCP()
+                }
+                .keyboardShortcut("y", modifiers: [.command, .shift])
+                .help("Write ~/.glia/psyche.md so the glia-context MCP server injects your current mind")
+
                 Button(model.selectedIndex.map { model.isStarred($0) } == true
                        ? "Remove from Collection" : "Add to Collection") {
                     model.toggleStarSelected()
