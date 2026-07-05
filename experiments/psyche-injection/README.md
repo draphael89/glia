@@ -58,5 +58,14 @@ Materials (the psyche + per-task context) are built from a real brain and are
 
 ## Results
 
-See [REPORT.md](REPORT.md) (regenerated from each run; aggregate metrics only —
-no private content).
+- [REPORT.md](REPORT.md) — raw metrics (Borda, pairwise win rates, rubric),
+  regenerated each run; aggregate only, no private content.
+- [FINDINGS.md](FINDINGS.md) — narrative reading of the pilot run.
+
+**Pilot headline:** on tasks where identity matters, the **psyche** arm beat a
+naked prompt 100% and beat relevance-retrieval 93% — and won on *insight*, not
+just *personal fit*. Surprise: **psyche alone beat context+psyche** (retrieval
+diluted the identity signal). Honest caveat: on the technical control, psyche
+still won — partly judge mirroring, partly (per the winning rationale) the
+model simply doing *better work when it knows who it's working for*. Separating
+those two is the next experiment.
