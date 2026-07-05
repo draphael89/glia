@@ -71,7 +71,7 @@ export default function Home() {
       {/* The result */}
       <section>
         <div className="wrap">
-          <h2>The honest result (v2, blind)</h2>
+          <h2>The honest result (blind, 49 judgments)</h2>
           <div className="grid2" style={{ marginBottom: 30 }}>
             <div className="card">
               <div className="stat gold">71%</div>
@@ -97,9 +97,12 @@ export default function Home() {
             <BordaChart data={v2.borda} />
           </div>
           <p className="muted" style={{ marginTop: 14 }}>
-            <span style={{ color: armColor.best }}>Both</span> wins. <span style={{ color: armColor.context }}>Relevance</span> alone
-            comes second and beats <span style={{ color: armColor.psyche }}>psyche</span> alone 71% of the time.
-            Identity is not a substitute for grounding — it&apos;s what you add <em>on top</em>.
+            <span style={{ color: armColor.best }}>Both</span> wins — and it holds:
+            <span style={{ color: armColor.best }}> both</span> beats <span style={{ color: armColor.context }}>relevance</span> alone
+            in {v2.consistency.bestOverContext} of {v2.consistency.ofTasks} tasks (71% pairwise), and
+            <span style={{ color: armColor.context }}> relevance</span> alone still beats
+            <span style={{ color: armColor.psyche }}> psyche</span> alone. Identity is not a substitute
+            for grounding — it&apos;s what you add <em>on top</em>.
           </p>
         </div>
       </section>
@@ -114,7 +117,7 @@ export default function Home() {
             Retrieved context is what makes an answer <span className="accent">specific</span> and
             <span className="accent"> actionable</span>. The psyche is what makes it
             <span className="gold"> insightful</span> — it tops that column among the ungrounded arms
-            and, combined with retrieval, tops it outright (9.0).
+            and, combined with retrieval, tops it outright (9.1).
           </p>
           <div className="card" style={{ marginTop: 20 }}>
             <table>
@@ -185,8 +188,11 @@ export default function Home() {
           </p>
           <p className="muted">
             We&apos;re leaving both runs in the repo. The correction is the point: a result you put your
-            name on should be one you&apos;ve tried, in public, to kill. This is a small-n pilot — the
-            harness is built to scale, and the next run widens the judge panel and crosses model families.
+            name on should be one you&apos;ve tried, in public, to kill. And we pushed on it: a third run
+            re-judged the same fixed answers with {v2.judgesPerTask} blind judges each ({v2.judgments}
+            judgments) — the ordering didn&apos;t just hold, it tightened, staying consistent in
+            {" "}{v2.consistency.bestOverContext} of {v2.consistency.ofTasks} tasks. Still a small-n pilot;
+            the open next step is cross-model-family judges.
           </p>
         </div>
       </section>

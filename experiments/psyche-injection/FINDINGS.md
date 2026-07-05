@@ -169,3 +169,27 @@ out, v2 rules out.
 
 The leverage thesis survives in its honest form: a faithful map of the mind is
 worth injecting — alongside, not instead of, what's relevant to the question.
+
+---
+
+# v3 — the confidence run (did more judges overturn it?)
+
+v2's blind result rested on only 2 judges/task. The answers are fixed, so the
+noisy part is the judging. v3 re-judges the **same** anonymized answers with 5
+more blind judges each (→ **7/task, 49 judgments**) and 3 more objective scorers
+per control (→ 4). Full numbers in [REPORT-v3.md](REPORT-v3.md).
+
+**It held — and tightened.** Merged blind Borda: **best 118, context 83, psyche
+65, naked 28** — the exact v2 ordering, now on 7× the data. The key pairwise,
+**best > context, is 71% (35/49) and holds in 6 of 7 tasks.** best > psyche 82%;
+context > psyche 59%; psyche-alone stays third. The rubric signature is
+unchanged: retrieval owns specificity/actionability, identity owns insight
+(psyche 8.9 tops the grounding-free arms, best 9.1 outright). On the neutral
+controls, all four arms score **100%** across 8 gradings — the identity lift
+stays specific to identity-shaped work.
+
+More judges did not rescue the v1 headline and did not weaken the v2 one. The
+honest finding is stable: **inject both; identity is the insight layer on top of
+retrieval.** The remaining threat we can't yet close in this harness is
+self-preference — generator and judges share a model family; a cross-family
+judge is the next experiment.
