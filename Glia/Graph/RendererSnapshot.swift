@@ -44,6 +44,13 @@ extension GraphRenderer {
                     camera: snapCamera,
                     forceRebuild: true)
         enc.endEncoding()
+        // On discrete-GPU Macs the resolve texture is `.managed`; its CPU-side
+        // copy is only coherent after an explicit synchronize, or `getBytes`
+        // below reads stale/black pixels. No-op on Apple Silicon (shared).
+        if let blit = cmd.makeBlitCommandEncoder() {
+            blit.synchronize(resource: resolve)
+            blit.endEncoding()
+        }
         cmd.commit()
         cmd.waitUntilCompleted()
         let gpuMs = (cmd.gpuEndTime - cmd.gpuStartTime) * 1000

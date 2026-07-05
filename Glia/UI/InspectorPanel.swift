@@ -149,7 +149,11 @@ struct InspectorPanel: View {
     }
 
     private func openInObsidian(slug: String) {
-        let encoded = slug.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? slug
+        // Obsidian's ?file= expects a vault-relative path, so keep path
+        // characters (`/`, `-`, `_`, `.`) literal and only encode what must be.
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: "/-_.")
+        let encoded = slug.addingPercentEncoding(withAllowedCharacters: allowed) ?? slug
         if let url = URL(string: "obsidian://open?vault=source-default&file=\(encoded)") {
             NSWorkspace.shared.open(url)
         }

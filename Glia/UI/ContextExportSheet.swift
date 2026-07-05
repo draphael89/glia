@@ -79,7 +79,7 @@ struct ContextExportSheet: View {
                     .buttonStyle(.bordered)
                 }
                 Button {
-                    synced = model.syncPsycheToMCP()
+                    Task { synced = await model.syncPsycheToMCP(scope: scope) }
                 } label: {
                     Label(synced > 0 ? "Synced \(synced) pages to MCP" : "Sync to glia-context MCP",
                           systemImage: synced > 0 ? "checkmark.circle" : "arrow.triangle.2.circlepath")
@@ -92,7 +92,7 @@ struct ContextExportSheet: View {
                 Button {
                     building = true
                     Task {
-                        let b = model.buildContextBundle(scope)
+                        let b = await model.buildContextBundleOffMain(scope)
                         bundle = b
                         building = false
                     }

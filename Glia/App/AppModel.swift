@@ -235,7 +235,7 @@ final class AppModel {
                 let psycheFile = FileManager.default.homeDirectoryForCurrentUser
                     .appendingPathComponent(".glia/psyche.md")
                 if !FileManager.default.fileExists(atPath: psycheFile.path) {
-                    self.syncPsycheToMCP()
+                    Task { await self.syncPsycheToMCP() }
                 }
                 self.snapshotIfRequested()
                 // GLIA_AUTOPLAY_REPLAY=1: start the growth replay shortly
@@ -593,14 +593,18 @@ final class AppModel {
         let world = renderer.camera.viewToWorld(p, viewport: viewport)
         let maxWorld = radiusPx / renderer.camera.zoom
         var best: Int? = nil
-        var bestDist = maxWorld
+        var bestDist = Float.greatestFiniteMagnitude
         let vis = renderer.scene.visible
         let flags = renderer.scene.flags
+        let radii = renderer.scene.radii
         for i in 0..<positions.count where vis.isEmpty || vis[i] {
             if !flags.isEmpty && (Int(flags[i]) & 16) != 0 { continue }   // dust isn't clickable
             let d = simd_length(positions[i] - world)
-            let hitRadius = max(renderer.scene.radii[i], bestDist)
-            if d < min(hitRadius, bestDist) { best = i; bestDist = d }
+            // A node is clickable anywhere within its visual disk, or within the
+            // base pick radius — whichever is larger — so hub nodes are as easy
+            // to hit as they look. Among all such nodes, take the nearest center.
+            let hitRadius = max(i < radii.count ? radii[i] : 0, maxWorld)
+            if d < hitRadius && d < bestDist { best = i; bestDist = d }
         }
         return best
     }
@@ -666,25 +670,35 @@ final class AppModel {
         UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")
         sceneDirty()   // reflect the star ring on the canvas immediately
         view?.requestDraw()
-        syncPsycheToMCP()   // keep the injection layer current with the collection
+        Task { await syncPsycheToMCP() }   // keep the injection layer current with the collection
     }
 
     /// Write the canonical psyche map that the glia-context MCP server injects
     /// (`~/.glia/psyche.md`). Uses the starred collection when you have one,
     /// else the identity map. This is what closes the loop: curate here →
     /// inject anywhere. Silent + best-effort; never blocks the UI.
+    /// Write `~/.glia/psyche.md` for the glia-context MCP. Pass an explicit
+    /// `scope` to sync exactly what the user built; omit it to use the default
+    /// identity map (starred collection when present, else the identity set).
+    /// All disk work runs off the main actor. Returns pages written.
     @discardableResult
-    func syncPsycheToMCP() -> Int {
+    func syncPsycheToMCP(scope: ContextScope? = nil) async -> Int {
         guard !demoActive else { return 0 }
-        let scope: ContextScope = starredSlugs.isEmpty ? .identity : .collection
-        let bundle = buildContextBundle(scope)
-        guard bundle.pageCount > 0 else { return 0 }
-        let dir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".glia", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let url = dir.appendingPathComponent("psyche.md")
-        try? bundle.text.data(using: .utf8)?.write(to: url, options: .atomic)
-        return bundle.pageCount
+        let resolved = scope ?? (starredSlugs.isEmpty ? .identity : .collection)
+        let nodes = contextNodes(resolved)
+        let header = contextHeader(resolved)
+        guard !nodes.isEmpty else { return 0 }
+        let mirrors = sourceMirrors(for: nodes)
+        return await Task.detached {
+            let bundle = ContextBundle.build(nodes: nodes, header: header, mirrors: mirrors)
+            guard bundle.pageCount > 0 else { return 0 }
+            let dir = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent(".glia", isDirectory: true)
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let url = dir.appendingPathComponent("psyche.md")
+            try? bundle.text.data(using: .utf8)?.write(to: url, options: .atomic)
+            return bundle.pageCount
+        }.value
     }
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
@@ -729,15 +743,42 @@ final class AppModel {
         }
     }
 
-    func buildContextBundle(_ scope: ContextScope) -> ContextBundle {
-        let header: String
+    func contextHeader(_ scope: ContextScope) -> String {
         switch scope {
-        case .collection: header = "Context — my collection"
-        case .selection:  header = "Context — \(selectedNode?.displayTitle ?? "selection")"
-        case .identity:   header = "Context — identity map"
-        case .everything: header = "Context — full brain"
+        case .collection: return "Context — my collection"
+        case .selection:  return "Context — \(selectedNode?.displayTitle ?? "selection")"
+        case .identity:   return "Context — identity map"
+        case .everything: return "Context — full brain"
         }
-        return ContextBundle.build(nodes: contextNodes(scope), header: header)
+    }
+
+    /// Resolve each node's source-id → on-disk mirror base on the main actor
+    /// (`BrainLocation` is @MainActor); the map (Sendable) is then handed to the
+    /// nonisolated builder so it can read files off the main actor.
+    func sourceMirrors(for nodes: [BrainNode]) -> [String: URL] {
+        var m: [String: URL] = [:]
+        for src in Set(nodes.map(\.source)) where m[src] == nil {
+            if let url = BrainLocation.sourceMirror(for: src) { m[src] = url }
+        }
+        return m
+    }
+
+    func buildContextBundle(_ scope: ContextScope) -> ContextBundle {
+        let nodes = contextNodes(scope)
+        return ContextBundle.build(nodes: nodes, header: contextHeader(scope),
+                                   mirrors: sourceMirrors(for: nodes))
+    }
+
+    /// Off-main-actor build: gather the nodes + header + mirrors on the main
+    /// actor (fast, in-memory), then do the file I/O on a background task so an
+    /// interactive caller (a star tap, the export sheet) never blocks on disk.
+    func buildContextBundleOffMain(_ scope: ContextScope) async -> ContextBundle {
+        let nodes = contextNodes(scope)
+        let header = contextHeader(scope)
+        let mirrors = sourceMirrors(for: nodes)
+        return await Task.detached {
+            ContextBundle.build(nodes: nodes, header: header, mirrors: mirrors)
+        }.value
     }
 
     /// Keyboard zoom (⌘+ / ⌘− / ⌘0), anchored at the viewport center.

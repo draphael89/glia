@@ -79,7 +79,7 @@ struct GliaApp: App {
                 .keyboardShortcut("e", modifiers: [.command, .option])
 
                 Button("Sync Psyche to MCP") {
-                    model.syncPsycheToMCP()
+                    Task { await model.syncPsycheToMCP() }
                 }
                 .keyboardShortcut("y", modifiers: [.command, .shift])
                 .help("Write ~/.glia/psyche.md so the glia-context MCP server injects your current mind")
