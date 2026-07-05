@@ -1,14 +1,19 @@
-# Release train: tag vX.Y.Z -> signed, notarized DMG + Sparkle appcast.
+# Release train: push a tag vX.Y.Z → build, (sign + notarize if secrets
+# present), assemble DMG, create the GitHub Release with the artifact.
 #
-# Required repository secrets before this can run (see docs/RELEASING.md):
-#   MACOS_CERT_P12 / MACOS_CERT_PASSWORD   Developer ID Application cert
-#   NOTARY_APPLE_ID / NOTARY_PASSWORD / NOTARY_TEAM_ID
-#   SPARKLE_ED_PRIVATE_KEY                 EdDSA key for appcast signing
+# Works WITHOUT secrets: produces an ad-hoc DMG attached to a prerelease
+# (clearly labeled unsigned). Add these repo secrets to get a signed +
+# notarized release automatically (see docs/RELEASING.md):
+#   MACOS_CERT_P12 (base64)   MACOS_CERT_PASSWORD
+#   NOTARY_APPLE_ID   NOTARY_PASSWORD (app-specific)   NOTARY_TEAM_ID
 name: Release
 
 on:
   push:
     tags: ["v*"]
+
+permissions:
+  contents: write            # create the GitHub Release
 
 jobs:
   release:
@@ -16,17 +21,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install tools
-        run: brew install xcodegen create-dmg
-      - name: Generate + build
+        run: brew install xcodegen
+
+      - name: Import Developer ID cert (if provided)
+        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        env:
+          CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PW: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: |
-          xcodegen generate
-          xcodebuild -project Glia.xcodeproj -scheme Glia \
-            -configuration Release build
-      # Signing, notarization (xcrun notarytool submit --wait), DMG assembly,
-      # Sparkle appcast generation, and GitHub Release upload are wired here
-      # once the secrets above exist. Kept as an explicit checklist so the
-      # first tagged release is a 10-minute task, not an archaeology project.
-      - name: Placeholder gate
+          KEYCHAIN=build.keychain
+          security create-keychain -p ci "$KEYCHAIN"
+          security default-keychain -s "$KEYCHAIN"
+          security unlock-keychain -p ci "$KEYCHAIN"
+          echo "$CERT_P12" | base64 --decode > /tmp/cert.p12
+          security import /tmp/cert.p12 -k "$KEYCHAIN" -P "$CERT_PW" \
+            -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci "$KEYCHAIN"
+          rm /tmp/cert.p12
+
+      - name: Store notary credentials (if provided)
+        if: ${{ secrets.NOTARY_APPLE_ID != '' }}
         run: |
-          echo "Release automation pending signing secrets — see docs/RELEASING.md"
-          exit 1
+          xcrun notarytool store-credentials glia-notary \
+            --apple-id "${{ secrets.NOTARY_APPLE_ID }}" \
+            --team-id "${{ secrets.NOTARY_TEAM_ID }}" \
+            --password "${{ secrets.NOTARY_PASSWORD }}"
+
+      - name: Build DMG (signs + notarizes when the cert/profile exist)
+        env:
+          NOTARY_PROFILE: ${{ secrets.NOTARY_APPLE_ID != '' && 'glia-notary' || '' }}
+        run: bash scripts/make-dmg.sh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Glia-*.dmg
+          # Signed builds → full release; unsigned → clearly-marked prerelease.
+          prerelease: ${{ secrets.MACOS_CERT_P12 == '' }}
+          generate_release_notes: true
+          body: ${{ secrets.MACOS_CERT_P12 == '' && '⚠️ Unsigned dev build — right-click → Open to bypass Gatekeeper. Signed + notarized releases land once signing secrets are configured.' || '' }}

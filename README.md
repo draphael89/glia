@@ -17,6 +17,26 @@ map — your brain's geography stays where you learned it.
 
 > Status: early. Built native-first in Swift 6 / SwiftUI / Metal. No web views.
 
+## Install
+
+**Build from source** (works today — requires Xcode 16+):
+
+```bash
+git clone https://github.com/draphael89/glia && cd glia
+brew install xcodegen
+xcodegen generate
+xcodebuild -project Glia.xcodeproj -scheme Glia -configuration Release \
+  -derivedDataPath build build
+open build/Build/Products/Release/Glia.app   # or just run from Xcode
+```
+
+No brain yet? Launch and click **Explore the Demo**.
+
+**Prebuilt DMG:** signed + notarized releases land on the
+[Releases](https://github.com/draphael89/glia/releases) page once code-signing
+is set up (tag a `v*` and CI builds it — see `docs/RELEASING.md`). A
+Homebrew cask (`packaging/glia.rb`) follows the first notarized release.
+
 ## Features
 
 - **The graph** — GPU-rendered (instanced SDF orbs, MSAA, 120Hz), colored by page
