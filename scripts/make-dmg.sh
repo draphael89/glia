@@ -48,8 +48,19 @@ if [ -n "$SIGN_IDENTITY" ]; then
       codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$fw"
     done
   codesign --force --options runtime --timestamp \
-    --entitlements Glia/Resources/Glia.entitlements \
+    --entitlements Glia/Resources/Glia-Release.entitlements \
     --sign "$SIGN_IDENTITY" "$STAGE/Glia.app"
+
+  # Notarization pre-flight guards — fail LOUD rather than ship an app the
+  # notary service will reject (get-task-allow present, or hardened runtime
+  # flag missing). Cheap insurance against a silent release regression.
+  if codesign -d --entitlements - "$STAGE/Glia.app" 2>/dev/null | grep -q "get-task-allow"; then
+    echo "FATAL: get-task-allow present after signing — notarization would reject."; exit 1
+  fi
+  if ! codesign -dvv "$STAGE/Glia.app" 2>&1 | grep -q "flags=.*runtime"; then
+    echo "FATAL: hardened runtime not enabled — notarization would reject."; exit 1
+  fi
+  echo "==> Notarization pre-flight passed (no get-task-allow, hardened runtime on)."
 else
   # Ad-hoc re-sign the WHOLE bundle so the app and its embedded frameworks
   # (Sparkle ships Developer-ID-signed) share a team identity — otherwise
