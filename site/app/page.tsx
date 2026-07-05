@@ -187,12 +187,15 @@ export default function Home() {
             mostly judges rewarding a voice they could see.
           </p>
           <p className="muted">
-            We&apos;re leaving both runs in the repo. The correction is the point: a result you put your
-            name on should be one you&apos;ve tried, in public, to kill. And we pushed on it: a third run
+            We&apos;re leaving every run in the repo. The correction is the point: a result you put your
+            name on should be one you&apos;ve tried, in public, to kill. So we kept pushing. A third run
             re-judged the same fixed answers with {v2.judgesPerTask} blind judges each ({v2.judgments}
-            judgments) — the ordering didn&apos;t just hold, it tightened, staying consistent in
-            {" "}{v2.consistency.bestOverContext} of {v2.consistency.ofTasks} tasks. Still a small-n pilot;
-            the open next step is cross-model-family judges.
+            judgments) — the ordering tightened, holding in {v2.consistency.bestOverContext} of
+            {" "}{v2.consistency.ofTasks} tasks. A fourth had a <em>different</em> model (Haiku&nbsp;4.5)
+            re-judge the Opus-written answers: it reproduced the exact ordering — so this isn&apos;t a
+            model grading its own homework — though the fine <span style={{ color: armColor.best }}>best</span>-vs-<span style={{ color: armColor.context }}>relevance</span> margin
+            shrank to a near-tie under the smaller judge. Trust the ordering; treat the exact margin as a
+            hypothesis. Still a small-n pilot; a true cross-vendor judge is the next test.
           </p>
         </div>
       </section>

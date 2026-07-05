@@ -55,8 +55,12 @@ public, to kill.
   arms average ~2.2k chars; not the driver.
 - **Judge noise** — v2 had only 2 judges/task. **v3 fixes this:** 7 judges/task
   on the same fixed answers.
-- **Self-preference** — generator and judge share a model family; a
-  cross-family judge would strengthen it. Noted, not yet possible in this harness.
+- **Self-preference** — generator and judge were both Opus. **v4 addresses this:**
+  a different model (Haiku 4.5) re-judged the Opus-written answers blind and
+  reproduced the exact ordering (best > context > psyche > naked) — so it isn't a
+  model grading its own homework. The one caveat: the fine best-vs-context margin
+  shrank to a near-tie under the smaller judge, so trust the ordering, not the
+  exact margin. A cross-vendor judge (GPT/Gemini) is the stronger test still open.
 - **n is still small.** Signal-finding pilot, not a publication benchmark — the
   harness scales.
 
@@ -78,7 +82,8 @@ Materials (the psyche + per-task context) are built from a real brain and are
 
 - [FINDINGS.md](FINDINGS.md) — narrative reading of both runs (read this first).
 - [REPORT.md](REPORT.md) / [REPORT-v2.md](REPORT-v2.md) / [REPORT-v3.md](REPORT-v3.md)
-  — raw metrics per run (Borda, pairwise, rubric); aggregate only, no private content.
+  / [REPORT-v4.md](REPORT-v4.md) — raw metrics per run (Borda, pairwise, rubric,
+  cross-model); aggregate only, no private content.
 
 **Honest headline (v2/v3, blind):** injecting **who you are** makes an agent
 measurably sharper — but as a **complement** to what's relevant, not a

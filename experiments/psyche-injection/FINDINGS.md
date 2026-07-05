@@ -190,6 +190,38 @@ stays specific to identity-shaped work.
 
 More judges did not rescue the v1 headline and did not weaken the v2 one. The
 honest finding is stable: **inject both; identity is the insight layer on top of
-retrieval.** The remaining threat we can't yet close in this harness is
-self-preference — generator and judges share a model family; a cross-family
-judge is the next experiment.
+retrieval.** The remaining threat is self-preference — v2/v3 judges were Opus,
+the same model that generated the answers. v4 takes that on.
+
+---
+
+# v4 — the cross-model check (is it Opus self-preference?)
+
+v2/v3 used Opus as both generator and judge — the tightest possible
+self-preference loop. v4 re-judges the **same Opus-generated answers**, blind,
+with a **different model**: Haiku 4.5. (Fable 5 was also planned but hit a usage
+limit and didn't run — so this rests on one non-generator model, and a smaller
+one; weaker than a two-model check, and we say so.) Full numbers in
+[REPORT-v4.md](REPORT-v4.md).
+
+**What reproduces, and what doesn't:**
+
+- **The ordering reproduces.** Haiku, blind, independently ranks
+  **best > context > psyche > naked** — the exact order Opus produced. So the
+  result is **not simply Opus preferring its own prose.**
+- **The floor is robust.** naked is clearly worst for Haiku too (Borda 14 vs
+  best 41) — priming with *something* real (identity or retrieval) beats a bare
+  prompt regardless of judge.
+- **But the best-vs-context margin is model-dependent.** Opus saw best > context
+  at 71%; Haiku sees it at **52% — a near-tie** (Borda best 41 vs context 39).
+  A smaller judge sees the *floor* clearly but is less sensitive to the subtle
+  *insight* lift that identity adds on top of retrieval. Interestingly Haiku
+  also rates psyche-alone a bit higher relative to the field than Opus did.
+
+**Honest takeaway.** The robust, cross-model claims: (1) priming beats a naked
+prompt, and (2) identity + retrieval together lead the field. The claim that is
+*model-sensitive* and shouldn't be over-trusted from a pilot: the exact size of
+the "identity adds this much on top of retrieval" edge — a strong judge (Opus)
+reads it as clear, a smaller judge (Haiku) as marginal. Trust the ordering;
+treat the margin as a hypothesis. A true cross-vendor judge (GPT/Gemini) is the
+stronger test still to run.
