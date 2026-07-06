@@ -191,7 +191,11 @@ async function assembleInjection(
     psycheSource = p.source;
     psycheStatus = p.status;
     psycheMtimeMs = p.fileMtimeMs;
-    const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
+    // both mode: front-load a CAPPED identity core (min of the 40% share and an
+    // absolute core cap), leaving the rest for retrieval — v9 showed the 24k core
+    // dilutes and crowds out retrieval, so the core cap is the v10 lever.
+    const psycheBudget = mode === "psyche" ? budget
+      : Math.min(Math.floor(budget * 0.4), config.psycheCoreMaxTokens);
     psycheText = p.status === "empty" ? "" : truncateToTokens(p.text, psycheBudget);
   }
 

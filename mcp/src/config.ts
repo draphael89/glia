@@ -63,6 +63,13 @@ export const config = {
    *  essay). Bounds memory if a psyche file is huge/binary — far above any real
    *  psyche (~100-250KB) but blocks a pathological multi-MB read per prime. */
   psycheMaxBytes: intEnv("GLIA_PSYCHE_MAX_BYTES", 2_000_000),
+  /** Absolute cap on the injected identity core in `both` mode (on top of the 40%
+   *  budget share). v9 measured the shipped 24k both-mode LOSING to retrieval-alone
+   *  — the 24k psyche dilutes and crowds out retrieval. v5's dose-response found a
+   *  ~3-4k core reaches ~95% of the full psyche's ranking, so a focused core plus
+   *  fuller retrieval is the v10 hypothesis. Default preserves prior behavior; set
+   *  GLIA_PSYCHE_CORE_MAX_TOKENS lower to focus the core. */
+  psycheCoreMaxTokens: intEnv("GLIA_PSYCHE_CORE_MAX_TOKENS", 24_000),
   /** GLIA_STRICT_STARTUP=1 → exit on any failed config check, not just fatal. */
   strictStartup: process.env.GLIA_STRICT_STARTUP === "1",
 };
