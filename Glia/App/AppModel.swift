@@ -769,6 +769,10 @@ final class AppModel {
             }
             break
         }
+        // A sync rewrote ~/.glia/psyche.md, so any on-screen injection preview now
+        // reflects the OLD identity — clear it so a stale manifest can't sit beside
+        // a freshly-synced status footer.
+        if pages > 0 { injectionPreview = nil }
         return pages
     }
 

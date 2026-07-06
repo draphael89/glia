@@ -45,7 +45,7 @@ struct ContextExportSheet: View {
                 }
             }
             .pickerStyle(.radioGroup)
-            .onChange(of: scope) { _, _ in bundle = nil; copied = false }
+            .onChange(of: scope) { _, _ in bundle = nil; copied = false; synced = 0 }
 
             if scope == .selection && model.selectedIndex == nil {
                 hint("Select a node first to export its neighborhood.")
@@ -154,7 +154,7 @@ struct ContextExportSheet: View {
                 .font(.system(size: 10)).foregroundStyle(.tertiary)
             if let registered = reach.serverRegistered {
                 Text(registered ? "glia-context server: registered with Claude Code"
-                                 : "glia-context server: not detected — run mcp/install.sh")
+                                 : "glia-context server: not detected — open Enable MCP… to register it")
                     .font(.system(size: 10)).foregroundStyle(.tertiary)
             }
         }
@@ -186,6 +186,18 @@ struct ContextExportSheet: View {
                 .help("Run the glia-context server's preview for this task")
             }
             if let preview = model.injectionPreview {
+                // Surface the core measured result — how much retrieval ADDED vs how
+                // much your identity already covered (the complement/dedup thesis) —
+                // as a legible header, not buried in 9.5pt gray monospace below.
+                if let s = injectionSummary(preview) {
+                    HStack(spacing: 6) {
+                        previewChip("person.fill", "Identity \(s.identityTokens)")
+                        previewChip("magnifyingglass", "\(s.pages) new page\(s.pages == 1 ? "" : "s")")
+                        if s.deduped > 0 {
+                            previewChip("arrow.triangle.merge", "\(s.deduped) already in identity")
+                        }
+                    }
+                }
                 ScrollView {
                     Text(preview)
                         .font(.system(size: 9.5, design: .monospaced))
@@ -198,6 +210,40 @@ struct ContextExportSheet: View {
                 .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 6))
             }
         }
+    }
+
+    private func previewChip(_ symbol: String, _ text: String) -> some View {
+        Label(text, systemImage: symbol)
+            .font(.system(size: 9.5, weight: .medium))
+            .foregroundStyle(Theme.accent)
+            .padding(.horizontal, 6).padding(.vertical, 3)
+            .background(Theme.accent.opacity(0.12), in: Capsule())
+            .lineLimit(1)
+    }
+
+    /// Parse the stable summary lines of the `--explain` manifest:
+    ///   `## Identity (file, ~23961 tok) — …`  and
+    ///   `## Retrieval (ok, ~5890 tok, 6 pages, 8 deduped)`
+    private func injectionSummary(_ text: String) -> (identityTokens: String, pages: Int, deduped: Int)? {
+        func firstMatch(_ line: Substring, _ pattern: String) -> String? {
+            guard let r = line.range(of: pattern, options: .regularExpression) else { return nil }
+            return String(line[r])
+        }
+        var identity: String?
+        var pages = 0, deduped = 0, sawRetrieval = false
+        for line in text.split(separator: "\n") {
+            if line.hasPrefix("## Identity") {
+                if let m = firstMatch(line, #"~\d+ tok"#) {
+                    identity = tokenLabel((Int(m.dropFirst().replacingOccurrences(of: " tok", with: "")) ?? 0))
+                }
+            } else if line.hasPrefix("## Retrieval") {
+                sawRetrieval = true
+                if let m = firstMatch(line, #"\d+ pages"#) { pages = Int(m.replacingOccurrences(of: " pages", with: "")) ?? 0 }
+                if let m = firstMatch(line, #"\d+ deduped"#) { deduped = Int(m.replacingOccurrences(of: " deduped", with: "")) ?? 0 }
+            }
+        }
+        guard identity != nil || sawRetrieval else { return nil }
+        return (identity ?? "~0", pages, deduped)
     }
 #endif
 
