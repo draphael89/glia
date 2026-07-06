@@ -18,7 +18,10 @@ function normalize(text) {
     .replaceAll(FIX, "<FIX>")
     .replace(/in \d+ms/g, "in <MS>ms")
     .replace(/, \d+ms/g, ", <MS>ms")
-    .replace(/~\d+/g, "~<T>");
+    .replace(/~\d+/g, "~<T>")
+    // psyche-file age is wall-clock-dependent — normalize so the golden is stable
+    .replace(/\(⚠ synced \d+[dh] ago[^)]*\)/g, "(synced <AGE>)")
+    .replace(/\(synced \d+[dh] ago\)/g, "(synced <AGE>)");
 }
 
 function openServer(env) {

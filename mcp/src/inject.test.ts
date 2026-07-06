@@ -134,6 +134,15 @@ test("priming header is mode-aware — psyche mode doesn't claim 'use both'", as
   assert.match(both, /use both/i, "both mode should reference both blocks");
 });
 
+test("identity self-page is recognized in BOTH slug forms (people-david ↔ people/david)", () => {
+  // rank 0 = the self-page; both dash and slash forms must qualify so the single
+  // most important page dedups + front-loads regardless of how the slug is written
+  assert.equal(identityRank("people-david"), 0);
+  assert.equal(identityRank("people/david"), 0);
+  assert.equal(identityRank("originals/telos"), 1);   // essays rank below self
+  assert.equal(identityRank("people/someone-else"), 3);
+});
+
 test("psycheSlugs is anchored — no false-positive on prose (review fix #2)", () => {
   // bare "· word *emphasis*" in body prose must NOT be parsed as a page marker
   assert.equal(psycheSlugs("we weigh · design *matters*, judges **blind** ranked").size, 0);

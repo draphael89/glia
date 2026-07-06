@@ -24,6 +24,18 @@ export interface PrimeResult {
   statusLines: string[];
 }
 
+/** Human age of the psyche file, flagging STALE identity — the product thesis is
+ *  that Glia keeps this file synced, so a weeks-old file means the agent is
+ *  priming with an out-of-date self. */
+function psycheAge(mtimeMs?: number): string {
+  if (!mtimeMs) return "";
+  const ageMs = Date.now() - mtimeMs;
+  const days = ageMs / 86_400_000;
+  const when = days >= 1 ? `${Math.round(days)}d` : `${Math.max(1, Math.round(ageMs / 3_600_000))}h`;
+  // 14+ days almost certainly means Glia hasn't synced in a while — warn.
+  return days >= 14 ? ` (⚠ synced ${when} ago — identity may be STALE; re-sync in Glia)` : ` (synced ${when} ago)`;
+}
+
 /** Build the status lines that describe exactly what was (and wasn't) injected.
  *  `injectedPages` is what actually made it into the text (may be < what was
  *  retrieved, if the budget dropped the context block). */
@@ -31,11 +43,12 @@ function buildStatusLines(a: {
   mode: InjectMode;
   psycheStatus: PsycheStatus | "skipped";
   psycheSource: string;
+  psycheMtimeMs?: number;
   retrieval: RetrievalResult;
   injectedPages: number;
 }): string[] {
   const out: string[] = [];
-  if (a.psycheStatus === "file") out.push(`identity: loaded from ${a.psycheSource}`);
+  if (a.psycheStatus === "file") out.push(`identity: loaded from ${a.psycheSource}${psycheAge(a.psycheMtimeMs)}`);
   else if (a.psycheStatus === "built") out.push(`identity: built from gbrain source (canonical Glia export not found at ${config.psycheFile})`);
   else if (a.psycheStatus === "empty") out.push("identity: UNAVAILABLE — no psyche file and no readable gbrain source; answer will NOT be personalized");
   // "skipped" (context-only mode) → no identity line
@@ -172,10 +185,12 @@ async function assembleInjection(
   let psycheText = "";
   let psycheSource = "";
   let psycheStatus: PsycheStatus | "skipped" = "skipped";
+  let psycheMtimeMs: number | undefined;
   if (mode === "psyche" || mode === "both") {
     const p = await loadPsyche();
     psycheSource = p.source;
     psycheStatus = p.status;
+    psycheMtimeMs = p.fileMtimeMs;
     const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
     psycheText = p.status === "empty" ? "" : truncateToTokens(p.text, psycheBudget);
   }
@@ -195,7 +210,7 @@ async function assembleInjection(
   const injectedPageSlugs = injectedPageSlugsFrom(contextText);
   const injectedPages = injectedPageSlugs.length;
 
-  const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, retrieval, injectedPages });
+  const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, psycheMtimeMs, retrieval, injectedPages });
   const degraded = psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status);
 
   // NB: a visible "how to use this" directive was A/B-tested (GLIA_NO_DIRECTIVE)

@@ -4,7 +4,7 @@
 <!-- Injected by glia-context. Below is who I am, then what's relevant to the task. Use both to serve me specifically — not generically. -->
 
 > glia-context status: OK
-> identity: loaded from <FIX>/psyche.md
+> identity: loaded from <FIX>/psyche.md (synced <AGE>)
 > retrieval: 2 pages in <MS>ms
 
 ## Who I am

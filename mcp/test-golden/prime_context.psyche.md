@@ -4,7 +4,7 @@
 <!-- Injected by glia-context. Below is who I am. Use it to serve me specifically — not generically. -->
 
 > glia-context status: OK
-> identity: loaded from <FIX>/psyche.md
+> identity: loaded from <FIX>/psyche.md (synced <AGE>)
 
 ## Who I am
 

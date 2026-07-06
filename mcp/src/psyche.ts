@@ -1,5 +1,5 @@
 import { readFile, readdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "./config.js";
 
@@ -11,10 +11,14 @@ export function cleanBody(raw: string): string {
     .trim();
 }
 
+/** Both slug forms of the identity self-page (people-david ↔ people/david),
+ *  config-driven so the OSS multi-user build isn't hardcoded to one person. */
+const SELF_FORMS = new Set([config.selfSlug, config.selfSlug.replace("-", "/"), config.selfSlug.replace("/", "-")]);
+
 /** Injection priority: self-page → essays → concepts → rest (mirrors Glia). */
 function identityRank(slug: string): number {
   const s = slug.toLowerCase();
-  if (s === "people-david" || s.endsWith("/david")) return 0;
+  if (SELF_FORMS.has(s)) return 0;
   if (s.startsWith("originals/")) return 1;
   if (s.startsWith("concepts/")) return 2;
   if (s.startsWith("people/") || s.startsWith("companies/")) return 3;
@@ -24,7 +28,15 @@ function identityRank(slug: string): number {
 /** Where the identity came from: the canonical Glia export, a live build from
  *  the gbrain source, or nothing at all (identity unavailable). */
 export type PsycheStatus = "file" | "built" | "empty";
-export interface PsycheResult { text: string; source: string; status: PsycheStatus; }
+export interface PsycheResult {
+  text: string;
+  source: string;
+  status: PsycheStatus;
+  /** mtime of the canonical psyche file (ms since epoch), when status==="file".
+   *  Lets callers warn that the agent is priming with a STALE identity — the
+   *  whole product thesis is that Glia keeps this file in sync. */
+  fileMtimeMs?: number;
+}
 
 /**
  * The psyche map — "who you are". Prefers the canonical file Glia exports;
@@ -35,7 +47,11 @@ export async function loadPsyche(): Promise<PsycheResult> {
   try {
     if (existsSync(config.psycheFile)) {
       const text = await readFile(config.psycheFile, "utf8");
-      if (text.trim().length > 200) return { text, source: config.psycheFile, status: "file" };
+      if (text.trim().length > 200) {
+        let fileMtimeMs: number | undefined;
+        try { fileMtimeMs = statSync(config.psycheFile).mtimeMs; } catch { /* best-effort */ }
+        return { text, source: config.psycheFile, status: "file", fileMtimeMs };
+      }
     }
   } catch {
     // unreadable canonical file — fall through to building from source
@@ -49,7 +65,7 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
   const parts: string[] = ["# Who I am — psyche map", ""];
   let found = 0;
   try {
-    const selfCandidates = ["people-david.md", "people/david.md"];
+    const selfCandidates = [...SELF_FORMS].map((f) => `${f}.md`);
     for (const rel of selfCandidates) {
       const p = join(dir, rel);
       if (existsSync(p)) {

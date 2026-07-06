@@ -14,6 +14,18 @@ function intEnv(name: string, def: number): number {
   return Math.floor(n);
 }
 
+/** Read a 0..1 fraction env var, falling back on a bad/out-of-range value. */
+function fracEnv(name: string, def: number): number {
+  const raw = process.env[name];
+  if (raw == null || raw.trim() === "") return def;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0 || n > 1) {
+    console.error(`glia-context: ${name}="${raw}" is not a 0..1 fraction — using default ${def}`);
+    return def;
+  }
+  return n;
+}
+
 /** All paths/commands/tunables configurable via env so the server is portable. */
 export const config = {
   /** Canonical psyche map Glia writes (File > Export Context → identity). */
@@ -40,6 +52,13 @@ export const config = {
    *  multi-hundred-KB raw dumps). Was an over-aggressive 40KB that dropped
    *  high-value ranked pages. */
   gbrainMaxPageBytes: intEnv("GBRAIN_MAX_PAGE_BYTES", 500_000),
+  /** Backfill stops once a candidate's score drops below this FRACTION of the
+   *  top candidate's score — so the topK budget isn't spent injecting weakly
+   *  ranked pages as noise just to hit the count. 0 disables the floor. */
+  gbrainRelScoreFloor: fracEnv("GBRAIN_REL_SCORE_FLOOR", 0.5),
+  /** The identity self-page slug (rank-0 in the psyche). Env-overridable so the
+   *  OSS multi-user build isn't hardcoded to one person. */
+  selfSlug: (process.env.GLIA_SELF_SLUG || "people-david").trim().toLowerCase(),
   /** GLIA_STRICT_STARTUP=1 → exit on any failed config check, not just fatal. */
   strictStartup: process.env.GLIA_STRICT_STARTUP === "1",
 };
