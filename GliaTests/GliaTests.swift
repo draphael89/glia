@@ -357,6 +357,22 @@ final class MCPProcessTests: XCTestCase {
     }
 }
 
+final class MarkdownPreviewTests: XCTestCase {
+    func testCodeBodyStripsLangAndFence() {
+        // round-8 audit: the ```lang info string was rendered as the first code line
+        XCTAssertEqual(MarkdownPreview.codeBody("```swift\nlet x = 1\n```"), "let x = 1")
+        XCTAssertEqual(MarkdownPreview.codeBody("```\nplain\n```"), "plain")
+        XCTAssertEqual(MarkdownPreview.codeBody("```ts\na\n\nb\n```"), "a\n\nb")  // internal blank line kept
+    }
+
+    func testParseTablePreservesEmptyLeadingCell() {
+        // round-8 audit: a char-set trim swallowed empty edge cells, shifting columns
+        let rows = MarkdownPreview.parseTable("| claim | kind | confidence |\n|  | preference | 0.9 |")
+        XCTAssertEqual(rows.first, ["claim", "kind", "confidence"])
+        XCTAssertEqual(rows.last, ["", "preference", "0.9"])   // empty first cell preserved
+    }
+}
+
 final class ContextBundleTests: XCTestCase {
     private func node(_ id: Int, slug: String, source: String) -> BrainNode {
         BrainNode(id: id, slug: slug, type: "company", source: source,

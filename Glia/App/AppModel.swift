@@ -214,7 +214,11 @@ final class AppModel {
         hoveredIndex = hoveredID.flatMap { newGraph.indexByID[$0] }
         createdDates = newGraph.nodes.map(\.createdDate)
         replay.recomputeRange()
-        SpotlightIndexer.reindex(graph: newGraph)
+        // Demo is a sandbox: reindexing would WIPE the real brain's system Spotlight
+        // index and expose synthetic demo pages (with deep-links) in system-wide
+        // search. The one side-effecting path that was left ungated — gate it like
+        // toggleStar / performSync / saveViewState.
+        if !demoActive { SpotlightIndexer.reindex(graph: newGraph) }
         if enabledSources.isEmpty { enabledSources = Set(newGraph.nodes.map(\.source)) }
         if enabledTypes.isEmpty { enabledTypes = Set(newGraph.nodes.map(\.type)) }
 

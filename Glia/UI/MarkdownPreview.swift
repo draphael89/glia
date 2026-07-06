@@ -18,12 +18,38 @@ struct MarkdownPreview: View {
     }
 
     private var blocks: [String] {
-        var out = MarkdownPreview.stripFrontmatter(text)
+        let src = MarkdownPreview.stripFrontmatter(text)
             .replacingOccurrences(of: "<!--- gbrain:facts:begin -->", with: "")
             .replacingOccurrences(of: "<!--- gbrain:facts:end -->", with: "")
-            .components(separatedBy: "\n\n")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+        // Fence-aware split: a fenced code block can contain blank lines, so it must
+        // NOT be torn on "\n\n" (which left its tail rendered as raw prose with
+        // literal backticks). Keep each fenced region intact; split only prose spans.
+        var out: [String] = []
+        var fence: [String] = []
+        var prose: [String] = []
+        var inFence = false
+        func flushProse() {
+            for chunk in prose.joined(separator: "\n").components(separatedBy: "\n\n") {
+                let t = chunk.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !t.isEmpty { out.append(t) }
+            }
+            prose.removeAll()
+        }
+        for line in src.components(separatedBy: "\n") {
+            if line.hasPrefix("```") {
+                if inFence {
+                    fence.append(line); out.append(fence.joined(separator: "\n")); fence.removeAll(); inFence = false
+                } else {
+                    flushProse(); inFence = true; fence.append(line)
+                }
+            } else if inFence {
+                fence.append(line)
+            } else {
+                prose.append(line)
+            }
+        }
+        if inFence { out.append(fence.joined(separator: "\n")) }   // unterminated fence
+        flushProse()
         if let first = out.first, first.hasPrefix("#") {
             let heading = MarkdownPreview.normalize(
                 first.drop(while: { $0 == "#" }).trimmingCharacters(in: .whitespaces))
@@ -38,6 +64,15 @@ struct MarkdownPreview: View {
         s.lowercased().filter { $0.isLetter || $0.isNumber }
     }
 
+    /// Code inside a fenced block, minus the ```lang info string (was shown as the
+    /// first line) and the closing ``` fence.
+    nonisolated static func codeBody(_ block: String) -> String {
+        var ls = block.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        if ls.first?.hasPrefix("```") == true { ls.removeFirst() }
+        if ls.last?.trimmingCharacters(in: .whitespaces) == "```" { ls.removeLast() }
+        return ls.joined(separator: "\n")
+    }
+
     @ViewBuilder
     private func render(_ block: String) -> some View {
         if block.hasPrefix("#") {
@@ -47,7 +82,7 @@ struct MarkdownPreview: View {
                 .font(.system(size: level <= 1 ? 13 : 12, weight: .semibold))
                 .padding(.top, 3)
         } else if block.hasPrefix("```") {
-            Text(block.trimmingCharacters(in: CharacterSet(charactersIn: "`\n")))
+            Text(MarkdownPreview.codeBody(block))
                 .font(.system(size: 10, design: .monospaced))
                 .padding(7)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -85,10 +120,14 @@ struct MarkdownPreview: View {
     /// Parse a markdown pipe table into header + data rows.
     nonisolated static func parseTable(_ block: String) -> [[String]] {
         block.split(separator: "\n")
-            .map { line in
-                line.trimmingCharacters(in: CharacterSet(charactersIn: "| "))
-                    .components(separatedBy: "|")
-                    .map { $0.trimmingCharacters(in: .whitespaces) }
+            .map { line -> [String] in
+                // Drop exactly one border pipe each side — NOT a character-set trim,
+                // which swallows empty edge cells and shifts every column (mislabeling
+                // fact claim/kind/confidence).
+                var s = line.trimmingCharacters(in: .whitespaces)
+                if s.hasPrefix("|") { s.removeFirst() }
+                if s.hasSuffix("|") { s.removeLast() }
+                return s.components(separatedBy: "|").map { $0.trimmingCharacters(in: .whitespaces) }
             }
             .filter { row in
                 // drop separator rows (---|---|---)
