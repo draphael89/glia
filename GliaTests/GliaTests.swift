@@ -89,6 +89,19 @@ final class CameraTests: XCTestCase {
         let back = cam.worldToView(cam.viewToWorld(p, viewport: viewport), viewport: viewport)
         XCTAssertLessThan(simd_length(p - back), 0.001)
     }
+
+    /// A snapshot smaller than 2×padding must not yield a negative/zero zoom (which
+    /// point-mirrors or collapses the PNG the CI/agent visual check depends on).
+    @MainActor func testFittingCameraClampsZoomPositiveForTinySnapshot() {
+        let positions = [SIMD2<Float>(-50, -50), SIMD2<Float>(50, 50), SIMD2<Float>(0, 20)]
+        // size (400×260) is smaller than 2×padding (320) in height → unclamped usable < 0
+        let cam = GraphRenderer.fittingCamera(
+            positions: positions, visible: [], size: CGSize(width: 400, height: 260), padding: 160)
+        XCTAssertGreaterThan(cam.zoom, 0, "zoom must stay positive so the snapshot isn't mirrored")
+        XCTAssertGreaterThanOrEqual(cam.zoom, 0.05)
+        XCTAssertLessThanOrEqual(cam.zoom, 60)
+        XCTAssertEqual(cam.center.x, 0, accuracy: 0.001)   // centered on the span midpoint
+    }
 }
 
 final class LayoutEngineTests: XCTestCase {

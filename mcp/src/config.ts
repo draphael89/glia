@@ -57,11 +57,18 @@ export const config = {
    *  ranked pages as noise just to hit the count. 0 disables the floor. */
   gbrainRelScoreFloor: fracEnv("GBRAIN_REL_SCORE_FLOOR", 0.5),
   /** `gbrain query` searches the FULL brain but bodies are read from the source
-   *  MIRROR, which is a subset — measured: some queries have 7-8/8 top-ranked
-   *  pages missing from the mirror, silently dropping the strongest retrieval.
-   *  For up to this many top pages that miss the mirror, fall back to a live
-   *  `gbrain get <slug>` read (bounded so latency stays sane). 0 disables it. */
-  gbrainGetFallbackMax: intEnv("GBRAIN_GET_FALLBACK_MAX", 3),
+   *  MIRROR, which is a subset — MEASURED (harness/retrieval-completeness.py, 15
+   *  real queries): 71% of top-ranked pages are absent from the mirror and only
+   *  29% are readable mirror-only, silently starving the strongest retrieval (the
+   *  root cause of the v9 regression). For up to this many top pages that miss the
+   *  mirror, fall back to a live `gbrain get <slug>` read. The fallbacks now run
+   *  CONCURRENTLY (see gbrainGetConcurrency), so the cap can be generous without
+   *  paying cap×round-trip in series: 8 recovers 99% of the top-8. 0 disables it. */
+  gbrainGetFallbackMax: intEnv("GBRAIN_GET_FALLBACK_MAX", 8),
+  /** Max concurrent `gbrain get` fallbacks. Bounds the subprocess/Postgres spike
+   *  when several top pages miss the mirror; the batch pays ~ceil(misses/N) round
+   *  trips of latency instead of one-per-page. */
+  gbrainGetConcurrency: intEnv("GBRAIN_GET_CONCURRENCY", 4),
   /** The identity self-page slug (rank-0 in the psyche). Env-overridable so the
    *  OSS multi-user build isn't hardcoded to one person. */
   selfSlug: (process.env.GLIA_SELF_SLUG || "people-david").trim().toLowerCase(),

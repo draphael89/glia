@@ -91,8 +91,13 @@ extension GraphRenderer {
         var cam = Camera()
         guard any else { return cam }
         let span = simd_max(hi - lo, SIMD2<Float>(1, 1))
-        let usable = SIMD2(Float(size.width) - padding * 2, Float(size.height) - padding * 2)
-        cam.zoom = min(usable.x / span.x, usable.y / span.y)
+        // Clamp exactly as Camera.fit does: if padding*2 >= a snapshot dimension (small
+        // GLIA_SNAPSHOT_SIZE), an unclamped `usable` goes <= 0 and zoom turns negative/zero
+        // — silently point-mirroring or collapsing the PNG that the CI/agent visual check
+        // relies on. Floor usable to 64px and the zoom to a positive range.
+        let usable = simd_max(SIMD2(Float(size.width) - padding * 2, Float(size.height) - padding * 2),
+                              SIMD2<Float>(64, 64))
+        cam.zoom = min(max(min(usable.x / span.x, usable.y / span.y), 0.05), 60)
         cam.center = (lo + hi) / 2
         return cam
     }

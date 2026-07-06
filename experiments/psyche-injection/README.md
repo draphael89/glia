@@ -91,6 +91,9 @@ Materials (the psyche + per-task context) are built from a real brain and are
   **production-pipeline**); aggregate only, no private content.
 - [REPORT-config-compare.md](REPORT-config-compare.md) — v9 vs v10: shrinking the
   shipped identity core made the combined arm *worse*, not better (hypothesis refuted).
+- [REPORT-completeness.md](REPORT-completeness.md) — **measures the bug behind the flip**:
+  69% of top-ranked pages were missing from the read mirror (31% → 99% readable with the
+  fix, +67 points; 12/15 queries starved). The quantitative root cause of v9.
 - [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
   confound (a shorter arm beats a longer one on content in all three judge pools).
 - [SIGNIFICANCE.md](SIGNIFICANCE.md) — task-clustered uncertainty: direction is
@@ -118,10 +121,13 @@ measured a *reconstruction* of context. Testing the **actually-shipped**
 `prime_context` end-to-end (v9) *overturned* it — blind judges preferred
 **retrieval-alone**; the injected `both` arm didn't beat it, and a config fix (v10)
 made it *worse*. But chasing *why* found the real cause: a **retrieval bug** — the
-server searched the whole brain yet read page bodies from a *subset* mirror,
-silently dropping 7–8 of the top 8 pages and starving the injected arm. Fix the
-retrieval and **v12 flips it back**: `both` beats retrieval-alone again,
-**cross-vendor** (best-vs-context 52%→64% Opus, 30%→56% gpt-5). So v9 was a bug,
+server searched the whole brain yet read page bodies from a *subset* mirror. We then
+**measured** it ([REPORT-completeness.md](REPORT-completeness.md)): across 15 real
+queries, **69% of top-ranked pages were missing from the mirror** — only 31% readable,
+12/15 queries starved — so the injected arm was fed a near-empty context. A bounded,
+*parallel* live-read fallback restores it to **99%** (+67 points). Fix the retrieval and
+**v12 flips it back**: `both` beats retrieval-alone again, **cross-vendor**
+(best-vs-context 52%→64% Opus, 30%→56% gpt-5). So v9 was a bug,
 not a thesis failure — sound grounding reconciles the shipped product with the
 reconstruction. And v11 fact-checked the injected identity at **98% accurate**, so
 the win is real, not hallucinated. The lesson we value most: **test what you ship —
