@@ -47,6 +47,10 @@ tag = os.path.basename(src).replace("results-", "").replace(".json", "")
 if not os.path.exists(src):
     raise SystemExit(f"{fname} not present — run the workflow first.")
 tasks = json.load(open(src))
+# A results file may carry its own arm set (e.g. v13's completeness 2×2); otherwise
+# fall back to the standard production arms. gpt-5 only ever sees the ANSWERS.
+# (Both shapes are 4-arm, so the 4-element PERMS and the ×4 indexing below hold.)
+CONDS = tasks[0].get("conditions") or CONDS
 
 def one(args):
     t, j = args
