@@ -304,3 +304,25 @@ final class MCPProvisionTests: XCTestCase {
         XCTAssertTrue(MCPProvision.isParseableJSON(out ?? Data()))
     }
 }
+
+// MARK: - MCPProvision.runProcess (Phase 3 fix regression guards)
+
+final class MCPProcessTests: XCTestCase {
+    func testRunProcessCapturesOutput() async {
+        let r = await MCPProvision.runProcess(URL(fileURLWithPath: "/bin/echo"), ["hello-glia"])
+        XCTAssertEqual(r.status, 0)
+        XCTAssertTrue(r.stdout.contains("hello-glia"))
+    }
+
+    func testRunProcessDoesNotHangWhenGrandchildHoldsPipe() async {
+        // Regression for the code-review finding: a fast-exiting child that
+        // leaves a grandchild holding the stdout pipe must NOT hang runProcess —
+        // the timeout bounds the drain rather than waiting for EOF.
+        let start = Date()
+        let r = await MCPProvision.runProcess(URL(fileURLWithPath: "/bin/sh"),
+                                              ["-c", "sleep 5 & echo started"], timeout: 1)
+        let elapsed = Date().timeIntervalSince(start)
+        XCTAssertLessThan(elapsed, 4, "runProcess must return ~timeout, not wait for the grandchild")
+        XCTAssertTrue(r.stderr.contains("timed out") || r.stdout.contains("started"))
+    }
+}

@@ -44,10 +44,23 @@ enum MCPProvision {
 
     // MARK: process
 
+    /// Thread-safe holder for the two concurrent pipe drains. `@unchecked
+    /// Sendable` with a lock; the reads run on UNSTRUCTURED tasks we can abandon.
+    private final class DrainBox: @unchecked Sendable {
+        private let lock = NSLock()
+        private var _out = Data(); private var _err = Data(); private var _done = 0
+        func finishOut(_ d: Data) { lock.lock(); _out = d; _done += 1; lock.unlock() }
+        func finishErr(_ d: Data) { lock.lock(); _err = d; _done += 1; lock.unlock() }
+        var out: Data { lock.lock(); defer { lock.unlock() }; return _out }
+        var err: Data { lock.lock(); defer { lock.unlock() }; return _err }
+        var doneCount: Int { lock.lock(); defer { lock.unlock() }; return _done }
+    }
+
     /// Run an executable and return a Sendable result. Drains stdout and stderr
-    /// CONCURRENTLY (draining them sequentially deadlocks if the child fills one
-    /// pipe buffer while we're blocked reading the other), and a watchdog
-    /// terminates a wedged child so the call can never hang forever.
+    /// CONCURRENTLY (sequential draining deadlocks if the child fills one pipe
+    /// buffer while we're blocked on the other), and bounds the wait by `timeout`
+    /// — so even a fast-exiting child that leaves a grandchild holding the pipe
+    /// write-ends can't hang us: we abandon the stuck reads and return.
     nonisolated static func runProcess(_ url: URL, _ args: [String], env extra: [String: String]? = nil,
                                        timeout: TimeInterval = 30) async -> ShellResult {
         await Task.detached(priority: .userInitiated) {
@@ -63,23 +76,26 @@ enum MCPProvision {
             p.standardOutput = out; p.standardError = err
             do { try p.run() } catch { return ShellResult(status: -1, stdout: "", stderr: "\(error)") }
 
-            // Watchdog: terminate a child that never exits (Process.terminate is
-            // safe to call from another thread).
-            let watchdog = DispatchWorkItem { if p.isRunning { p.terminate() } }
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: watchdog)
-
-            // Drain both pipes concurrently (each read blocks until its EOF) so a
-            // full buffer on one can't deadlock the read of the other.
             let outHandle = out.fileHandleForReading
             let errHandle = err.fileHandleForReading
-            async let oData: Data = Task.detached { outHandle.readDataToEndOfFile() }.value
-            async let rData: Data = Task.detached { errHandle.readDataToEndOfFile() }.value
-            let (o, r) = await (oData, rData)
-            p.waitUntilExit()
-            watchdog.cancel()
-            return ShellResult(status: p.terminationStatus,
-                               stdout: String(decoding: o, as: UTF8.self),
-                               stderr: String(decoding: r, as: UTF8.self))
+            let box = DrainBox()
+            // Unstructured so they can be abandoned on timeout (a blocking read
+            // is not cancellation-aware, so we must not structurally await it).
+            Task.detached { box.finishOut(outHandle.readDataToEndOfFile()) }
+            Task.detached { box.finishErr(errHandle.readDataToEndOfFile()) }
+
+            let deadline = Date().addingTimeInterval(timeout)
+            while box.doneCount < 2 && Date() < deadline {
+                try? await Task.sleep(for: .milliseconds(25))
+            }
+            let completed = box.doneCount >= 2
+            if p.isRunning { p.terminate() }
+            if completed { p.waitUntilExit() }
+            return ShellResult(
+                status: completed ? p.terminationStatus : -1,
+                stdout: String(decoding: box.out, as: UTF8.self),
+                stderr: completed ? String(decoding: box.err, as: UTF8.self)
+                                  : "runProcess timed out after \(Int(timeout))s")
         }.value
     }
 
@@ -87,7 +103,11 @@ enum MCPProvision {
     /// don't resolve, so ask the login shell first, then probe known locations.
     nonisolated static func resolveExecutable(_ name: String) async -> String? {
         let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
-        let r = await runProcess(URL(fileURLWithPath: shell), ["-lic", "command -v \(name) 2>/dev/null || true"])
+        // `-l` (login) sources the profile for PATH, but NOT `-i` (interactive):
+        // interactive rc files can background daemons that inherit our pipe and
+        // keep the read from ever reaching EOF. The known-location probe below
+        // covers the rare user whose PATH is set only in an interactive rc.
+        let r = await runProcess(URL(fileURLWithPath: shell), ["-lc", "command -v \(name) 2>/dev/null || true"], timeout: 12)
         if let hit = r.stdout.split(separator: "\n").last.map(String.init)?.trimmingCharacters(in: .whitespaces),
            !hit.isEmpty, FileManager.default.isExecutableFile(atPath: hit) {
             return hit
