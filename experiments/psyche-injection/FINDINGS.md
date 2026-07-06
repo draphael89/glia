@@ -437,6 +437,48 @@ finding — the *conditionality* is.
 
 ---
 
+# v9 — the production-pipeline test (does the SHIPPED thing win?), and it doesn't
+
+Every version so far (v1–v8) fed the generator a *reconstruction* of context —
+raw pages re-read via `genPrompt`. v9 is the first to test the **actually-shipped
+artifact**: the real `prime_context` output captured per task per mode from the
+compiled MCP (mode-aware header + 40%-capped, self-page-first psyche + dedup'd
+*natural-query* retrieval), then generated + blind-judged. 5 tasks. Numbers in
+[REPORT-v9.md](REPORT-v9.md); harness `capture-prod-injections.mjs`.
+
+**The shipped `both` does NOT beat retrieval-alone — cross-vendor confirmed.**
+
+- **Opus judge (25 judgments):** `context` **44** > `best` 41 > `psyche` 35 >
+  `naked` 30. `best` is *second*, and best-vs-context is a coin-flip **52%**.
+- **gpt-5 judge (20 judgments, position-bias-clean):** harsher — `context` **36**
+  > `naked` 35 > `psyche` 28 > **`best` 21 (LAST)**; best-vs-context **30%**,
+  best even loses to `naked` (30%).
+- Both non-trivially independent judges put **`context` (retrieval-alone) first**
+  and decline to reward the injected `both` arm. The clean "best is the top arm"
+  from the reconstructions **did not survive contact with the real product.**
+
+**Why — the mechanism is in the capture.** The shipped `both` mode spends ~40% of
+budget on the psyche *and* dedups its retrieval against that psyche, so on these
+tasks `best` ends up with **thinner retrieval than the `context` arm** (which gets
+the full budget). Worse, for identity-shaped tasks the dedup moves the relevant
+identity pages *out* of `best`'s retrieval — but the `context` arm keeps them as
+*ranked, focused* pages, and the judges preferred that focused framing over
+`best`'s 24k-token psyche dump. The 24k psyche looks to be **past the useful dose**
+(v5 found a ~3k core reaches ~95%) and is *diluting*, not helping, relative to
+focused retrieval of the same identity content.
+
+**Honest caveats:** small n (5 tasks); p1's capture hit a cold-query retrieval
+miss so its `both` arm was psyche-only (degenerate — it dragged `best` down, but
+the result holds on p2–p5 too); single shipped config. This measures the *current
+shipped configuration*, not the thesis: it says the 40%-cap + aggressive-dedup
+`both` mode **under-serves retrieval**, which is a **fixable product problem**, and
+the actionable hypothesis is v10 — a rebalanced `both` (a small focused ~3–4k
+identity core + the *full* retrieval the `context` arm gets) should recover the
+combined arm. This is the most important thing the whole arc surfaced: *test what
+you ship, not a reconstruction of it.*
+
+---
+
 # Iteration loop — injection tuning (what moved the needle, what didn't)
 
 A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself

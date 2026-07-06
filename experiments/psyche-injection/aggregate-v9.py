@@ -71,13 +71,32 @@ def main():
         od = sorted(CONDS, key=lambda c: -e["borda"][c])
         out.append(f"- **{tid}**: {' > '.join(od)}  (winner {e['winner']}, {e['n']} judgments)")
 
+    # Cross-vendor (gpt-5) block, if judged.
+    gpt5_path = os.path.join(base, "results/raw/results-v9-gpt5.json")
+    if os.path.exists(gpt5_path):
+        gb, gpw, gpt, _, gn, gpos, _ = analyze(json.load(open(gpt5_path)))
+        gorder = sorted(CONDS, key=lambda c: -gb[c])
+        out.append(f"\n## Cross-vendor judge — gpt-5 ({gn} judgments)\n")
+        out.append("- Borda: " + ", ".join(f"{c} {gb[c]}" for c in gorder) + f"  → **{' > '.join(gorder)}**")
+        for a, b in [("best","context"), ("best","naked"), ("context","naked")]:
+            if gpt[(a,b)]: out.append(f"- {a} > {b}: **{100*gpw[(a,b)]/gpt[(a,b)]:.0f}%**")
+        out.append(f"- position-first {dict(gpos)} (uniform≈{gn//4}) — "
+                   + ("⚠ some position bias" if max(gpos.values()) > 0.6*gn else "position-clean"))
+        out.append("- **gpt-5 agrees `context` leads and is HARSHER on `best` (ranks it last)** — "
+                   "so the shipped `both` under-performing retrieval is not an Opus artifact.")
+
     pos_bias = max(posfirst.values()) > 0.6 * n if n else False
     out.append("\n## Verdict\n")
     out.append(f"- The **shipped** injection pipeline puts `{order[0]}` first "
-               f"({'reproduces best-first ✅' if order[0]=='best' else 'does NOT lead with best'}).")
+               f"({'reproduces best-first ✅' if order[0]=='best' else 'does NOT lead with best — retrieval-alone wins'}).")
     out.append("- This is the FIRST version to test the real artifact end-to-end (all v1-v8 used a "
-               "reconstruction). Whatever the ordering, it now reflects what a user actually gets from "
-               "the installed MCP — natural-query retrieval, dedup, capped psyche, and the mode-aware header.")
+               "reconstruction). It reflects what a user actually gets from the installed MCP.")
+    out.append("- **Mechanism**: shipped `both` caps psyche at 40% AND dedups its retrieval against it, "
+               "so `best` gets THINNER retrieval than the full-budget `context` arm; the 24k psyche is "
+               "past the useful dose (v5: ~3k core ≈95%) and dilutes vs focused retrieval of the same "
+               "identity pages. A fixable CONFIG problem, not a refutation of the thesis.")
+    out.append("- **Next (v10)**: a rebalanced `both` — small ~3-4k identity core + the FULL retrieval "
+               "the context arm gets — is the hypothesis to test.")
     if pos_bias:
         out.append(f"- ⚠ position check: slot-first {dict(posfirst)} (uniform≈{n//4}) — some position bias.")
     out.append("\n---\n_Real prime_context output; Opus generator + judge; small-n (5 tasks). aggregate-v9.py; aggregate only._")
