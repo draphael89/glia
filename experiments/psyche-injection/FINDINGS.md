@@ -552,6 +552,34 @@ expose the bugs the reconstruction hid, and fixing them is the actual product
 win.* The one thread no LLM judge can close is still human eval
 (`harness/generate-human-eval.py`, delivered).
 
+## Quantifying the bug — and completing the fix (`REPORT-completeness.md`)
+
+v12 named the retrieval bug; then we *measured* it. Across 15 real queries
+(`harness/retrieval-completeness.py`, aggregate-only), at the injection's top-6 depth
+only **31% of top-ranked pages were readable from the mirror — 69% were silently
+dropped, and 12 of 15 queries were starved** (several to 0/6). That is the mechanism
+of the v9 regression, made numeric: the injected arm wasn't failing, it was fed a
+near-empty context.
+
+The fix has two parts. (1) The bounded `gbrain get` fallback for mirror-missing pages —
+but it was *serial* (one ~170ms subprocess per miss), so its cap sat at a timid 3,
+recovering only half the misses. (2) **Prefetch the missing pages concurrently** (a
+small worker pool) so the cap can rise to 8 without paying cap×round-trip: completeness
+goes **31% → 99%** (+67 points). Measured end-to-end on a 0-mirror-hit query, the
+injected arm's retrieval went from **3 pages / ~286 tok → 6 pages / ~2264 tok** (8×) for
++0.28s, and parallelism buys back 0.8s vs the same reads in series. **v12 flipped the
+finding at ~65% completeness; the product now runs at 99%.**
+
+## v13 — does identity survive *complete* retrieval? (the sharp open question)
+
+v12's win was measured with retrieval still only ~65% complete, leaving a real doubt:
+was the psyche partly a *proxy* for the pages retrieval was dropping? v13 isolates it —
+a controlled 2×2 (`context`/`both` × `thin` cap-3 / `full` cap-8), all four arms judged
+blind together (`harness/eval-v13-completeness.js`, `aggregate-v13.py`). If `both_full`
+still beats `context_full`, identity is a genuine *complement*, not a retrieval-gap
+filler — the strongest form of the thesis. (p2 is a natural control: its mirror coverage
+was already complete, so its thin and full arms should tie.) Result in `REPORT-v13.md`.
+
 ---
 
 # Iteration loop — injection tuning (what moved the needle, what didn't)
