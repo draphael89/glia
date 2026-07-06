@@ -230,3 +230,36 @@ final class MarkdownTests: XCTestCase {
                           MarkdownPreview.normalize("Fountain"))
     }
 }
+
+// MARK: - Psyche sync status (Phase 2 pure seams)
+
+final class PsycheSyncTests: XCTestCase {
+    func testRelativeTimeBuckets() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        XCTAssertEqual(relativePsycheTime(now.addingTimeInterval(-10), now: now), "just now")
+        XCTAssertEqual(relativePsycheTime(now.addingTimeInterval(-120), now: now), "2m ago")
+        XCTAssertEqual(relativePsycheTime(now.addingTimeInterval(-7200), now: now), "2h ago")
+        XCTAssertEqual(relativePsycheTime(now.addingTimeInterval(-172_800), now: now), "2d ago")
+    }
+
+    func testFileStateMirrorsServerGate() {
+        // missing file → MCP falls back to building from source
+        var s = PsycheSyncStatus()
+        XCTAssertEqual(s.fileState, .missing)
+        XCTAssertFalse(s.mcpWillUseFile)
+        // present but ≤200 bytes → thin (server's loadPsyche rejects it)
+        s.fileModified = .now; s.fileBytes = 200
+        XCTAssertEqual(s.fileState, .thin)
+        XCTAssertFalse(s.mcpWillUseFile)
+        // present and >200 bytes → usable (server injects it)
+        s.fileBytes = 201
+        XCTAssertEqual(s.fileState, .usable)
+        XCTAssertTrue(s.mcpWillUseFile)
+    }
+
+    func testSourceLabels() {
+        XCTAssertEqual(PsycheSyncStatus.Source.collection.label, "starred collection")
+        XCTAssertEqual(PsycheSyncStatus.Source.identity.label, "identity map")
+        XCTAssertEqual(PsycheSyncStatus.Source.custom.label, "custom scope")
+    }
+}

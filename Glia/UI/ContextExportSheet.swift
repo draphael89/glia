@@ -79,7 +79,10 @@ struct ContextExportSheet: View {
                     .buttonStyle(.bordered)
                 }
                 Button {
-                    Task { synced = await model.syncPsycheToMCP(scope: scope) }
+                    Task {
+                        synced = await model.syncPsycheToMCP(scope: scope)
+                        await model.refreshPsycheStatusFromDisk()
+                    }
                 } label: {
                     Label(synced > 0 ? "Synced \(synced) pages to MCP" : "Sync to glia-context MCP",
                           systemImage: synced > 0 ? "checkmark.circle" : "arrow.triangle.2.circlepath")
@@ -87,7 +90,7 @@ struct ContextExportSheet: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(Theme.accent)
-                .help("Write ~/.glia/psyche.md so any agent using the glia-context MCP injects this")
+                .help("Write \(AppModel.psycheFileURL.path) so any agent using the glia-context MCP injects this")
             } else {
                 Button {
                     building = true
@@ -107,10 +110,51 @@ struct ContextExportSheet: View {
                 .tint(Theme.accent)
                 .disabled(building || scopeEmpty)
             }
+
+            Divider().opacity(0.4)
+            mcpStatusFooter
         }
         .padding(20)
         .frame(width: 380)
         .background(Theme.background)
+        .task {
+            await model.refreshPsycheStatusFromDisk()
+            await model.refreshServerRegistration()
+        }
+    }
+
+    /// Persistent readout of whether the glia-context MCP will actually inject
+    /// what the app writes — the trust signal for the loop.
+    @ViewBuilder private var mcpStatusFooter: some View {
+        let reach = model.psycheReachability
+        VStack(alignment: .leading, spacing: 4) {
+            switch reach.file {
+            case .usable:
+                mcpLine("checkmark.seal.fill", Theme.accent,
+                        "glia-context will inject this — \(AppModel.psycheFileURL.lastPathComponent), \(tokenLabel(reach.bytes / 4)) tokens" +
+                        (reach.modified.map { " · updated \(relativePsycheTime($0))" } ?? ""))
+            case .thin:
+                mcpLine("exclamationmark.triangle.fill", .orange,
+                        "psyche.md is thin — the MCP will fall back to building from your gbrain source. Sync a fuller collection.")
+            case .missing:
+                mcpLine("arrow.triangle.2.circlepath", .secondary,
+                        "Not synced yet — the MCP builds from your gbrain source until you sync.")
+            }
+            Text("Live sync: \(model.psycheStatus.source.label)")
+                .font(.system(size: 10)).foregroundStyle(.tertiary)
+            if let registered = reach.serverRegistered {
+                Text(registered ? "glia-context server: registered with Claude Code"
+                                 : "glia-context server: not detected — run mcp/install.sh")
+                    .font(.system(size: 10)).foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    private func mcpLine(_ symbol: String, _ color: Color, _ text: String) -> some View {
+        Label(text, systemImage: symbol)
+            .font(.system(size: 10.5))
+            .foregroundStyle(color)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func hint(_ text: String) -> some View {

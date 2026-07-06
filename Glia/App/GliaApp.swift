@@ -122,13 +122,33 @@ struct MenuBarContent: View {
     var body: some View {
         Group {
             Text("\(model.graph.nodes.count.formatted()) pages · \(model.updatedTodayCount) today")
+            Text(psycheLine)
             Divider()
+            Button("Sync Psyche Now") { Task { await model.syncPsycheToMCP() } }
+                .disabled(model.demoActive)
             Button("Open Glia") {
                 NSApp.activate(ignoringOtherApps: true)
                 NSApp.windows.first(where: { $0.canBecomeMain })?.makeKeyAndOrderFront(nil)
             }
             Divider()
             Button("Quit Glia") { NSApp.terminate(nil) }
+        }
+        .task { await model.refreshPsycheStatusFromDisk() }   // fresh mtime each open
+    }
+
+    /// One-glance state of the psyche → glia-context MCP sync.
+    private var psycheLine: String {
+        let s = model.psycheStatus
+        switch s.phase {
+        case .pending:  return "Psyche: syncing shortly…"
+        case .syncing:  return "Psyche: syncing…"
+        case .failed:   return "Psyche: sync failed"
+        case .skipped:  return "Psyche: paused (demo)"
+        case .idle where s.fileModified == nil: return "Psyche: not synced yet"
+        default:
+            let when = s.fileModified.map { relativePsycheTime($0) } ?? "—"
+            return s.pageCount > 0 ? "Psyche: \(s.pageCount) pages · synced \(when)"
+                                   : "Psyche: synced \(when)"
         }
     }
 }

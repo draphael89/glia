@@ -33,6 +33,14 @@ final class AppModel {
     /// Mirrors BrainLocation.demoMode as observable state.
     private(set) var demoActive = false
 
+    /// Live status of the psyche → glia-context MCP sync (menu bar + sheet observe).
+    private(set) var psycheStatus = PsycheSyncStatus()
+    /// Best-effort: is the glia-context server registered with Claude Code? (nil = unknown)
+    private(set) var serverRegistered: Bool?
+    /// Coalesces rapid star toggles into one atomic psyche write. A `let`, so
+    /// @Observable leaves it untracked; @MainActor so it needs no annotation.
+    private let liveSyncDebouncer = Debouncer(delay: .milliseconds(700))
+
     let renderer: GraphRenderer
     let replay = ReplayController()
     private weak var view: GraphMTKView?
@@ -231,11 +239,13 @@ final class AppModel {
                 self.viewStateReady = true
                 LayoutStore.save(graph: g, positions: final)
                 // Seed the MCP psyche once if it doesn't exist yet, so the
-                // injection layer works even before the user syncs manually.
-                let psycheFile = FileManager.default.homeDirectoryForCurrentUser
-                    .appendingPathComponent(".glia/psyche.md")
-                if !FileManager.default.fileExists(atPath: psycheFile.path) {
-                    Task { await self.syncPsycheToMCP() }
+                // injection layer works even before the user syncs manually —
+                // and refresh status so the menu bar is accurate at launch.
+                Task {
+                    await self.refreshPsycheStatusFromDisk()
+                    if !FileManager.default.fileExists(atPath: Self.psycheFileURL.path) {
+                        await self.performSync(scope: nil)
+                    }
                 }
                 self.snapshotIfRequested()
                 // GLIA_AUTOPLAY_REPLAY=1: start the growth replay shortly
@@ -670,35 +680,112 @@ final class AppModel {
         UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")
         sceneDirty()   // reflect the star ring on the canvas immediately
         view?.requestDraw()
-        Task { await syncPsycheToMCP() }   // keep the injection layer current with the collection
+        scheduleLiveSync()   // debounced: coalesce rapid toggles into one write
     }
 
-    /// Write the canonical psyche map that the glia-context MCP server injects
-    /// (`~/.glia/psyche.md`). Uses the starred collection when you have one,
-    /// else the identity map. This is what closes the loop: curate here →
-    /// inject anywhere. Silent + best-effort; never blocks the UI.
-    /// Write `~/.glia/psyche.md` for the glia-context MCP. Pass an explicit
-    /// `scope` to sync exactly what the user built; omit it to use the default
-    /// identity map (starred collection when present, else the identity set).
-    /// All disk work runs off the main actor. Returns pages written.
+    // MARK: psyche → MCP sync (the injection loop)
+
+    /// The exact path the glia-context MCP reads, honoring GLIA_PSYCHE so the
+    /// app writes precisely what the server reads.
+    static var psycheFileURL: URL {
+        if let p = ProcessInfo.processInfo.environment["GLIA_PSYCHE"], !p.isEmpty {
+            return URL(fileURLWithPath: (p as NSString).expandingTildeInPath)
+        }
+        return FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".glia/psyche.md")
+    }
+
+    private struct PsycheWriteResult: Sendable { let pageCount: Int; let bytes: Int; let modified: Date? }
+
+    /// Debounced live sync — called from `toggleStar` and the first-settle seed.
+    /// Coalesces a burst of star toggles into a single atomic write 700ms later.
+    func scheduleLiveSync() {
+        guard !demoActive else { return }
+        psycheStatus.phase = .pending                        // menu reflects it instantly
+        psycheStatus.source = starredSlugs.isEmpty ? .identity : .collection
+        liveSyncDebouncer.schedule { [weak self] in await self?.performSync(scope: nil) }
+    }
+
+    /// Manual override (File ▸ Sync Psyche to MCP ⌘⇧Y, menu bar, sheet). Cancels
+    /// any pending debounce and syncs now. Keeps the public name its call sites use.
     @discardableResult
     func syncPsycheToMCP(scope: ContextScope? = nil) async -> Int {
-        guard !demoActive else { return 0 }
+        liveSyncDebouncer.cancel()
+        return await performSync(scope: scope)
+    }
+
+    /// The worker: resolve scope + gather Sendable inputs on the main actor, do
+    /// the build + atomic write + stat off the main actor, then publish status.
+    @discardableResult
+    private func performSync(scope: ContextScope? = nil) async -> Int {
+        guard !demoActive else { psycheStatus.phase = .skipped; return 0 }
         let resolved = scope ?? (starredSlugs.isEmpty ? .identity : .collection)
         let nodes = contextNodes(resolved)
-        let header = contextHeader(resolved)
         guard !nodes.isEmpty else { return 0 }
+        let header = contextHeader(resolved)
         let mirrors = sourceMirrors(for: nodes)
-        return await Task.detached {
+        let url = Self.psycheFileURL
+        psycheStatus.phase = .syncing
+        let out = await Task.detached { () -> PsycheWriteResult in
             let bundle = ContextBundle.build(nodes: nodes, header: header, mirrors: mirrors)
-            guard bundle.pageCount > 0 else { return 0 }
-            let dir = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent(".glia", isDirectory: true)
-            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            let url = dir.appendingPathComponent("psyche.md")
-            try? bundle.text.data(using: .utf8)?.write(to: url, options: .atomic)
-            return bundle.pageCount
+            guard bundle.pageCount > 0 else { return .init(pageCount: 0, bytes: 0, modified: nil) }
+            try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                     withIntermediateDirectories: true)
+            let data = Data(bundle.text.utf8)
+            try? data.write(to: url, options: .atomic)
+            let mtime = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
+            return .init(pageCount: bundle.pageCount, bytes: data.count, modified: mtime)
         }.value
+        if out.pageCount > 0 {
+            psycheStatus.phase = .synced
+            psycheStatus.pageCount = out.pageCount
+            psycheStatus.source = resolved == .collection ? .collection
+                : (resolved == .identity ? .identity : .custom)
+            psycheStatus.fileBytes = out.bytes
+            psycheStatus.fileModified = out.modified ?? .now
+            psycheStatus.lastSyncedAt = .now
+            UserDefaults.standard.set(out.pageCount, forKey: "psycheLastPageCount")
+            UserDefaults.standard.set(psycheStatus.source.rawValue, forKey: "psycheLastSource")
+        } else {
+            psycheStatus.phase = .failed
+        }
+        return out.pageCount
+    }
+
+    /// Cheap disk probe (mtime + size only, no body parse) so the menu bar shows
+    /// accurate status at launch / each menu open, even without a sync this run.
+    func refreshPsycheStatusFromDisk() async {
+        let url = Self.psycheFileURL
+        struct Probe: Sendable { let mtime: Date?; let bytes: Int }
+        let p = await Task.detached { () -> Probe in
+            guard let a = try? FileManager.default.attributesOfItem(atPath: url.path) else {
+                return Probe(mtime: nil, bytes: 0)
+            }
+            return Probe(mtime: a[.modificationDate] as? Date, bytes: (a[.size] as? Int) ?? 0)
+        }.value
+        psycheStatus.fileModified = p.mtime
+        psycheStatus.fileBytes = p.bytes
+        if psycheStatus.lastSyncedAt == nil { psycheStatus.lastSyncedAt = p.mtime }
+        if psycheStatus.pageCount == 0 {
+            psycheStatus.pageCount = UserDefaults.standard.integer(forKey: "psycheLastPageCount")
+        }
+        if psycheStatus.phase == .idle, p.mtime != nil { psycheStatus.phase = .synced }
+    }
+
+    /// Best-effort: is glia-context registered with Claude Code? (nil = unknown/unreadable)
+    func refreshServerRegistration() async {
+        let cfg = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude.json")
+        serverRegistered = await Task.detached { () -> Bool? in
+            guard let d = try? Data(contentsOf: cfg), d.count < 4_000_000,
+                  let s = String(data: d, encoding: .utf8) else { return nil }
+            return s.contains("glia-context")
+        }.value
+    }
+
+    /// Whether the MCP will inject the app's file or fall back to building.
+    var psycheReachability: PsycheReachability {
+        let s = psycheStatus
+        return .init(file: s.fileState, bytes: s.fileBytes, modified: s.fileModified, serverRegistered: serverRegistered)
     }
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
