@@ -204,7 +204,14 @@ final class AppModel {
 
     private func apply(graph newGraph: BrainGraph, animateInsertions: Bool) {
         let old = graph
+        // selectedIndex/hoveredIndex are raw indices into the OLD node array; the
+        // new payload is JSON-ordered, so remap them by stable node id (not clamp)
+        // or the selection silently jumps to a different node after a poll.
+        let selectedID = selectedIndex.flatMap { $0 < old.nodes.count ? old.nodes[$0].id : nil }
+        let hoveredID = hoveredIndex.flatMap { $0 < old.nodes.count ? old.nodes[$0].id : nil }
         graph = newGraph
+        selectedIndex = selectedID.flatMap { newGraph.indexByID[$0] }
+        hoveredIndex = hoveredID.flatMap { newGraph.indexByID[$0] }
         createdDates = newGraph.nodes.map(\.createdDate)
         replay.recomputeRange()
         SpotlightIndexer.reindex(graph: newGraph)
@@ -240,9 +247,13 @@ final class AppModel {
             config.alphaStart = 0.25
             config.maxIterations = 120
         }
-        runSettle(config: config, pinNothing: full || placed.isEmpty)
-        if selectedIndex.map({ $0 >= newGraph.nodes.count }) == true { selectedIndex = nil }
-        if hoveredIndex.map({ $0 >= newGraph.nodes.count }) == true { hoveredIndex = nil }
+        // Incremental update: PIN carried-over nodes so only the newly-inserted
+        // neighborhood relaxes. Without this every poll re-relaxes the whole graph
+        // and drifts every node — destroying the stable spatial memory that is the
+        // viewer's whole promise ("come back to exactly where you were").
+        let pinned: [Bool]? = full ? nil : newGraph.nodes.map { placed[$0.id] != nil }
+        runSettle(config: config, pinned: pinned)
+        // (selection/hover were already remapped by id at the top of apply)
         // A cold-launch deep link (Spotlight / glia://) that arrived before the
         // graph loaded now resolves against the freshly-installed brain.
         if let pending = pendingNodeID, let i = graph.indexByID[pending] {
@@ -251,14 +262,14 @@ final class AppModel {
         }
     }
 
-    private func runSettle(config: LayoutEngine.Config, pinNothing: Bool) {
+    private func runSettle(config: LayoutEngine.Config, pinned: [Bool]?) {
         isSettling = true
         setContinuousRendering(true)
         let g = graph
         let start = positions
         Task.detached(priority: .userInitiated) {
             let final = LayoutEngine.settle(
-                graph: g, start: start, pinned: nil, config: config,
+                graph: g, start: start, pinned: pinned, config: config,
                 tickEvery: 2,
                 onTick: { snapshot, _ in
                     Task { @MainActor in

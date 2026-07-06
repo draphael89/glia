@@ -229,12 +229,18 @@ struct QuadTree {
             let cell = cells[Int(idx)]
             if cell.mass == 0 { continue }
             let d = p - cell.centerOfMass
-            let distSq = max(simd_length_squared(d), 0.01)
+            let lenSq = simd_length_squared(d)
+            let distSq = max(lenSq, 0.01)
+            // Coincident / near-coincident bodies: the clamp is on the denominator
+            // only, so as |d|→0 the separating force →0 (the opposite of what's
+            // wanted). Substitute a deterministic per-body direction so overlapping
+            // nodes get a finite, separating push (still fully deterministic).
+            let dir = lenSq < 1e-6 ? SIMD2<Float>(cos(Float(skip)), sin(Float(skip))) * 0.1 : d
             if cell.isLeaf {
                 if cell.body == Int32(skip) || cell.body == -1 { continue }
-                force += d * (cell.mass / distSq)
+                force += dir * (cell.mass / distSq)
             } else if cell.size * cell.size < theta * theta * distSq {
-                force += d * (cell.mass / distSq)
+                force += dir * (cell.mass / distSq)
             } else {
                 let c = cell.children
                 if c.0 != -1 { stack.append(c.0) }
