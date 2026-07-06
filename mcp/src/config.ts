@@ -1,10 +1,34 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { readFileSync } from "node:fs";
 
-/** Read a positive-integer env var, logging (to stderr) + falling back on a bad
+/** Optional tuning file the Glia app's Settings window writes (~/.glia/config.json).
+ *  Keys are the env-var names. Precedence: an explicit env var wins (power users, tests,
+ *  CI), then this file, then the built-in default — so a user can tune the server from
+ *  the UI without touching the MCP registration, and the server picks it up on next spawn. */
+const fileTuning: Record<string, unknown> = (() => {
+  try {
+    const p = process.env.GLIA_CONFIG ?? join(homedir(), ".glia", "config.json");
+    const parsed = JSON.parse(readFileSync(p, "utf8"));
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};   // absent/malformed → env + defaults only
+  }
+})();
+
+/** Raw setting from env, else the tuning file, else undefined. */
+function rawSetting(name: string): string | undefined {
+  const env = process.env[name];
+  if (env != null && env.trim() !== "") return env;
+  const f = fileTuning[name];
+  if (typeof f === "number" || (typeof f === "string" && f.trim() !== "")) return String(f);
+  return undefined;
+}
+
+/** Read a positive-integer setting, logging (to stderr) + falling back on a bad
  *  value so a typo can't silently disable a timeout. */
 function intEnv(name: string, def: number): number {
-  const raw = process.env[name];
+  const raw = rawSetting(name);
   if (raw == null || raw.trim() === "") return def;
   const n = Number(raw);
   if (!Number.isFinite(n) || n <= 0) {
@@ -14,9 +38,9 @@ function intEnv(name: string, def: number): number {
   return Math.floor(n);
 }
 
-/** Read a 0..1 fraction env var, falling back on a bad/out-of-range value. */
+/** Read a 0..1 fraction setting, falling back on a bad/out-of-range value. */
 function fracEnv(name: string, def: number): number {
-  const raw = process.env[name];
+  const raw = rawSetting(name);
   if (raw == null || raw.trim() === "") return def;
   const n = Number(raw);
   if (!Number.isFinite(n) || n < 0 || n > 1) {

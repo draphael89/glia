@@ -92,7 +92,14 @@ built entrypoint:
 
 Then, at the start of a session: *"prime_context with what I'm trying to do."*
 
-## Configuration (env)
+## Configuration (env + `~/.glia/config.json`)
+
+Tunables resolve in order: an explicit **env var** wins, then **`~/.glia/config.json`**
+(a flat JSON object keyed by these env-var names — what Glia's Settings → Retrieval tab
+writes), then the built-in default. So you can tune the server from the app without
+touching its registration; it picks up changes on the next spawn. `GLIA_CONFIG` overrides
+the file path.
+
 
 | Var | Default | Meaning |
 |---|---|---|

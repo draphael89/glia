@@ -127,6 +127,12 @@ struct GliaApp: App {
                 .symbolEffect(.bounce, value: model.graph.generatedAt)
         }
         .menuBarExtraStyle(.menu)
+
+        // ⌘, Preferences: MCP status + one-click actions + the retrieval/injection
+        // tuning knobs (Glia has no other Settings surface — it's a viewer).
+        Settings {
+            SettingsView(model: model)
+        }
     }
 }
 
