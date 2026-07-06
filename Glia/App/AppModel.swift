@@ -93,7 +93,8 @@ final class AppModel {
         // one): drive the load → settle → render pipeline directly.
         Markers.drop("model.init")
         let env = ProcessInfo.processInfo.environment
-        if env["GLIA_SNAPSHOT"] != nil || env["GLIA_ENABLE_MCP"] != nil || env["GLIA_EXPORT_CONTEXT"] != nil {
+        if env["GLIA_SNAPSHOT"] != nil || env["GLIA_ENABLE_MCP"] != nil
+            || env["GLIA_EXPORT_CONTEXT"] != nil || env["GLIA_PREVIEW"] != nil {
             start()
         }
     }
@@ -177,6 +178,13 @@ final class AppModel {
         if ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil {
             await enableMCP()
             print("glia: enableMCP node=\(mcpStatus.node) code=\(mcpStatus.claudeCode) desktop=\(mcpStatus.claudeDesktop) dist=\(mcpStatus.distPath ?? "-") phase=\(mcpStatus.phase)")
+            exit(0)
+        }
+        // GLIA_PREVIEW=<task> — headless run of the in-app injection preview
+        // (resolve node + staged dist + --explain) for automation/verification.
+        if let task = ProcessInfo.processInfo.environment["GLIA_PREVIEW"] {
+            await previewInjection(task: task)
+            print("glia: previewInjection ↓\n\(injectionPreview ?? "nil")")
             exit(0)
         }
     }

@@ -9,7 +9,8 @@ struct GliaApp: App {
         // Snapshot / headless-provision runs are tooling, not sessions: stay
         // out of the Dock and never steal focus from whatever the user is doing.
         if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil
-            || ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil {
+            || ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil
+            || ProcessInfo.processInfo.environment["GLIA_PREVIEW"] != nil {
             NSApplication.shared.setActivationPolicy(.accessory)
         }
         Markers.drop("app.init")
