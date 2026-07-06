@@ -13,7 +13,10 @@ struct RenderScene: Sendable {
     var edges: [(Int32, Int32)] = []
     var edgeColors: [SIMD4<Float>] = []
     var dimStrength: Float = 0
-    var version: Int = 0                    // bump to signal buffer rebuild
+    var version: Int = 0                    // bump to rebuild the NODE buffer
+    var edgeVersion: Int = 0                // bump to rebuild the EDGE buffer (separate:
+                                            // a hover/flags-only change leaves edges untouched,
+                                            // so it need not pay the O(E) rebuild + reshuffle)
 }
 
 @MainActor
@@ -51,6 +54,7 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
     private var nodeCount = 0
     private var edgeCount = 0
     private var builtVersion = -1
+    private var builtEdgeVersion = -1
 
     var camera = Camera()
     var scene = RenderScene()
@@ -102,6 +106,11 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
     // MARK: buffers
 
     private func rebuildBuffersIfNeeded() {
+        rebuildNodeBufferIfNeeded()
+        rebuildEdgeBufferIfNeeded()
+    }
+
+    private func rebuildNodeBufferIfNeeded() {
         guard scene.version != builtVersion else { return }
         builtVersion = scene.version
 
@@ -116,6 +125,11 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
         nodeCount = nodes.count
         nodeBuffer = nodes.isEmpty ? nil :
             device.makeBuffer(bytes: nodes, length: MemoryLayout<NodeInstance>.stride * nodes.count)
+    }
+
+    private func rebuildEdgeBufferIfNeeded() {
+        guard scene.edgeVersion != builtEdgeVersion else { return }
+        builtEdgeVersion = scene.edgeVersion
 
         var edges: [EdgeInstance] = []
         edges.reserveCapacity(scene.edges.count)
@@ -186,7 +200,7 @@ final class GraphRenderer: NSObject, MTKViewDelegate {
                      viewport: SIMD2<Float>,
                      camera drawCamera: Camera,
                      forceRebuild: Bool) {
-        if forceRebuild { builtVersion = -1 }
+        if forceRebuild { builtVersion = -1; builtEdgeVersion = -1 }
         rebuildBuffersIfNeeded()
 
         var uniforms = Uniforms(

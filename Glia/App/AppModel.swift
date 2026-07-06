@@ -20,7 +20,9 @@ final class AppModel {
     var enabledTypes: Set<String> = [] { didSet { sceneDirty() } }
 
     var selectedIndex: Int? { didSet { sceneDirty() } }
-    var hoveredIndex: Int? { didSet { sceneDirty() } }
+    // Hover flips only a flag bit — edges are untouched, so skip the O(E) edge
+    // rebuild + reshuffle + GPU re-upload as the cursor crosses nodes.
+    var hoveredIndex: Int? { didSet { sceneDirty(edgesChanged: false) } }
     var searchText = ""
     var paletteVisible = false
     var shortcutsVisible = false
@@ -416,11 +418,16 @@ final class AppModel {
     private(set) var visibleCount = 0
     private(set) var visibleEdgeCount = 0
 
-    func sceneDirty() {
+    func sceneDirty(edgesChanged: Bool = true) {
         guard positions.count == graph.nodes.count else { return }
+        let prior = renderer.scene
         var scene = RenderScene()
         scene.positions = positions
-        scene.version = renderer.scene.version + 1
+        scene.version = prior.version + 1
+        // Edges depend only on positions + visibility + focus — never on the
+        // hover flag. A flags-only update keeps the prior edgeVersion so the edge
+        // buffer is NOT rebuilt.
+        scene.edgeVersion = edgesChanged ? prior.edgeVersion + 1 : prior.edgeVersion
 
         let n = graph.nodes.count
         var visible = [Bool](repeating: false, count: n)
@@ -480,34 +487,40 @@ final class AppModel {
             flags[i] = f
         }
 
-        var edgeColors: [SIMD4<Float>] = []
-        edgeColors.reserveCapacity(graph.linkIndices.count)
-        var edges: [(Int32, Int32)] = []
-        edges.reserveCapacity(graph.linkIndices.count)
-        var shownEdges = 0
-        for (s, t) in graph.linkIndices {
-            let si = Int(s), ti = Int(t)
-            guard visible[si] && visible[ti] else { continue }
-            edges.append((s, t))
-            shownEdges += 1
-            if inFocus.isEmpty {
-                edgeColors.append(Theme.ambientEdge)
-            } else {
-                let focused = inFocus.contains(si) && inFocus.contains(ti)
-                edgeColors.append(Theme.edgeColor(focused: focused))
+        if edgesChanged {
+            var edgeColors: [SIMD4<Float>] = []
+            edgeColors.reserveCapacity(graph.linkIndices.count)
+            var edges: [(Int32, Int32)] = []
+            edges.reserveCapacity(graph.linkIndices.count)
+            var shownEdges = 0
+            for (s, t) in graph.linkIndices {
+                let si = Int(s), ti = Int(t)
+                guard visible[si] && visible[ti] else { continue }
+                edges.append((s, t))
+                shownEdges += 1
+                if inFocus.isEmpty {
+                    edgeColors.append(Theme.ambientEdge)
+                } else {
+                    let focused = inFocus.contains(si) && inFocus.contains(ti)
+                    edgeColors.append(Theme.edgeColor(focused: focused))
+                }
             }
+            scene.edges = edges
+            scene.edgeColors = edgeColors
+            visibleEdgeCount = shownEdges
+        } else {
+            // hover-only: reuse the prior edges verbatim (they can't have changed)
+            scene.edges = prior.edges
+            scene.edgeColors = prior.edgeColors
         }
 
         scene.visible = visible
         scene.flags = flags
         scene.radii = radii
         scene.colors = colors
-        scene.edges = edges
-        scene.edgeColors = edgeColors
         scene.dimStrength = inFocus.isEmpty ? 0 : 1
         renderer.scene = scene
         visibleCount = shown
-        visibleEdgeCount = shownEdges
         cameraTick &+= 1
         view?.requestDraw()
     }
