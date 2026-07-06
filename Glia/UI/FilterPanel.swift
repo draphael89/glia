@@ -77,8 +77,12 @@ struct FilterPanel: View {
                            isOn: Bool, action: @escaping (Bool) -> Void) -> some View {
         Button { action(!isOn) } label: {
             HStack(spacing: 7) {
-                Circle().fill(color).frame(width: 7, height: 7)
-                    .opacity(isOn ? 1 : 0.25)
+                // A checkmark ring (not just opacity) so on/off doesn't rely on
+                // color alone — legible for low-vision users.
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 8))
+                    .foregroundStyle(color)
+                    .opacity(isOn ? 1 : 0.5)
                 Text(label)
                     .font(.system(size: 11))
                     .foregroundStyle(isOn ? .primary : .tertiary)
@@ -92,5 +96,8 @@ struct FilterPanel: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // Expose on/off to VoiceOver (a plain Button otherwise announces nothing).
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+        .accessibilityValue(isOn ? "shown" : "hidden")
     }
 }

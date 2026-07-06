@@ -264,7 +264,11 @@ final class AppModel {
 
     private func runSettle(config: LayoutEngine.Config, pinned: [Bool]?) {
         isSettling = true
-        setContinuousRendering(true)
+        // Reduce Motion: the settle swirl is the app's biggest full-field motion —
+        // suppress it (compute off-thread, SNAP to the final layout) the same way
+        // camera flights and haptics already honor the setting.
+        let reduce = Camera.reduceMotion
+        if !reduce { setContinuousRendering(true) }
         let g = graph
         let start = positions
         Task.detached(priority: .userInitiated) {
@@ -272,6 +276,7 @@ final class AppModel {
                 graph: g, start: start, pinned: pinned, config: config,
                 tickEvery: 2,
                 onTick: { snapshot, _ in
+                    if reduce { return }   // Reduce Motion: no intermediate streaming, snap to final
                     Task { @MainActor in
                         guard self.graph.generatedAt == g.generatedAt else { return }
                         self.positions = snapshot
@@ -470,6 +475,7 @@ final class AppModel {
 
         let replayCursor = replay.cursor
         let now = CACurrentMediaTime()
+        let reduceMotion = Camera.reduceMotion
         var shown = 0
         for i in 0..<n {
             let node = graph.nodes[i]
@@ -500,7 +506,9 @@ final class AppModel {
             if i == hoveredIndex { f += 2 }
             if !inFocus.isEmpty && !inFocus.contains(i) { f += 4 }
             // birth bloom: pop in bright and settle over ~0.9s
-            if let birth = replay.birthTimes[graph.nodes[i].id] {
+            // Birth bloom: pop in bright and settle over ~0.9s — but under Reduce
+            // Motion the node just appears at full size (no scale-in animation).
+            if !reduceMotion, let birth = replay.birthTimes[graph.nodes[i].id] {
                 let age = Float(now - birth)
                 if age < 0.9 {
                     let t = 1 - age / 0.9
@@ -1144,8 +1152,12 @@ final class AppModel {
         for (i, n) in graph.nodes.enumerated() {
             let slug = n.slug.lowercased()
             let title = n.title.lowercased()
-            if slug.hasPrefix(q) || title.hasPrefix(q) { hits.append((i, 0)) }
-            else if slug.contains(q) || title.contains(q) { hits.append((i, 1)) }
+            // Match the HUMANIZED name each row actually shows too — a page
+            // displayed as "David Worthy" (empty/echoed title, slug
+            // people-david-worthy-<hash>) was otherwise unfindable by typing it.
+            let display = n.displayTitle.lowercased()
+            if slug.hasPrefix(q) || title.hasPrefix(q) || display.hasPrefix(q) { hits.append((i, 0)) }
+            else if slug.contains(q) || title.contains(q) || display.contains(q) { hits.append((i, 1)) }
             if hits.count > 400 { break }
         }
         hits.sort { ($0.1, -graph.degree[$0.0]) < ($1.1, -graph.degree[$1.0]) }
