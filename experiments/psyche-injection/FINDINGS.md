@@ -268,9 +268,9 @@ open: maybe the whole family shares a preference for its own outputs. v6 settles
 it — a **non-Anthropic frontier model, gpt-5 (OpenAI)**, blind-judges the same
 FIXED Opus-4.8 answers. Numbers in [REPORT-v6.md](REPORT-v6.md).
 
-**It reproduces.** gpt-5 (27 blind judgments, position bias controlled) ranks
-**best first** (Borda: best 49 > context 42 > naked 39 > psyche 32) and beats
-context **63%**, psyche **67%** head-to-head. And the *mechanism* holds cleanly
+**It reproduces.** gpt-5 (28 blind judgments, position bias controlled) ranks
+**best first** (Borda: best 52 > context 42 > naked 40 > psyche 34) and beats
+context **64%**, psyche **68%** head-to-head. And the *mechanism* holds cleanly
 on its rubric: psyche-alone is **lowest on specificity** (7.1) but **top on
 insight** (8.6); `best` tops both (7.9 / 8.7) — exactly "retrieval buys
 specificity, identity buys insight." **A different vendor's frontier model agrees

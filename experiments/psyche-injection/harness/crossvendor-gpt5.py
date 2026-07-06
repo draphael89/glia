@@ -13,7 +13,10 @@ base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def call(prompt):
     body = json.dumps({"model": "gpt-5", "messages": [{"role": "user", "content": prompt}],
-                       "response_format": {"type": "json_object"}, "reasoning_effort": "low", "max_completion_tokens": 12000}).encode()
+                       "response_format": {"type": "json_object"}, "reasoning_effort": "low",
+                       # gpt-5's reasoning tokens count toward this; too low → empty output
+                       # (finish_reason=length) → JSON parse fails. 16k leaves room for the answer.
+                       "max_completion_tokens": 16000}).encode()
     for a in range(3):
         try:
             req = urllib.request.Request("https://api.openai.com/v1/chat/completions", data=body,

@@ -3,13 +3,13 @@
 _A different VENDOR's model blind-judges the FIXED Opus-4.8 answers. Opus (v2/v3) + Haiku (v4) — both Anthropic — found best > context > psyche > naked. Does a non-Anthropic frontier model agree?_
 
 
-## Judge = gpt-5 (OpenAI frontier) (27 blind judgments)
+## Judge = gpt-5 (OpenAI frontier) (28 blind judgments)
 
-- Borda: best 49, context 42, naked 39, psyche 32  → **best > context > naked > psyche**
+- Borda: best 52, context 42, naked 40, psyche 34  → **best > context > naked > psyche**
 - best-first: YES ✓ | reproduces best>context>… : True
-- best > context: 63%
-- best > psyche: 67%
-- best > naked: 52%
+- best > context: 64%
+- best > psyche: 68%
+- best > naked: 54%
 - rubric: naked(spec 7.5, ins 7.8) | context(spec 7.9, ins 8.1) | psyche(spec 7.1, ins 8.6) | best(spec 7.9, ins 8.7)
 
 ## Judge = gpt-4o (OpenAI) (42 blind judgments) — ⚠ POSITION-BIASED, uninformative

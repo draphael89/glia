@@ -218,7 +218,7 @@ export default function Home() {
                 <tr><td className="mono">v3</td><td><strong>7 judges</strong>/task (49 judgments)</td><td>held and tightened — consistent in 6 of 7 tasks</td></tr>
                 <tr><td className="mono">v4</td><td>a <strong>different model</strong> (Haiku 4.5) re-judges</td><td>reproduced the ordering → not self-preference; margin model-dependent</td></tr>
                 <tr><td className="mono">v5</td><td><strong>dose-response</strong> — psyche truncated to 4 budgets</td><td>a ~3k-token core reaches ~95% of peak; insight keeps climbing with more</td></tr>
-                <tr><td className="mono">v6</td><td>a <strong>different vendor</strong> (OpenAI gpt-5) re-judges</td><td><span style={{ color: armColor.best }}>both</span> still wins (beats context 63%, psyche 67%); mechanism holds → not self-preference</td></tr>
+                <tr><td className="mono">v6</td><td>a <strong>different vendor</strong> (OpenAI gpt-5) re-judges</td><td><span style={{ color: armColor.best }}>both</span> still wins (beats context 64%, psyche 68%); mechanism holds → not self-preference</td></tr>
               </tbody>
             </table>
           </div>
