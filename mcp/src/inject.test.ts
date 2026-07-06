@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { estimateTokens, truncateToTokens } from "./config.js";
 import { cleanBody, identityRank, buildPsycheFromSource, psycheSlugs } from "./psyche.js";
 import { primeContext, explainContext } from "./inject.js";
-import { retrieveContext, _clearRetrievalCache } from "./gbrain.js";
+import { retrieveContext, _clearRetrievalCache, safePagePath } from "./gbrain.js";
 
 // Tests run hermetically via the `test` npm script env:
 //   GLIA_PSYCHE=test-fixtures/psyche.md
@@ -101,6 +101,17 @@ test("retrieveContext excludes psyche slugs (dedup) before taking topK", async (
   assert.equal(r.pages.length, 1);
   assert.equal(r.pages[0].slug, "note-beta");
   assert.equal(r.dedupedCount, 1);       // note-alpha dropped as already-in-identity
+});
+
+test("safePagePath blocks slug path-traversal, allows normal + nested slugs", () => {
+  const base = "/brain/source";
+  assert.equal(safePagePath(base, "note-alpha"), "/brain/source/note-alpha.md");
+  assert.equal(safePagePath(base, "originals/telos"), "/brain/source/originals/telos.md");
+  // escapes — must be rejected
+  assert.equal(safePagePath(base, "../../../etc/passwd"), null);
+  assert.equal(safePagePath(base, "../secret"), null);
+  assert.equal(safePagePath(base, "/etc/passwd"), null);
+  assert.equal(safePagePath(base, "originals/../../escape"), null);
 });
 
 test("dedupedCount surfaces the v7 mechanism: all-overlap retrieval reads 'deduped', not 'empty'", async () => {
