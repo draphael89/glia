@@ -9,6 +9,7 @@ import { primeContext, explainContext, renderManifest, type InjectMode } from ".
 import { loadPsyche } from "./psyche.js";
 import { retrieveContext, formatContext } from "./gbrain.js";
 import { validateConfig, renderHealthReport } from "./health.js";
+import { truncateToTokens } from "./config.js";
 
 const server = new Server(
   { name: "glia-context", version: "0.1.0" },
@@ -119,19 +120,34 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
     if (name === "who_am_i") {
       const p = await loadPsyche();
-      const text = p.status === "empty"
-        ? "> glia-context status: DEGRADED\n> identity: UNAVAILABLE — no psyche file and no readable gbrain source."
-        : p.text;
-      return { content: [{ type: "text", text }] };
+      if (p.status === "empty") {
+        return { content: [{ type: "text", text: "> glia-context status: DEGRADED\n> identity: UNAVAILABLE — no psyche file and no readable gbrain source." }] };
+      }
+      // Provenance mirrors prime_context: tell the agent whether this is the
+      // canonical Glia export or a thin live build (a degraded fallback), and
+      // bound the size so identity-only priming can't dump an unbounded psyche.
+      const provenance = p.status === "file"
+        ? `> identity: loaded from ${p.source}`
+        : `> identity: built from gbrain source (canonical Glia export not found — degraded fallback)`;
+      const capped = truncateToTokens(p.text, 24_000);
+      return { content: [{ type: "text", text: `${provenance}\n\n${capped}` }] };
     }
     if (name === "recall") {
       const r = await retrieveContext(String(args?.query ?? ""));
-      const body = formatContext(r.pages) || "No relevant pages found.";
+      const failed = r.status === "timeout" || r.status === "error" || r.status === "disabled";
+      // Never claim authoritative absence when retrieval merely FAILED — an agent
+      // must not read "No relevant pages found" as "the user has nothing on X".
+      const body = r.pages.length
+        ? formatContext(r.pages)
+        : failed
+          ? `Retrieval did not complete (${r.status}${r.detail ? ": " + r.detail : ""}) — result UNKNOWN, not an authoritative absence. Do not conclude the user has nothing on this.`
+          : "No relevant pages found.";
       const status = r.status === "ok"
         ? `${r.pages.length} pages${r.cached ? ", cached" : ""}, ${r.elapsedMs}ms`
         : `${r.status}${r.detail ? ": " + r.detail : ""}`;
       return {
         content: [{ type: "text", text: `> glia-context recall: ${status}\n\n${body}` }],
+        isError: failed,
       };
     }
     if (name === "explain_context") {
@@ -144,11 +160,18 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     if (name === "health") {
       const report = validateConfig(true);
       let probe = "";
+      let probeFailed = false;
       if (args?.probe === true) {
         const r = await retrieveContext("glia self test");
-        probe = `\nlive probe: retrieval=${r.status} (${r.pages.length} pages, ${r.elapsedMs}ms${r.cached ? ", cached" : ""})${r.detail ? " — " + r.detail : ""}`;
+        // The sentinel rarely matches real pages, so a WORKING gbrain returns
+        // 'empty'. Treat ok/empty as a successful round-trip; only timeout/
+        // error/disabled are real probe failures.
+        probeFailed = r.status === "timeout" || r.status === "error" || r.status === "disabled";
+        probe = probeFailed
+          ? `\nlive probe: FAILED — gbrain ${r.status}${r.detail ? ": " + r.detail : ""} (${r.elapsedMs}ms)`
+          : `\nlive probe: round-trip OK — gbrain ran in ${r.elapsedMs}ms (${r.pages.length} match${r.pages.length === 1 ? "" : "es"} for the sentinel query${r.cached ? ", cached" : ""})`;
       }
-      return { content: [{ type: "text", text: renderHealthReport(report) + probe }], isError: report.overall === "fail" };
+      return { content: [{ type: "text", text: renderHealthReport(report) + probe }], isError: report.overall === "fail" || probeFailed };
     }
     return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
   } catch (e: any) {

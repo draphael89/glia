@@ -201,10 +201,15 @@ async function assembleInjection(
   // NB: a visible "how to use this" directive was A/B-tested (GLIA_NO_DIRECTIVE)
   // and came out a dead 50/50 tie with a strong judge, so we don't ship the extra
   // tokens; the "prime first" nudge lives in the server `instructions` instead.
+  // The comment IS mode-aware: in psyche/context mode only one block is present,
+  // so "use both" would misdescribe the payload to the consuming model.
+  const describe =
+    mode === "psyche"  ? "Below is who I am. Use it to serve me specifically — not generically." :
+    mode === "context" ? "Below is what's relevant to the task." :
+                         "Below is who I am, then what's relevant to the task. Use both to serve me specifically — not generically.";
   const header = [
     "# Priming context for this session",
-    "<!-- Injected by glia-context. Below is who I am, then what's relevant to the task.",
-    "     Use both to serve me specifically — not generically. -->",
+    `<!-- Injected by glia-context. ${describe} -->`,
     "",
   ].join("\n");
 

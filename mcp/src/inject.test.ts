@@ -125,6 +125,15 @@ test("explainContext returns a truthful manifest (sections + retrieved slugs, de
   assert.ok(m.totalTokens >= m.psycheTokens);
 });
 
+test("priming header is mode-aware — psyche mode doesn't claim 'use both'", async () => {
+  const psy = (await primeContext("anything", { mode: "psyche" })).text;
+  assert.ok(!/use both/i.test(psy), "psyche mode must not tell the model to 'use both'");
+  assert.ok(!/what's relevant/i.test(psy), "psyche mode has no relevance block to reference");
+  assert.match(psy, /who I am/i);
+  const both = (await primeContext("anything", { mode: "both" })).text;
+  assert.match(both, /use both/i, "both mode should reference both blocks");
+});
+
 test("psycheSlugs is anchored — no false-positive on prose (review fix #2)", () => {
   // bare "· word *emphasis*" in body prose must NOT be parsed as a page marker
   assert.equal(psycheSlugs("we weigh · design *matters*, judges **blind** ranked").size, 0);

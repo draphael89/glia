@@ -1,8 +1,7 @@
 <!-- glia-context: mode=both, ~<T> tokens (psyche ~<T>, context ~<T> from 2 pages), psyche=file, retrieval=ok, degraded=false, source=<FIX>/psyche.md -->
 
 # Priming context for this session
-<!-- Injected by glia-context. Below is who I am, then what's relevant to the task.
-     Use both to serve me specifically — not generically. -->
+<!-- Injected by glia-context. Below is who I am, then what's relevant to the task. Use both to serve me specifically — not generically. -->
 
 > glia-context status: OK
 > identity: loaded from <FIX>/psyche.md
