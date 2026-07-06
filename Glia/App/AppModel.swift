@@ -179,9 +179,13 @@ final class AppModel {
             let scope = ContextScope(rawValue: String(spec[..<colon])) ?? .identity
             let path = String(spec[spec.index(after: colon)...])
             let b = buildContextBundle(scope)
-            try? b.text.data(using: .utf8)?.write(to: URL(fileURLWithPath: path))
-            print("glia: context \(b.pageCount) pages, ~\(b.tokenEstimate) tokens -> \(path)")
-            exit(0)
+            // Atomic + outcome-reporting: this is a headless automation/CI export, so a
+            // partial write (disk full) must surface as a nonzero exit, not a silently
+            // truncated artifact that reads as success. (Matches the .atomic convention
+            // used by the psyche sync + layout writes elsewhere.)
+            let ok = ((try? Data(b.text.utf8).write(to: URL(fileURLWithPath: path), options: .atomic)) != nil)
+            print("glia: context \(b.pageCount) pages, ~\(b.tokenEstimate) tokens -> \(path)\(ok ? "" : " (WRITE FAILED)")")
+            exit(ok ? 0 : 1)
         }
         // GLIA_ENABLE_MCP=1 — headless one-click enable (register Claude Code +
         // Desktop). Registration doesn't need the graph, so it runs even if the
@@ -870,9 +874,13 @@ final class AppModel {
             try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                                      withIntermediateDirectories: true)
             let data = Data(bundle.text.utf8)
-            let wrote = ((try? data.write(to: url, options: .atomic)) != nil)   // report the real outcome
+            // Write to the symlink TARGET, not the link: an atomic write is temp + rename,
+            // which would replace a symlinked GLIA_PSYCHE (dotfiles setups) with a regular
+            // file and orphan the real target. Same guard as the Claude-config write.
+            let target = url.resolvingSymlinksInPath()
+            let wrote = ((try? data.write(to: target, options: .atomic)) != nil)   // report the real outcome
             var mtime: Date? = nil
-            if wrote { mtime = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date }
+            if wrote { mtime = (try? FileManager.default.attributesOfItem(atPath: target.path))?[.modificationDate] as? Date }
             return .init(pageCount: wrote ? bundle.pageCount : 0, bytes: data.count, modified: mtime, wrote: wrote)
         }.value
         if out.wrote && out.pageCount > 0 {
@@ -1214,14 +1222,21 @@ enum LayoutStore {
 
     static func save(graph: BrainGraph, positions: [SIMD2<Float>]) {
         guard graph.nodes.count == positions.count else { return }
-        var payload: [String: [Float]] = [:]
-        payload.reserveCapacity(graph.nodes.count)
-        for (i, n) in graph.nodes.enumerated() {
-            payload["\(n.id)"] = [positions[i].x, positions[i].y]
-        }
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        if let data = try? JSONEncoder().encode(payload) {
-            try? data.write(to: file, options: .atomic)
+        // Fires on every settle completion (called from a @MainActor block). The
+        // payload build + JSON encode + disk write are O(N); doing them inline hitches
+        // the main thread at the exact frame the layout settles. Offload like the psyche
+        // write does — best-effort persistence, so fire-and-forget is fine.
+        let nodes = graph.nodes   // Sendable snapshot
+        Task.detached(priority: .utility) {
+            var payload: [String: [Float]] = [:]
+            payload.reserveCapacity(nodes.count)
+            for (i, n) in nodes.enumerated() {
+                payload["\(n.id)"] = [positions[i].x, positions[i].y]
+            }
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            if let data = try? JSONEncoder().encode(payload) {
+                try? data.write(to: file, options: .atomic)
+            }
         }
     }
 

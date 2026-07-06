@@ -38,9 +38,27 @@ final class JSONFileBrainSource: BrainSource {
         let url = self.url
         return AsyncStream { continuation in
             let task = Task.detached(priority: .utility) {
+                // Cheap on-disk signature (sub-second mtime + size). Two things ride on it:
+                //  • skip the read + O(V+E) decode/index-rebuild entirely when the file is
+                //    unchanged — otherwise an all-day viewer rebuilds the whole graph every
+                //    10s forever just to discard it on the stamp check;
+                //  • detect a change by CONTENT, not the writer's second-granular
+                //    generatedAt string, so a same-second re-export isn't silently dropped.
+                func signature() -> String? {
+                    guard let a = try? FileManager.default.attributesOfItem(atPath: url.path),
+                          let m = a[.modificationDate] as? Date, let s = a[.size] as? Int
+                    else { return nil }
+                    return "\(m.timeIntervalSinceReferenceDate)|\(s)"
+                }
+                // Seed from the file loadGraph() already read, so the first poll doesn't
+                // re-yield the just-applied snapshot (a redundant re-settle ~10s post-load).
+                var lastSig = signature()
                 var lastStamp = ""
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .seconds(10))
+                    let sig = signature()
+                    if let sig, sig == lastSig { continue }   // unchanged on disk — no work
+                    lastSig = sig
                     guard let data = try? Data(contentsOf: url),
                           let graph = try? Self.parse(data),
                           graph.generatedAt != lastStamp else { continue }

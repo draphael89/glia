@@ -175,8 +175,12 @@ enum MCPProvision {
                 // copy never destroys the live ~/.glia/mcp the clients point at.
                 let parent = dest.deletingLastPathComponent()
                 try fm.createDirectory(at: parent, withIntermediateDirectories: true)
-                let tmp = parent.appendingPathComponent(".mcp-staging-\(version)")
-                if fm.fileExists(atPath: tmp.path) { try? fm.removeItem(at: tmp) }
+                // Unique per invocation: two provisioning flows (Enable-MCP + injection
+                // preview) staging the same new version concurrently must not share — and
+                // thus delete — each other's temp mid-copy (a spurious "couldn't prepare
+                // server"). defer-clean so a failed stage never leaks a temp dir.
+                let tmp = parent.appendingPathComponent(".mcp-staging-\(version)-\(UUID().uuidString)")
+                defer { try? fm.removeItem(at: tmp) }
                 try fm.copyItem(at: res, to: tmp)
                 try? version.write(to: tmp.appendingPathComponent(".staged-version"), atomically: true, encoding: .utf8)
                 if fm.fileExists(atPath: dest.path) {
