@@ -56,6 +56,14 @@ line naming the identity source and retrieval outcome (never silently empty).
 The server also sends MCP `instructions` at initialize, nudging compliant clients
 to call `prime_context` at the start of a substantive session.
 
+**CLI (no client needed)** — inspect the injection from a terminal or a script:
+
+```bash
+node dist/index.js --explain "plan the launch"   # preview the manifest
+node dist/index.js --prime   "plan the launch"   # the full prime text
+node dist/index.js --health                       # config health report
+```
+
 ## Setup
 
 One command — builds and registers with Claude Code:

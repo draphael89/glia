@@ -156,6 +156,19 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
   }
 });
 
+// CLI one-shot modes (no server): handy for a quick terminal check, scripting,
+// or the app — `node dist/index.js --explain "<task>"` prints the injection
+// manifest; `--prime "<task>"` prints the full prime; `--health` the report.
+{
+  const argv = process.argv;
+  const flag = (name: string) => { const i = argv.indexOf(name); return i !== -1 ? (argv[i + 1] ?? "") : null; };
+  const explain = flag("--explain");
+  const prime = flag("--prime");
+  if (explain !== null) { console.log(renderManifest(await explainContext(explain))); process.exit(0); }
+  if (prime !== null) { console.log((await primeContext(prime)).text); process.exit(0); }
+  if (argv.includes("--health")) { console.log(renderHealthReport(validateConfig(true))); process.exit(0); }
+}
+
 // Validate configuration at startup: log the health report to stderr (stdout is
 // the JSON-RPC channel), and exit only when nothing is usable (or strict mode).
 const report = validateConfig();
