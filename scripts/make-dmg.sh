@@ -39,6 +39,16 @@ rm -rf "$DIST"; mkdir -p "$STAGE"
 ditto "$APP" "$STAGE/Glia.app"          # ditto preserves signatures; cp -R may not
 ln -s /Applications "$STAGE/Applications"
 
+# Bundle the prebuilt glia-context server so "Enable MCP" is self-contained.
+# Must land BEFORE codesign so it's sealed into CodeResources (pure JS, no
+# separate signature needed). Best-effort: the app has runtime fallbacks.
+if bash scripts/stage-mcp.sh; then
+  ditto build-mcp/glia-context-mcp "$STAGE/Glia.app/Contents/Resources/glia-context-mcp"
+  echo "==> Bundled glia-context server into Glia.app"
+else
+  echo "warn: mcp staging failed — app will fall back to install.sh / existing registration" >&2
+fi
+
 if [ -n "$SIGN_IDENTITY" ]; then
   echo "==> Signing (Developer ID): $SIGN_IDENTITY"
   # Inside-out (Apple guidance; --deep is discouraged for Developer ID):

@@ -263,3 +263,44 @@ final class PsycheSyncTests: XCTestCase {
         XCTAssertEqual(PsycheSyncStatus.Source.custom.label, "custom scope")
     }
 }
+
+// MARK: - MCP provisioning: config merge must never clobber (Phase 3)
+
+final class MCPProvisionTests: XCTestCase {
+    private func json(_ obj: [String: Any]) -> Data { try! JSONSerialization.data(withJSONObject: obj) }
+    private func parse(_ d: Data?) -> [String: Any] {
+        (try? JSONSerialization.jsonObject(with: d ?? Data())) as? [String: Any] ?? [:]
+    }
+
+    func testMergePreservesOtherKeysAndSiblingServers() {
+        let existing = json([
+            "coworkUserFilesPath": "/tmp/x",
+            "preferences": ["theme": "dark"],
+            "mcpServers": ["other": ["command": "foo", "args": ["bar"]]],
+        ])
+        let out = MCPProvision.mergeDesktopConfig(existing: existing,
+                                                  node: "/opt/homebrew/bin/node",
+                                                  dist: "/x/dist/index.js")
+        let root = parse(out)
+        XCTAssertEqual(root["coworkUserFilesPath"] as? String, "/tmp/x")   // preserved
+        XCTAssertNotNil(root["preferences"])                               // preserved
+        let servers = root["mcpServers"] as! [String: Any]
+        XCTAssertNotNil(servers["other"])                                  // sibling server preserved
+        let glia = servers["glia-context"] as! [String: Any]
+        XCTAssertEqual(glia["command"] as? String, "/opt/homebrew/bin/node")
+        XCTAssertEqual((glia["args"] as? [String])?.first, "/x/dist/index.js")
+    }
+
+    func testMergeIntoNilCreatesServer() {
+        let servers = parse(MCPProvision.mergeDesktopConfig(existing: nil, node: "/n", dist: "/d"))["mcpServers"] as! [String: Any]
+        XCTAssertNotNil(servers["glia-context"])
+    }
+
+    func testCorruptExistingIsDetected() {
+        let corrupt = Data("not json {".utf8)
+        XCTAssertFalse(MCPProvision.isParseableJSON(corrupt))
+        // merge still yields a valid config (caller backs up + aborts on corrupt)
+        let out = MCPProvision.mergeDesktopConfig(existing: corrupt, node: "/n", dist: "/d")
+        XCTAssertTrue(MCPProvision.isParseableJSON(out ?? Data()))
+    }
+}

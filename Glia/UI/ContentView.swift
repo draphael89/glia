@@ -51,6 +51,9 @@ struct ContentView: View {
         .sheet(isPresented: $model.contextExportVisible) {
             ContextExportSheet(model: model)
         }
+        .sheet(isPresented: $model.enableMCPVisible) {
+            EnableMCPSheet(model: model)
+        }
         .background(Theme.background)
         .preferredColorScheme(.dark)
         .focusedSceneValue(\.appModel, model)

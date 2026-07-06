@@ -6,9 +6,10 @@ struct GliaApp: App {
     @State private var model = AppModel()
 
     init() {
-        // Snapshot runs are tooling, not sessions: stay out of the Dock and
-        // never steal focus from whatever the user is doing.
-        if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil {
+        // Snapshot / headless-provision runs are tooling, not sessions: stay
+        // out of the Dock and never steal focus from whatever the user is doing.
+        if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil
+            || ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil {
             NSApplication.shared.setActivationPolicy(.accessory)
         }
         Markers.drop("app.init")
@@ -83,6 +84,11 @@ struct GliaApp: App {
                 }
                 .keyboardShortcut("y", modifiers: [.command, .shift])
                 .help("Write ~/.glia/psyche.md so the glia-context MCP server injects your current mind")
+
+                Button("Enable MCP…") {
+                    model.enableMCPVisible = true
+                }
+                .help("Register the glia-context MCP with Claude Code and Claude Desktop")
 
                 Button(model.selectedIndex.map { model.isStarred($0) } == true
                        ? "Remove from Collection" : "Add to Collection") {

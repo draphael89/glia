@@ -25,6 +25,9 @@ final class AppModel {
     var paletteVisible = false
     var shortcutsVisible = false
     var contextExportVisible = false
+    var enableMCPVisible = false
+    /// State of registering glia-context with Claude Code + Desktop (sheet observes).
+    private(set) var mcpStatus = MCPStatus()
     /// Slugs the user has starred as core-identity — the curated "who I am"
     /// set that becomes a Context Bundle scope. Persisted across launches.
     private(set) var starredSlugs: Set<String> = []
@@ -156,6 +159,13 @@ final class AppModel {
                 let b = buildContextBundle(scope)
                 try? b.text.data(using: .utf8)?.write(to: URL(fileURLWithPath: path))
                 print("glia: context \(b.pageCount) pages, ~\(b.tokenEstimate) tokens -> \(path)")
+                exit(0)
+            }
+            // GLIA_ENABLE_MCP=1 — headless one-click enable (register Claude Code
+            // + Desktop) for automation/verification; prints the outcome + exits.
+            if ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil {
+                await enableMCP()
+                print("glia: enableMCP node=\(mcpStatus.node) code=\(mcpStatus.claudeCode) desktop=\(mcpStatus.claudeDesktop) dist=\(mcpStatus.distPath ?? "-") phase=\(mcpStatus.phase)")
                 exit(0)
             }
         } catch {
@@ -786,6 +796,53 @@ final class AppModel {
     var psycheReachability: PsycheReachability {
         let s = psycheStatus
         return .init(file: s.fileState, bytes: s.fileBytes, modified: s.fileModified, serverRegistered: serverRegistered)
+    }
+
+    // MARK: one-click Enable MCP (register with Claude Code + Claude Desktop)
+
+    /// Fast initial status for the Enable sheet (reads configs, cheap node probe).
+    func refreshMCPStatus() async {
+#if MAS
+        return   // sandboxed: the sheet shows a degraded card, no provisioning
+#else
+        let desktopInstalled = NSWorkspace.shared
+            .urlForApplication(withBundleIdentifier: "com.anthropic.claudefordesktop") != nil
+        mcpStatus = await MCPProvision.currentStatus(desktopInstalled: desktopInstalled)
+#endif
+    }
+
+    /// One-click: resolve node, stage the server, register Claude Code + Desktop,
+    /// then ensure a psyche exists. All Process/file work is off the main actor.
+    func enableMCP() async {
+#if MAS
+        return
+#else
+        mcpStatus.phase = .working
+        guard let node = await MCPProvision.resolveExecutable("node") else {
+            mcpStatus.node = .missing; mcpStatus.phase = .needsNode; return
+        }
+        mcpStatus.node = .found(node)
+        let dist: String
+        do { dist = try await MCPProvision.ensureStaged() }
+        catch {
+            mcpStatus.phase = .error("Couldn't prepare the server: \(error.localizedDescription)")
+            return
+        }
+        mcpStatus.distPath = dist
+
+        if let claude = await MCPProvision.resolveExecutable("claude") {
+            mcpStatus.claudeCode = await MCPProvision.registerClaudeCode(node: node, dist: dist, claude: claude)
+        } else {
+            mcpStatus.claudeCode = .cliMissing
+        }
+        let desktopInstalled = NSWorkspace.shared
+            .urlForApplication(withBundleIdentifier: "com.anthropic.claudefordesktop") != nil
+        mcpStatus.desktopInstalled = desktopInstalled
+        mcpStatus.claudeDesktop = await MCPProvision.registerClaudeDesktop(node: node, dist: dist, desktopInstalled: desktopInstalled)
+
+        await syncPsycheToMCP()   // ensure ~/.glia/psyche.md exists so the server has data
+        mcpStatus.phase = .done
+#endif
     }
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
