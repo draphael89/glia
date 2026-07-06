@@ -761,6 +761,12 @@ final class AppModel {
     func isStarred(_ index: Int) -> Bool { starredSlugs.contains(graph.nodes[index].slug) }
 
     func toggleStar(_ index: Int) {
+        // Demo mode is a sandbox: starring a DEMO node must not write a phantom slug
+        // into the REAL starred collection — that flips scope to .collection, and
+        // contextNodes(.collection) then matches zero real nodes, silently stopping
+        // the user's psyche sync. Matches the !demoActive guard on every other
+        // identity-mutating path (starIdentityCore, performSync, saveViewState).
+        guard !demoActive else { return }
         let slug = graph.nodes[index].slug
         if starredSlugs.contains(slug) { starredSlugs.remove(slug) } else { starredSlugs.insert(slug) }
         UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")

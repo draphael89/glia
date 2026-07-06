@@ -52,6 +52,18 @@ jobs:
             --team-id "${{ secrets.NOTARY_TEAM_ID }}" \
             --password "${{ secrets.NOTARY_PASSWORD }}"
 
+      - name: Verify the tag matches the app version
+        run: |
+          # The DMG version comes from project.yml/Info.plist, NOT the tag — so
+          # pushing v0.2.0 without bumping project.yml would ship "Glia-0.1.0.dmg"
+          # inside a "v0.2.0" release. Fail loudly instead (see RELEASING.md).
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          APP_VERSION="$(grep -m1 CFBundleShortVersionString project.yml | sed -E 's/.*"([^"]+)".*/\1/')"
+          if [ "$TAG_VERSION" != "$APP_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME ($TAG_VERSION) != app version $APP_VERSION in project.yml. Bump project.yml (CFBundleShortVersionString + CFBundleVersion) before tagging — see RELEASING.md."
+            exit 1
+          fi
+
       - name: Build DMG (signs + notarizes when the cert/profile exist)
         env:
           NOTARY_PROFILE: ${{ secrets.NOTARY_APPLE_ID != '' && 'glia-notary' || '' }}
@@ -61,7 +73,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/Glia-*.dmg
-          # Signed builds → full release; unsigned → clearly-marked prerelease.
-          prerelease: ${{ secrets.MACOS_CERT_P12 == '' }}
+          # Full release ONLY when signed AND notarized. A Developer-ID-signed but
+          # UN-notarized DMG is still Gatekeeper-quarantined on other Macs, so it
+          # must be a clearly-marked prerelease, not a full release with no warning.
+          prerelease: ${{ secrets.MACOS_CERT_P12 == '' || secrets.NOTARY_APPLE_ID == '' }}
           generate_release_notes: true
-          body: ${{ secrets.MACOS_CERT_P12 == '' && '⚠️ Unsigned dev build — right-click → Open to bypass Gatekeeper. Signed + notarized releases land once signing secrets are configured.' || '' }}
+          body: ${{ secrets.MACOS_CERT_P12 == '' && '⚠️ Unsigned dev build — right-click → Open to bypass Gatekeeper. Signed + notarized releases land once signing secrets are configured.' || secrets.NOTARY_APPLE_ID == '' && '⚠️ Signed but NOT notarized — Gatekeeper will still warn on other Macs (right-click → Open the first time). Notarized releases land once the notary secrets are configured.' || '' }}
