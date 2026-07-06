@@ -27,9 +27,13 @@ global "try harder" effect. (An earlier non-blind run overclaimed that psyche
 See [FINDINGS.md](../experiments/psyche-injection/FINDINGS.md).)
 
 So `prime_context` defaults to `both`: it front-loads a **concentrated identity
-core** (capped — identity is high-density, a small dose carries the insight
-lift) and hands the larger share of the budget to retrieval, so the answer
-stays grounded.
+core** (capped) and hands the larger share of the budget to retrieval, so the
+answer stays grounded. The cap is measured, not guessed: a
+[dose-response run](../experiments/psyche-injection/REPORT-v5.md) found a
+~3k-token core (self-page + top essays, front-loaded) reaches ~95% of the full
+psyche's blind ranking — though the very deepest *insight* keeps climbing with
+more identity, so the 40% cap is set to clear that knee comfortably at every
+budget while still leaving the majority of the window for retrieval.
 
 ## Tools
 

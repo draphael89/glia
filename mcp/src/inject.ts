@@ -18,15 +18,16 @@ export interface PrimeResult {
  * The core of the thesis: build the injection that primes the model with WHO
  * YOU ARE (psyche) and, optionally, WHAT'S RELEVANT (gbrain context).
  *
- * Budgeting reflects the v2 (blind-judge) finding: identity and relevance are
+ * Budgeting reflects the blind-judge findings: identity and relevance are
  * COMPLEMENTS, not substitutes. Retrieval is what makes an answer specific and
  * actionable; identity is what makes it insightful. The winning arm carried
- * both. And identity is high-density — a concentrated dose already tops the
- * insight dimension, so it doesn't need the whole file. So in `both` mode we
- * front-load a CAPPED identity core (enough to convey who you are) and hand the
- * larger remainder to retrieval, so the answer stays grounded. (v1's
- * "retrieval dilutes identity" did not survive blind judging — see
- * experiments/psyche-injection/FINDINGS.md.)
+ * both. And identity is high-density — a dose-response run found a ~3k-token
+ * core (self-page + top essays) reaches ~95% of the full psyche's blind ranking,
+ * so it doesn't need the whole file (deepest insight does keep climbing with
+ * more, so the cap leaves headroom). So in `both` mode we front-load a CAPPED
+ * identity core and hand the larger remainder to retrieval, so the answer stays
+ * grounded. (v1's "retrieval dilutes identity" did not survive blind judging —
+ * see experiments/psyche-injection/FINDINGS.md.)
  */
 export async function primeContext(
   task: string,

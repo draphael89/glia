@@ -82,8 +82,9 @@ Materials (the psyche + per-task context) are built from a real brain and are
 
 - [FINDINGS.md](FINDINGS.md) — narrative reading of both runs (read this first).
 - [REPORT.md](REPORT.md) / [REPORT-v2.md](REPORT-v2.md) / [REPORT-v3.md](REPORT-v3.md)
-  / [REPORT-v4.md](REPORT-v4.md) — raw metrics per run (Borda, pairwise, rubric,
-  cross-model); aggregate only, no private content.
+  / [REPORT-v4.md](REPORT-v4.md) / [REPORT-v5.md](REPORT-v5.md) — raw metrics per
+  run (Borda, pairwise, rubric, cross-model, dose-response); aggregate only, no
+  private content.
 
 **Honest headline (v2/v3, blind):** injecting **who you are** makes an agent
 measurably sharper — but as a **complement** to what's relevant, not a

@@ -225,3 +225,36 @@ the "identity adds this much on top of retrieval" edge — a strong judge (Opus)
 reads it as clear, a smaller judge (Haiku) as marginal. Trust the ordering;
 treat the margin as a hypothesis. A true cross-vendor judge (GPT/Gemini) is the
 stronger test still to run.
+
+---
+
+# v5 — dose-response (how much psyche is enough?)
+
+The MCP ships a design claim we hadn't directly measured: identity is
+high-density, so a *concentrated* core carries the lift and the psyche can be
+capped to leave room for retrieval. v5 tests it. Truncating the psyche to N
+tokens is exactly what the MCP does, so for each of 5 tasks we generated a
+psyche-arm answer at four budgets — **tiny ~700, small ~3k, medium ~8k, full
+~28k tokens** — and blind-ranked them. Numbers in [REPORT-v5.md](REPORT-v5.md).
+
+**Borda by dose:** tiny **4**, small **20**, medium **15**, full **21**.
+**Insight by dose:** 7.8 → 8.6 → 8.6 → **9.4**.
+
+- **The self-page alone (tiny) is not enough** — Borda 4, far below the rest.
+  You need at least one full essay's worth of identity.
+- **A ~3k-token concentrated core (small) reaches ~95% of the full psyche's
+  blind ranking** (Borda 20 vs 21). This is the claim holding up: most of the
+  quality lift is in the first few thousand tokens of well-ordered identity
+  (self-page → top essays). The medium dip is noise (n=10, and the mid-essay
+  truncation cut awkwardly).
+- **But insight keeps climbing to the full psyche** (9.4 vs 3k's 8.6). More
+  identity still buys *insight* past the ranking knee — the deepest, most
+  identity-saturated answers come from more psyche.
+
+**Validates the MCP's cap, with the tradeoff now quantified.** The 40%-of-budget
+psyche cap clears the ~3k-token knee at every realistic budget (40% of a 20k
+budget = 8k tokens; of 60k = 24k ≈ full), so it captures most of the insight
+climb while still reserving the majority of the window for retrieval. The knee
+being ~3k also means: if the window is *tight*, ~3k tokens of front-loaded
+identity (self-page + top essays) is the high-value core to keep — exactly the
+`identityRank` ordering the exporter already front-loads.
