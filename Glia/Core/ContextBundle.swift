@@ -1,6 +1,18 @@
 import Foundation
 import AppKit
 
+extension URL {
+    /// True if this URL is `base` itself or strictly inside it. A boundary-aware
+    /// replacement for a raw `path.hasPrefix(base.path)`, which lets a sibling directory
+    /// whose name merely shares the prefix (e.g. `source-foo` vs `source-foobar`) slip
+    /// past the containment check a slug-escape guard is meant to enforce.
+    func isInside(_ base: URL) -> Bool {
+        let p = standardizedFileURL.path
+        let b = base.standardizedFileURL.path
+        return p == b || p.hasPrefix(b.hasSuffix("/") ? b : b + "/")
+    }
+}
+
 /// The "vault of mind" export: turn a region of the brain into a structured
 /// markdown context pack, ready to paste at the top of a new LLM chat — the
 /// "this is who I am" injection, distinct from relevance retrieval. Glia is
@@ -73,7 +85,7 @@ struct ContextBundle {
             guard seen.insert(node.slug).inserted else { continue }
             guard let base = mirrors[node.source] else { continue }
             let url = base.appendingPathComponent(node.slug + ".md")
-            guard url.standardizedFileURL.path.hasPrefix(base.path),
+            guard url.isInside(base),
                   let data = try? Data(contentsOf: url, options: .mappedIfSafe),
                   data.count < 400_000,
                   let raw = String(data: data, encoding: .utf8) else { continue }

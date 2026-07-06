@@ -392,6 +392,16 @@ final class ContextBundleTests: XCTestCase {
                   title: "", created: "2026-06-01", updated: "2026-06-01T00:00:00Z")
     }
 
+    func testURLIsInsideRejectsSiblingPrefixDir() {
+        // Regression for the round-14 audit: a raw hasPrefix let a sibling dir whose
+        // name shares the prefix (source-foobar vs source-foo) escape the guard.
+        let base = URL(fileURLWithPath: "/Users/x/.gbrain/source-foo")
+        XCTAssertTrue(base.isInside(base))                                               // the dir itself
+        XCTAssertTrue(URL(fileURLWithPath: "/Users/x/.gbrain/source-foo/people/david.md").isInside(base))
+        XCTAssertFalse(URL(fileURLWithPath: "/Users/x/.gbrain/source-foobar/secret.md").isInside(base)) // sibling
+        XCTAssertFalse(URL(fileURLWithPath: "/Users/x/.gbrain/other/x.md").isInside(base))
+    }
+
     func testBuildDedupsBySlugAcrossSources() throws {
         // Regression for the round-7 audit: a slug present in two enabled sources
         // was injected twice (wasted budget, inflated pageCount). Must emit once.

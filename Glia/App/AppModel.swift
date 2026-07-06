@@ -306,7 +306,10 @@ final class AppModel {
                 // to exactly where you were, not a re-fit.
                 if !self.restoreViewState() { self.fitView() }
                 self.viewStateReady = true
-                LayoutStore.save(graph: g, positions: final)
+                // Never persist DEMO positions to the real brain's layout.json (demo
+                // ids 1..352 would overwrite real nodes' saved coordinates — the same
+                // !demoActive guard every other persistence path already has).
+                if !self.demoActive { LayoutStore.save(graph: g, positions: final) }
                 // Seed the MCP psyche once if it doesn't exist yet, so the
                 // injection layer works even before the user syncs manually —
                 // and refresh status so the menu bar is accurate at launch.
@@ -697,7 +700,12 @@ final class AppModel {
                 padding: 110)
         let insetShift = SIMD2<Float>(-92, -18) / cam.zoomTarget   // px -> world
         renderer.camera.fly(to: cam.centerTarget - insetShift, zoom: cam.zoomTarget)
-        setContinuousRendering(true)
+        // Under Reduce Motion the fit SNAPS (Camera.fly), so it isn't a reason to spin
+        // continuous rendering — that would latch a 24fps loop forever when a node is
+        // selected (frameTicked never pauses while selectedIndex != nil) and animate the
+        // selection glow the setting should freeze. Let the central gate decide, as
+        // select()/click() do.
+        if Camera.reduceMotion { refreshContinuousRendering() } else { setContinuousRendering(true) }
     }
 
     func pick(atView p: SIMD2<Float>, viewport: SIMD2<Float>, radiusPx: Float = 14) -> Int? {
@@ -1165,7 +1173,7 @@ final class AppModel {
         guard let node = selectedNode,
               let base = BrainLocation.sourceMirror(for: node.source) else { return nil }
         let url = base.appendingPathComponent(node.slug + ".md")
-        guard url.standardizedFileURL.path.hasPrefix(base.path),
+        guard url.isInside(base),
               FileManager.default.fileExists(atPath: url.path) else { return nil }
         return url
     }
@@ -1176,8 +1184,8 @@ final class AppModel {
         guard let node = selectedNode,
               let base = BrainLocation.sourceMirror(for: node.source) else { return nil }
         let url = base.appendingPathComponent(node.slug + ".md")
-        // guard against slug path escapes
-        guard url.standardizedFileURL.path.hasPrefix(base.path),
+        // guard against slug path escapes (boundary-aware — see URL.isInside)
+        guard url.isInside(base),
               let data = try? Data(contentsOf: url, options: .mappedIfSafe),
               data.count < 400_000,
               let text = String(data: data, encoding: .utf8) else { return nil }
