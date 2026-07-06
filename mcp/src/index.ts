@@ -30,7 +30,7 @@ const TOOLS = [
   {
     name: "prime_context",
     description:
-      "Prime this session with WHO THE USER IS (their psyche/identity map) and WHAT'S RELEVANT to the task (retrieved from their gbrain). Call this FIRST, before answering a substantive request, so your answer serves this specific person — their values, worldview, and how they work — not a generic user. Returns a context block to fold into your reasoning.",
+      "Prime this session with WHO THE USER IS (their psyche/identity map) and WHAT'S RELEVANT to the task (retrieved from their gbrain). Call this FIRST when the answer should be SHAPED BY THE PERSON — a decision, a plan, advice, writing in their voice, anything synthesized from who they are — so it serves this specific person, not a generic user. (For a pure fact lookup where identity is irrelevant, use `recall` instead — measured: identity helps most on person-shaped tasks, and is redundant when the answer is just the relevant facts.) Returns a context block to fold into your reasoning.",
     inputSchema: {
       type: "object",
       properties: {
@@ -62,7 +62,7 @@ const TOOLS = [
   {
     name: "recall",
     description:
-      "Retrieve pages relevant to a query from the user's gbrain knowledge base (pure relevance, no identity). Use when you need specific facts/context the user has recorded.",
+      "Retrieve pages relevant to a query from the user's gbrain knowledge base (pure relevance, no identity). Use for a FACT LOOKUP — specific things the user has recorded — where the answer is the information itself, not shaped by who they are. (When the answer should reflect the person — a decision, plan, or anything synthesized from their values/voice — use `prime_context` instead.)",
     inputSchema: {
       type: "object",
       properties: {
