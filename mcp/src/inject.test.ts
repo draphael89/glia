@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { estimateTokens, truncateToTokens } from "./config.js";
+import { estimateTokens, truncateToTokens, config } from "./config.js";
 import { cleanBody, identityRank, buildPsycheFromSource, psycheSlugs } from "./psyche.js";
 import { primeContext, explainContext } from "./inject.js";
 import { retrieveContext, _clearRetrievalCache, safePagePath } from "./gbrain.js";
@@ -101,6 +101,24 @@ test("retrieveContext excludes psyche slugs (dedup) before taking topK", async (
   assert.equal(r.pages.length, 1);
   assert.equal(r.pages[0].slug, "note-beta");
   assert.equal(r.dedupedCount, 1);       // note-alpha dropped as already-in-identity
+});
+
+test("relevance floor anchors to the first READABLE page, not an unreadable top-ranked one", async () => {
+  // regression: floor was candidates[0].score * frac; if the top page is missing/
+  // unreadable, that poisoned the floor and cut the real best readable page.
+  const savedCmd = config.gbrainCmd, savedFloor = config.gbrainRelScoreFloor;
+  config.gbrainCmd = "test-fixtures/gbrain-stub-missing-top.sh";  // top=0.99 (missing), then note-beta=0.40
+  config.gbrainRelScoreFloor = 0.5;   // 0.99*0.5=0.495 > 0.40 → old code would drop note-beta
+  _clearRetrievalCache();
+  try {
+    const r = await retrieveContext("anything");
+    assert.equal(r.pages.length, 1, "the readable lower page must survive the unreadable top");
+    assert.equal(r.pages[0].slug, "note-beta");
+  } finally {
+    config.gbrainCmd = savedCmd;
+    config.gbrainRelScoreFloor = savedFloor;
+    _clearRetrievalCache();
+  }
 });
 
 test("safePagePath blocks slug path-traversal, allows normal + nested slugs", () => {
