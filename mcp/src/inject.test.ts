@@ -152,6 +152,43 @@ test("gbrain-get fallback recovers a top page missing from the mirror", async ()
   }
 });
 
+test("parallel fallback recovers MULTIPLE mirror-missing pages (up to the cap)", async () => {
+  // The prefetch refactor's whole point: several top pages absent from the mirror are
+  // fetched CONCURRENTLY, not one-per-page in series. All three must come back, in order.
+  const savedCmd = config.gbrainCmd;
+  config.gbrainCmd = "test-fixtures/gbrain-stub-multi-miss.sh";
+  _clearRetrievalCache();
+  try {
+    const r = await retrieveContext("anything");
+    assert.equal(r.pages.length, 3, "all three mirror-missing pages recovered via parallel get");
+    assert.deepEqual(r.pages.map((p) => p.slug), ["miss-one", "miss-two", "miss-three"]);
+    assert.match(r.pages[0].body, /first live-only/);
+    assert.match(r.pages[2].body, /third live-only/);
+  } finally {
+    config.gbrainCmd = savedCmd;
+    _clearRetrievalCache();
+  }
+});
+
+test("fallback cap bounds how many mirror-missing pages are recovered", async () => {
+  // With the cap at 2, only the top two misses are fetched; the third is dropped —
+  // the loop's fallbackUsed guard and the prefetch window must agree on the bound.
+  const savedCmd = config.gbrainCmd;
+  const savedMax = config.gbrainGetFallbackMax;
+  config.gbrainCmd = "test-fixtures/gbrain-stub-multi-miss.sh";
+  config.gbrainGetFallbackMax = 2;
+  _clearRetrievalCache();
+  try {
+    const r = await retrieveContext("anything");
+    assert.equal(r.pages.length, 2, "cap=2 recovers exactly the top two misses");
+    assert.deepEqual(r.pages.map((p) => p.slug), ["miss-one", "miss-two"]);
+  } finally {
+    config.gbrainCmd = savedCmd;
+    config.gbrainGetFallbackMax = savedMax;
+    _clearRetrievalCache();
+  }
+});
+
 test("safePagePath blocks slug path-traversal, allows normal + nested slugs", () => {
   const base = "/brain/source";
   assert.equal(safePagePath(base, "note-alpha"), "/brain/source/note-alpha.md");
