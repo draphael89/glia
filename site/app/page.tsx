@@ -218,11 +218,21 @@ export default function Home() {
             significant). The reason was instructive: on the tasks where adding identity <em>didn&apos;t</em>
             help, retrieval had already surfaced the person&apos;s own essays — the identity was present,
             so injecting it again was redundant. Identity helps over retrieval precisely when retrieval
-            <em> doesn&apos;t already carry it</em>. The durable claim is narrower and better for it.
+            <em> doesn&apos;t already carry it</em>.
+          </p>
+          <p>
+            But that cut two ways — so we checked it (v8). v7&apos;s retrieval was built with
+            keyword-heavy queries that <em>over</em>-pulled those essays; the real product queries with
+            the plain task sentence, which surfaces them far less. Rebuilding the same tasks&apos; context
+            the production way, the margin <strong>recovered from 33% to 60%</strong> — v7 had partly
+            <em> under</em>-counted identity. Triangulated across three constructions (pilot 71%, keyword
+            33%, natural 60%), the honest edge over retrieval is <strong>~55–65%</strong>: real, moderate,
+            and dependent on whether retrieval already carries the identity. The exact number was never
+            the finding — the conditionality is.
           </p>
           <p className="muted">
-            Still a small-n pilot — but one we&apos;ve tried hard, across vendors and across a doubled
-            task set, to kill. When it broke, we wrote down how.
+            Still a small-n pilot — but one we&apos;ve tried hard, across vendors, a doubled task set, and
+            a context-construction control, to kill. Every time it bent, we wrote down how.
           </p>
         </div>
       </section>
@@ -231,7 +241,7 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>How hard we pushed on it</h2>
-          <h3>Seven runs, each trying to break the last.</h3>
+          <h3>Eight runs, each trying to break the last.</h3>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>
             <table>
               <thead>
@@ -245,6 +255,7 @@ export default function Home() {
                 <tr><td className="mono">v5</td><td><strong>dose-response</strong> — psyche truncated to 4 budgets</td><td>a ~3k-token core reaches ~95% of peak; insight keeps climbing with more</td></tr>
                 <tr><td className="mono">v6</td><td>a <strong>different vendor</strong> (OpenAI gpt-5) re-judges</td><td><span style={{ color: armColor.best }}>both</span> still wins (beats context 64%, psyche 68%); mechanism holds → not self-preference</td></tr>
                 <tr><td className="mono">v7</td><td><strong>expansion</strong> — 7 fresh pre-registered tasks (→12 total)</td><td>ordering holds, but <span style={{ color: armColor.best }}>both</span>-over-<span style={{ color: armColor.context }}>relevance</span> tempered 71%→59% (n.s.); identity&apos;s edge is conditional on retrieval not already carrying it</td></tr>
+                <tr><td className="mono">v8</td><td><strong>construction control</strong> — rebuild context with natural (production) queries</td><td>edge recovered 33%→60%: v7&apos;s keyword context over-pulled essays; honest range ~55–65%, construction-sensitive</td></tr>
               </tbody>
             </table>
           </div>
