@@ -54,7 +54,7 @@ const call = (s, name, args = {}) => s.rpc("tools/call", { name, arguments: args
 
   const list = await s.rpc("tools/list", {});
   const names = (list.result?.tools ?? []).map((t) => t.name);
-  ok(["prime_context", "who_am_i", "recall", "health"].every((n) => names.includes(n)), `[happy] lists all tools (${names.join(",")})`);
+  ok(["prime_context", "who_am_i", "recall", "health", "explain_context"].every((n) => names.includes(n)), `[happy] lists all tools (${names.join(",")})`);
 
   const who = await call(s, "who_am_i");
   ok(who.includes("FIXTURE-PSYCHE-MARKER"), "[happy] who_am_i returns the canonical psyche");
@@ -68,6 +68,10 @@ const call = (s, name, args = {}) => s.rpc("tools/call", { name, arguments: args
 
   const health = await call(s, "health");
   ok(/overall: OK/.test(health) && /identity: available/.test(health) && /retrieval: available/.test(health), "[happy] health reports all available");
+
+  const manifest = await call(s, "explain_context", { task: "gbrain sync", mode: "both" });
+  ok(/glia-context preview/.test(manifest) && /## Identity/.test(manifest) && /## Retrieval/.test(manifest) && /note-alpha/.test(manifest),
+     "[happy] explain_context returns a manifest with sections + retrieved slugs");
 
   const recall = await call(s, "recall", { query: "gbrain sync" });
   ok(recall.includes("> glia-context recall:") && recall.includes("FIXTURE-ALPHA-MARKER"), "[happy] recall returns pages + status");

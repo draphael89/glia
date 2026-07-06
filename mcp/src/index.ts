@@ -5,7 +5,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { primeContext, type InjectMode } from "./inject.js";
+import { primeContext, explainContext, renderManifest, type InjectMode } from "./inject.js";
 import { loadPsyche } from "./psyche.js";
 import { retrieveContext, formatContext } from "./gbrain.js";
 import { validateConfig, renderHealthReport } from "./health.js";
@@ -78,6 +78,19 @@ const TOOLS = [
       },
     },
   },
+  {
+    name: "explain_context",
+    description:
+      "Preview EXACTLY what prime_context would inject for a task — the identity source + which page sections, the pages retrieval would add (with scores), and token estimates — WITHOUT the full content. Use to see/trust what's loaded before priming, or to decide whether priming is worth it.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task: { type: "string", description: "The task you'd prime for." },
+        mode: { type: "string", enum: ["psyche", "context", "both"] },
+      },
+      required: ["task"],
+    },
+  },
 ];
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
@@ -119,6 +132,12 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       return {
         content: [{ type: "text", text: `> glia-context recall: ${status}\n\n${body}` }],
       };
+    }
+    if (name === "explain_context") {
+      const m = await explainContext(String(args?.task ?? ""), {
+        mode: args?.mode as InjectMode | undefined,
+      });
+      return { content: [{ type: "text", text: renderManifest(m) }] };
     }
     if (name === "health") {
       const report = validateConfig(true);

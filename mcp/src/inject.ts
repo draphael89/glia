@@ -57,6 +57,79 @@ function buildStatusLines(a: {
 const renderStatusBlock = (lines: string[], degraded: boolean) =>
   [`> glia-context status: ${degraded ? "DEGRADED" : "OK"}`, ...lines.map((l) => `> ${l}`), ""].join("\n");
 
+export interface ContextManifest {
+  mode: InjectMode;
+  psycheStatus: PsycheStatus | "skipped";
+  psycheSource: string;
+  psycheTokens: number;
+  psycheSections: string[];   // page slugs present in the (capped) psyche
+  retrievalStatus: RetrievalStatus;
+  retrievalPages: { slug: string; score: number }[];
+  retrievalTokens: number;
+  totalTokens: number;
+  degraded: boolean;
+}
+
+/**
+ * Preview what prime_context WOULD inject for a task — the psyche source +
+ * sections, the pages retrieval would add, and token estimates — WITHOUT the
+ * full content. For transparency ("what's loaded?") and to decide whether to
+ * prime. Same budgeting + dedup as primeContext, so the manifest is truthful.
+ */
+export async function explainContext(
+  task: string,
+  opts: { mode?: InjectMode; maxTokens?: number } = {},
+): Promise<ContextManifest> {
+  const mode = opts.mode ?? "both";
+  const budget = opts.maxTokens ?? 60_000;
+
+  let psycheText = "";
+  let psycheSource = "";
+  let psycheStatus: PsycheStatus | "skipped" = "skipped";
+  if (mode === "psyche" || mode === "both") {
+    const p = await loadPsyche();
+    psycheSource = p.source;
+    psycheStatus = p.status;
+    const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
+    psycheText = p.status === "empty" ? "" : truncateToTokens(p.text, psycheBudget);
+  }
+  const sections = [...psycheSlugs(psycheText)];
+
+  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task };
+  if (mode === "context" || mode === "both") {
+    const exclude = mode === "both" && psycheText ? psycheSlugs(psycheText) : undefined;
+    retrieval = await retrieveContext(task, { excludeSlugs: exclude });
+  }
+  const psycheTokens = estimateTokens(psycheText);
+  const retrievalTokens = estimateTokens(formatContext(retrieval.pages));
+
+  return {
+    mode, psycheStatus, psycheSource, psycheTokens, psycheSections: sections,
+    retrievalStatus: retrieval.status,
+    retrievalPages: retrieval.pages.map((p) => ({ slug: p.slug, score: p.score })),
+    retrievalTokens,
+    totalTokens: psycheTokens + retrievalTokens,
+    degraded: psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status),
+  };
+}
+
+/** Render a manifest as compact, readable text for the explain_context tool. */
+export function renderManifest(m: ContextManifest): string {
+  const lines = [
+    `# glia-context preview (mode=${m.mode}${m.degraded ? ", DEGRADED" : ""})`,
+    `~${m.totalTokens} tokens total`,
+    "",
+    `## Identity (${m.psycheStatus}, ~${m.psycheTokens} tok) — ${m.psycheSource}`,
+    m.psycheSections.length ? m.psycheSections.map((s) => `  · ${s}`).join("\n") : "  (no page sections parsed)",
+    "",
+    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages)`,
+    m.retrievalPages.length
+      ? m.retrievalPages.map((p) => `  · ${p.slug}  (${p.score.toFixed(2)})`).join("\n")
+      : "  (no pages)",
+  ];
+  return lines.join("\n");
+}
+
 /**
  * The core of the thesis: build the injection that primes the model with WHO
  * YOU ARE (psyche) and, optionally, WHAT'S RELEVANT (gbrain context).

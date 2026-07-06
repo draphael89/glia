@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { estimateTokens, truncateToTokens } from "./config.js";
 import { cleanBody, identityRank, buildPsycheFromSource, psycheSlugs } from "./psyche.js";
-import { primeContext } from "./inject.js";
+import { primeContext, explainContext } from "./inject.js";
 import { retrieveContext, _clearRetrievalCache } from "./gbrain.js";
 
 // Tests run hermetically via the `test` npm script env:
@@ -100,4 +100,13 @@ test("retrieveContext excludes psyche slugs (dedup) before taking topK", async (
   assert.equal(r.status, "ok");
   assert.equal(r.pages.length, 1);
   assert.equal(r.pages[0].slug, "note-beta");
+});
+
+test("explainContext returns a truthful manifest (sections + retrieved slugs, deduped)", async () => {
+  const m = await explainContext("hermes architecture", { mode: "both" });
+  assert.equal(m.psycheStatus, "file");
+  assert.ok(m.psycheTokens > 0);
+  assert.equal(m.retrievalStatus, "ok");
+  assert.ok(m.retrievalPages.some((p) => p.slug === "note-alpha"));
+  assert.ok(m.totalTokens >= m.psycheTokens);
 });
