@@ -121,6 +121,20 @@ test("relevance floor anchors to the first READABLE page, not an unreadable top-
   }
 });
 
+test("retrieval drops operational snapshot/provenance dumps", async () => {
+  const savedCmd = config.gbrainCmd;
+  config.gbrainCmd = "test-fixtures/gbrain-stub-noise.sh";  // top hit is a snapshots/ dump
+  _clearRetrievalCache();
+  try {
+    const r = await retrieveContext("anything");
+    assert.ok(!r.pages.some((p) => /snapshots\//.test(p.slug)), "snapshot dumps must be filtered out");
+    assert.ok(r.pages.some((p) => p.slug === "note-beta"), "the substantive page survives");
+  } finally {
+    config.gbrainCmd = savedCmd;
+    _clearRetrievalCache();
+  }
+});
+
 test("gbrain-get fallback recovers a top page missing from the mirror", async () => {
   // The query returns live-only-page (absent from the fixture mirror); the fallback
   // reads it live via `gbrain get`, so retrieval isn't silently empty.
