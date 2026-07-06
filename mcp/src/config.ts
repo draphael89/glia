@@ -56,6 +56,12 @@ export const config = {
    *  top candidate's score — so the topK budget isn't spent injecting weakly
    *  ranked pages as noise just to hit the count. 0 disables the floor. */
   gbrainRelScoreFloor: fracEnv("GBRAIN_REL_SCORE_FLOOR", 0.5),
+  /** `gbrain query` searches the FULL brain but bodies are read from the source
+   *  MIRROR, which is a subset — measured: some queries have 7-8/8 top-ranked
+   *  pages missing from the mirror, silently dropping the strongest retrieval.
+   *  For up to this many top pages that miss the mirror, fall back to a live
+   *  `gbrain get <slug>` read (bounded so latency stays sane). 0 disables it. */
+  gbrainGetFallbackMax: intEnv("GBRAIN_GET_FALLBACK_MAX", 3),
   /** The identity self-page slug (rank-0 in the psyche). Env-overridable so the
    *  OSS multi-user build isn't hardcoded to one person. */
   selfSlug: (process.env.GLIA_SELF_SLUG || "people-david").trim().toLowerCase(),

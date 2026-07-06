@@ -121,6 +121,23 @@ test("relevance floor anchors to the first READABLE page, not an unreadable top-
   }
 });
 
+test("gbrain-get fallback recovers a top page missing from the mirror", async () => {
+  // The query returns live-only-page (absent from the fixture mirror); the fallback
+  // reads it live via `gbrain get`, so retrieval isn't silently empty.
+  const savedCmd = config.gbrainCmd;
+  config.gbrainCmd = "test-fixtures/gbrain-stub-fallback.sh";
+  _clearRetrievalCache();
+  try {
+    const r = await retrieveContext("anything");
+    assert.equal(r.pages.length, 1, "the mirror-missing top page must be recovered via get");
+    assert.equal(r.pages[0].slug, "live-only-page");
+    assert.match(r.pages[0].body, /Live-fetched/);
+  } finally {
+    config.gbrainCmd = savedCmd;
+    _clearRetrievalCache();
+  }
+});
+
 test("safePagePath blocks slug path-traversal, allows normal + nested slugs", () => {
   const base = "/brain/source";
   assert.equal(safePagePath(base, "note-alpha"), "/brain/source/note-alpha.md");
