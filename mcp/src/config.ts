@@ -38,6 +38,20 @@ function intEnv(name: string, def: number): number {
   return Math.floor(n);
 }
 
+/** Like intEnv but accepts an explicit 0, for keys where 0 is a documented "disable"
+ *  sentinel (e.g. GBRAIN_GET_FALLBACK_MAX=0 turns the live-read fallback OFF). Only
+ *  negatives / NaN fall back to the default. */
+function nonNegIntEnv(name: string, def: number): number {
+  const raw = rawSetting(name);
+  if (raw == null || raw.trim() === "") return def;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) {
+    console.error(`glia-context: ${name}="${raw}" is not a non-negative number — using default ${def}`);
+    return def;
+  }
+  return Math.floor(n);
+}
+
 /** Read a 0..1 fraction setting, falling back on a bad/out-of-range value. */
 function fracEnv(name: string, def: number): number {
   const raw = rawSetting(name);
@@ -88,7 +102,7 @@ export const config = {
    *  mirror, fall back to a live `gbrain get <slug>` read. The fallbacks now run
    *  CONCURRENTLY (see gbrainGetConcurrency), so the cap can be generous without
    *  paying cap×round-trip in series: 8 recovers 99% of the top-8. 0 disables it. */
-  gbrainGetFallbackMax: intEnv("GBRAIN_GET_FALLBACK_MAX", 8),
+  gbrainGetFallbackMax: nonNegIntEnv("GBRAIN_GET_FALLBACK_MAX", 8),
   /** Max concurrent `gbrain get` fallbacks. Bounds the subprocess/Postgres spike
    *  when several top pages miss the mirror; the batch pays ~ceil(misses/N) round
    *  trips of latency instead of one-per-page. */

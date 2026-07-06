@@ -121,14 +121,20 @@ enum TuningConfig {
     }
 
     static func write(fallbackMax: Int, psycheCore: Int, relFloor: Double, concurrency: Int) {
-        // Keys are the server's env-var names (config.ts layers this file under env).
-        let payload: [String: Any] = [
-            "GBRAIN_GET_FALLBACK_MAX": fallbackMax,
-            "GLIA_PSYCHE_CORE_MAX_TOKENS": psycheCore,
-            "GBRAIN_REL_SCORE_FLOOR": relFloor,
-            "GBRAIN_GET_CONCURRENCY": concurrency,
-        ]
+        // MERGE into any existing config.json — never drop keys the UI doesn't manage.
+        // config.ts reads several more from this same file (GBRAIN_TIMEOUT_MS, the cache
+        // TTLs, GBRAIN_MAX_PAGE_BYTES, GLIA_PSYCHE_MAX_BYTES); a full replace would wipe a
+        // user's hand-set values. Keys are the server's env-var names.
         let url = fileURL
+        var payload: [String: Any] = {
+            guard let data = try? Data(contentsOf: url), data.count < 1_000_000,
+                  let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
+            return obj
+        }()
+        payload["GBRAIN_GET_FALLBACK_MAX"] = fallbackMax
+        payload["GLIA_PSYCHE_CORE_MAX_TOKENS"] = psycheCore
+        payload["GBRAIN_REL_SCORE_FLOOR"] = relFloor
+        payload["GBRAIN_GET_CONCURRENCY"] = concurrency
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys]) {
             try? data.write(to: url, options: .atomic)
@@ -159,13 +165,13 @@ private struct TuningSettingsTab: View {
                 Text("The local mirror is a subset of your brain, so top-ranked pages can be missing. This is how many to re-read live from the full brain (measured: raises top-page completeness 31%→99%), and how many at once. Higher = more complete, slightly slower.")
             }
             Section {
-                Stepper("Identity core: **\(psycheCore / 1000)k** tokens", value: $psycheCore, in: 4_000...48_000, step: 2_000)
+                Stepper("Identity core: **\(psycheCore / 1000)k** tokens", value: $psycheCore, in: 4_000...24_000, step: 2_000)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Relevance floor: **\(relFloor, format: .number.precision(.fractionLength(2)))**")
                     Slider(value: $relFloor, in: 0...0.9)
                 }
             } header: { Text("Injection") } footer: {
-                Text("The identity core cap in ‘both’ mode (validated: smaller is worse), and the minimum relevance — as a fraction of the top page — for a retrieved page to be injected.")
+                Text("The identity core in ‘both’ mode is capped at 40% of the token budget (24k under the default), so 24k is the validated best — lowering it trades identity for more retrieval room (v10 found that generally worse). And the minimum relevance — as a fraction of the top page — for a retrieved page to be injected.")
             }
             Section {
                 HStack {
@@ -194,7 +200,7 @@ private struct TuningSettingsTab: View {
         guard let d = TuningConfig.read() else { return }
         if let n = d["GBRAIN_GET_FALLBACK_MAX"] { fallbackMax = min(max(n.intValue, 1), 16) }
         if let n = d["GBRAIN_GET_CONCURRENCY"] { concurrency = min(max(n.intValue, 1), 8) }
-        if let n = d["GLIA_PSYCHE_CORE_MAX_TOKENS"] { psycheCore = min(max(n.intValue, 4_000), 48_000) }
+        if let n = d["GLIA_PSYCHE_CORE_MAX_TOKENS"] { psycheCore = min(max(n.intValue, 4_000), 24_000) }
         if let n = d["GBRAIN_REL_SCORE_FLOOR"] { relFloor = min(max(n.doubleValue, 0), 0.9) }
     }
 
