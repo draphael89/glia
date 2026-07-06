@@ -200,6 +200,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Robustness ledger */}
+      <section>
+        <div className="wrap">
+          <h2>How hard we pushed on it</h2>
+          <h3>Five runs, each trying to break the last.</h3>
+          <div className="card" style={{ marginTop: 16, padding: 0 }}>
+            <table>
+              <thead>
+                <tr><th>run</th><th>the test</th><th>what it showed</th></tr>
+              </thead>
+              <tbody>
+                <tr><td className="mono">v1</td><td>signal-finding (non-blind)</td><td>psyche looked dominant — a headline too good to trust</td></tr>
+                <tr><td className="mono">v2</td><td>judges <strong>blind</strong>, personal-fit removed, objective controls</td><td>overturned v1: identity is a <em>complement</em>; <span style={{ color: armColor.best }}>both</span> wins</td></tr>
+                <tr><td className="mono">v3</td><td><strong>7 judges</strong>/task (49 judgments)</td><td>held and tightened — consistent in 6 of 7 tasks</td></tr>
+                <tr><td className="mono">v4</td><td>a <strong>different model</strong> (Haiku 4.5) re-judges</td><td>reproduced the ordering → not self-preference; margin model-dependent</td></tr>
+                <tr><td className="mono">v5</td><td><strong>dose-response</strong> — psyche truncated to 4 budgets</td><td>a ~3k-token core reaches ~95% of peak; insight keeps climbing with more</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="muted" style={{ marginTop: 12 }}>
+            The claims that survived every run: priming beats a bare prompt, and identity + retrieval
+            together lead the field. Every run&apos;s harness and aggregate numbers are in the repo.
+          </p>
+        </div>
+      </section>
+
       {/* The stack */}
       <section>
         <div className="wrap">
