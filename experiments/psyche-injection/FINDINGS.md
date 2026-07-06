@@ -1,15 +1,20 @@
 # Findings
 
-> **v2 update (read this first).** The v1 headline below — *"psyche alone beats
-> everything; retrieval dilutes identity"* — **did not survive blind judging.**
-> We ran the isolation experiment v1 itself called for (judges blind to the
-> psyche, personal-fit dimension removed, objective scoring on neutral
-> controls). Under those conditions the durable finding is different and, we
-> think, better: **identity is a real signal, but a *complement* to relevance,
-> not a replacement.** The combined arm wins; psyche-alone falls to third. Full
-> corrected story in [§ v2](#v2--the-honest-run-blind-judges--objective-controls)
-> below and [REPORT-v2.md](REPORT-v2.md). v1 is kept intact for the arc — the
-> correction is the point.
+> **The arc in one breath (read this first).** Eleven runs, each trying to break
+> the last, and the finding *changed under scrutiny twice* — that's the point.
+> **v1** (non-blind) said *psyche alone dominates* — an artifact. **v2–v6** (blind,
+> cross-model, cross-vendor) overturned it: injecting identity is a *complement* to
+> retrieval; the combined arm wins. **v7–v8** tempered then partly recovered the
+> exact margin (it's construction-sensitive, ~55–65%). Then **v9** tested the
+> thing we actually *ship* — not a reconstruction — and it overturned the
+> reconstruction: blind judges (Opus *and* gpt-5) prefer **retrieval-alone**; the
+> injected arm doesn't beat it. **v10**'s config fix was *refuted* by its own data.
+> **v11** measured why: the injected identity is **98% accurate** — so v9/v10 is a
+> **floor** (a psyche-blind judge penalizing real, unverifiable-to-it specifics),
+> not a failure. **Honest bottom line: identity injection is a real, accurate
+> complement to retrieval, but every LLM-judge number here bounds its value from
+> *below* — the one reader who can verify identity, the user, needs human eval no
+> automated judge can stand in for.** Full story, and every retraction, below.
 
 ---
 
