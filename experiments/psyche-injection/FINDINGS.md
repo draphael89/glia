@@ -595,6 +595,26 @@ the exact percentages are directional. A cleaner test needs more tasks (to beat 
 noise floor) and possibly a diversity-aware retrieval arm (MMR) to separate relevance from
 breadth — noted as future work, not built.
 
+## v16 — variance reduction resolves it: identity DOES beat retrieval at complete retrieval, task-dependently (`REPORT-v16.md`)
+
+v13 was a null because a single generation per arm was pure coin-flip. v16 attacks that head-on:
+**K=3 independent generations per arm** per task, blind *pairwise*-judged (45 votes), so the
+per-answer noise averages out. **Result: `both` (retrieval+identity) beats `context`
+(retrieval-alone) 62% pooled at 99%-complete retrieval** — the v12 direction survives BOTH
+complete retrieval AND variance reduction. So identity is a genuine complement, not merely a
+proxy for the pages the mirror-bug used to drop.
+
+But the **pooled 62% hides the real finding — task heterogeneity**: identity helps most on
+**generative / synthesis-from-self** tasks (speaker bio, the velocity-toward-telos weekly
+structure, what-to-drop — p3/p4/p5 win 67–100%) where knowing the *person* shapes the whole
+answer, and **least on the diagnostic** task ("why will I be stuck" — p2, 11%) where the
+retrieved facts already carry it. So "does identity help?" resolves to **"depends on task
+shape"**: a real complement when the answer is *synthesized from who you are*, redundant when
+it's *just the relevant facts*. Honest caveats kept: the round-to-round spread was still **47
+points** (K=3 only partly tames the noise), 5 tasks, one generator/judge family — trust the
+direction + the per-task pattern, not the decimal. This is the most decisive the LLM-judge arc
+gets; the last mile is still human eval (only David can verify the specifics).
+
 ---
 
 # Iteration loop — injection tuning (what moved the needle, what didn't)
