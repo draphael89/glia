@@ -40,9 +40,12 @@ def prompt_for(task, arr, permIdx):
             f'"scores":{{"A":{{"specificity":n,"actionability":n,"correctness":n,"insight":n}},"B":{{...}},"C":{{...}},"D":{{...}}}},'
             f'"rationale":"2 sentences"}}')
 
-src = os.path.join(base, "results/raw/results-v9.json")
+import sys
+fname = sys.argv[1] if len(sys.argv) > 1 else "results/raw/results-v9.json"
+src = fname if os.path.isabs(fname) else os.path.join(base, fname)
+tag = os.path.basename(src).replace("results-", "").replace(".json", "")
 if not os.path.exists(src):
-    raise SystemExit("results-v9.json not present — run the v9 workflow first.")
+    raise SystemExit(f"{fname} not present — run the workflow first.")
 tasks = json.load(open(src))
 
 def one(args):
@@ -59,7 +62,7 @@ def one(args):
     return (t["taskId"], None)
 
 jobs = [(t, j) for t in tasks for j in range(4)]
-dest = os.path.join(base, "results/raw/results-v9-gpt5.json")
+dest = os.path.join(base, f"results/raw/results-{tag}-gpt5.json")
 by_task = {t["taskId"]: [] for t in tasks}
 if os.path.exists(dest):
     for t in json.load(open(dest)):

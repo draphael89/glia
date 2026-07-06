@@ -9,12 +9,16 @@
 > thing we actually *ship* — not a reconstruction — and it overturned the
 > reconstruction: blind judges (Opus *and* gpt-5) prefer **retrieval-alone**; the
 > injected arm doesn't beat it. **v10**'s config fix was *refuted* by its own data.
-> **v11** measured why: the injected identity is **98% accurate** — so v9/v10 is a
-> **floor** (a psyche-blind judge penalizing real, unverifiable-to-it specifics),
-> not a failure. **Honest bottom line: identity injection is a real, accurate
-> complement to retrieval, but every LLM-judge number here bounds its value from
-> *below* — the one reader who can verify identity, the user, needs human eval no
-> automated judge can stand in for.** Full story, and every retraction, below.
+> **v11** measured why: the injected identity is **98% accurate** — v9/v10 was a
+> **floor**, not a failure. Then **v12** found the real culprit: v9's retrieval was
+> *bugged* (the MCP read page bodies from a subset mirror, dropping 7–8 of the top
+> 8 pages) — fix it, and the production result **flips back**: `both` beats
+> retrieval-alone again, blind and **cross-vendor** (best-vs-context 52%→64% Opus,
+> 30%→56% gpt-5), reconciling with the reconstruction. **Honest bottom line:
+> identity injection is a real, accurate complement to retrieval — and testing the
+> *shipped* pipeline is what exposed the retrieval bug that was hiding it. The one
+> number no LLM judge can give is the verifying user's; that tool is built and
+> delivered.** Full story, and every retraction, below.
 
 ---
 
@@ -516,14 +520,37 @@ fabrication is negligible). The one reader who can verify these accurate specifi
 autonomous arc honestly ends: LLM judges bound identity's value from *below*; the
 true value needs a human who can verify. Every number here is a floor.**
 
-*Postscript — the pipeline got better after v9.* Probing why v9's retrieval was
-thin surfaced a real bug: `gbrain query` searches the full brain but the MCP read
-bodies from a *subset* mirror, so 7–8 of the top 8 pages were silently dropped on
-some queries. Fixed (bounded live `gbrain get` fallback + an operational-snapshot
-noise filter) — retrieval on the reflections task went 0→5 substantive pages.
-This *strengthens* the strong arm, so it only reinforces v9's direction (retrieval
-wins); the human-eval tool (`harness/generate-human-eval.py`) is the one open
-thread, and it needs a verifier no LLM can stand in for.
+# v12 — the shipped result FLIPS once retrieval is fixed (v9 was a bug)
+
+Probing why v9's retrieval was thin surfaced a real bug: `gbrain query` searches
+the full brain but the MCP read bodies from a *subset* mirror, so on some queries
+7–8 of the top 8 pages were silently dropped and the `both` arm was left with
+almost no grounding. Fixed it — a bounded live `gbrain get` fallback for
+mirror-missing pages + an operational-snapshot noise filter (reflections task
+0→5 substantive pages). I *predicted* this would only reinforce v9 ("retrieval
+wins even harder"). **v12 refuted that prediction — it flips the finding.**
+
+Same 5 production tasks, same shipped pipeline, only the *fixed* retrieval:
+
+- **Opus (25 judgments):** `psyche` 46 > **`best` 42** > `context` 38 > `naked` 24 —
+  `context` fell from 1st (v9) to 3rd, and **best-vs-context rose 52% → 64%**.
+- **gpt-5 (18 judgments, position-clean):** `best` **30** > `context` 29 > `naked`
+  27 > `psyche` 22 — `best` went from **LAST (v9) to FIRST**, best-vs-context
+  **30% → 56%.**
+- **Both independent vendors now put the injected `both` arm ahead of
+  retrieval-alone.** The v9/v10 "shipped both loses to retrieval" was **an artifact
+  of the retrieval bug**, not a property of identity injection.
+
+**This reconciles the whole arc.** The reconstruction runs (v2–v8) said *inject
+both wins*. The first production test (v9) said *retrieval wins* — but its
+retrieval was broken, starving the very arm under test. Fix the retrieval and the
+production result snaps back to the reconstruction: **with sound grounding, adding
+identity on top of retrieval beats retrieval alone, blind and cross-vendor.** And
+v11 already showed that identity content is 98% accurate, so the win is real, not
+hallucinated. The lesson stands and sharpened: *test what you ship — it will
+expose the bugs the reconstruction hid, and fixing them is the actual product
+win.* The one thread no LLM judge can close is still human eval
+(`harness/generate-human-eval.py`, delivered).
 
 ---
 

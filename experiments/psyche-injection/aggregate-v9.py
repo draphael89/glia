@@ -57,7 +57,7 @@ def main():
         print(f"{fname} not present yet — run the workflow first."); return
     borda, pw, pt, rub, n, posfirst, per_task = analyze(json.load(open(path)))
     order = sorted(CONDS, key=lambda c: -borda[c])
-    out = ["# Psyche Injection — v9 (production-pipeline: does the SHIPPED thing help?)\n"]
+    out = [f"# Psyche Injection — {tag} (production-pipeline: does the SHIPPED thing help?)\n"]
     out.append("_Answers generated from the ACTUAL `prime_context` output (real header + "
                "capped psyche + dedup'd natural-query retrieval), captured per task per mode "
                "from the compiled MCP — not a reconstruction. 5 tasks, Opus judge, blind._\n")
@@ -86,21 +86,31 @@ def main():
             if gpt[(a,b)]: out.append(f"- {a} > {b}: **{100*gpw[(a,b)]/gpt[(a,b)]:.0f}%**")
         out.append(f"- position-first {dict(gpos)} (uniform≈{gn//4}) — "
                    + ("⚠ some position bias" if max(gpos.values()) > 0.6*gn else "position-clean"))
-        out.append("- **gpt-5 agrees `context` leads and is HARSHER on `best` (ranks it last)** — "
-                   "so the shipped `both` under-performing retrieval is not an Opus artifact.")
+        gbc = (100*gpw[("best","context")]/gpt[("best","context")]) if gpt[("best","context")] else 0
+        if gorder.index("best") < gorder.index("context"):
+            out.append(f"- **gpt-5 AGREES with Opus: `best` beats `context` ({gbc:.0f}%)** — the injected "
+                       "arm leads under a second, independent vendor too. Not an Opus artifact.")
+        else:
+            out.append(f"- **gpt-5 puts `context` ahead of `best` ({gbc:.0f}% best>context)** — the "
+                       "identity arm does not lead under this judge.")
 
     pos_bias = max(posfirst.values()) > 0.6 * n if n else False
+    bc = (100*pw[("best","context")]/pt[("best","context")]) if pt[("best","context")] else 0
     out.append("\n## Verdict\n")
-    out.append(f"- The **shipped** injection pipeline puts `{order[0]}` first "
-               f"({'reproduces best-first ✅' if order[0]=='best' else 'does NOT lead with best — retrieval-alone wins'}).")
-    out.append("- This is the FIRST version to test the real artifact end-to-end (all v1-v8 used a "
-               "reconstruction). It reflects what a user actually gets from the installed MCP.")
-    out.append("- **Mechanism**: shipped `both` caps psyche at 40% AND dedups its retrieval against it, "
-               "so `best` gets THINNER retrieval than the full-budget `context` arm; the 24k psyche is "
-               "past the useful dose (v5: ~3k core ≈95%) and dilutes vs focused retrieval of the same "
-               "identity pages. A fixable CONFIG problem, not a refutation of the thesis.")
-    out.append("- **Next (v10)**: a rebalanced `both` — small ~3-4k identity core + the FULL retrieval "
-               "the context arm gets — is the hypothesis to test.")
+    out.append(f"- Borda order **{' > '.join(order)}**; the injected `both` arm beats retrieval-alone "
+               f"`context` **{bc:.0f}%**.")
+    out.append("- Tests the ACTUAL shipped artifact end-to-end (v1-v8 used a reconstruction) — what a "
+               "user really gets from the installed MCP.")
+    if bc >= 55:
+        out.append("- **The injected arm WINS.** With sound retrieval, adding identity on top beats "
+                   "retrieval-alone — reconciling the production pipeline with the reconstruction thesis.")
+    elif bc <= 45:
+        out.append("- **Retrieval-alone leads.** The injected arm does not beat `context` here; if retrieval "
+                   "was thin/noisy this may be a retrieval quality problem (see the v9→v12 story).")
+    else:
+        out.append("- **Coin-flip.** `best` and `context` are ~tied by this judge.")
+    if pos_bias:
+        out.append(f"- ⚠ position check: slot-first {dict(posfirst)} (uniform≈{n//4}) — some position bias.")
     if pos_bias:
         out.append(f"- ⚠ position check: slot-first {dict(posfirst)} (uniform≈{n//4}) — some position bias.")
     out.append("\n---\n_Real prime_context output; Opus generator + judge; small-n (5 tasks). aggregate-v9.py; aggregate only._")
