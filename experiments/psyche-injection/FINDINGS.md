@@ -615,6 +615,16 @@ A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself
   returns operational/atom pages instead. So dedup is a cheap **correctness
   guardrail** (never double-inject when overlap *does* happen), not the frequent
   token win first advertised. Honest measurement shrank the claim.
+  - **Update — the completeness fix makes dedup MORE load-bearing, exactly where it
+    should.** Re-measuring at the now-complete retrieval (5 queries): task-shaped prompts
+    still dedup ~0 ("focus this quarter", "hiring", "recent meetings" → 0/6), but
+    *identity-shaped* ones now dedup hard — "my philosophy on legacy" → **6 of 6 deduped**,
+    "how I make decisions" → 1. That's the fix working as intended: complete retrieval
+    now *reliably* surfaces the identity essays it used to starve, so without dedup the
+    `both` arm would double-inject them. And critically the **backfill still delivered a
+    full 6 unique pages** even when all 6 top hits were deduped — so the guardrail costs
+    no coverage. Two injection-engine features (dedup + backfill) validated together under
+    the completeness fix.
 
 - **A model-facing "how to use this" directive — cut (no effect).** Adding an
   explicit "serve this specific person, reason from their frameworks…" directive
