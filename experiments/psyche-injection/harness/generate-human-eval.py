@@ -8,14 +8,17 @@ computes the human Borda + best-vs-context once he submits.
 
 Output: human-eval.html (gitignored — embeds private answers). Open it in a browser.
 """
-import json, os, html
+import json, os, html, sys
 
 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONDS = ["naked", "context", "psyche", "best"]
 # fixed per-task shuffles (arm -> slot), balanced so no arm sits in one slot
 PERMS = [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1], [0, 2, 1, 3]]
 
-data = json.load(open(os.path.join(base, "results/raw/results-v9.json")))
+# Default to v12 — the answers from the FIXED retrieval pipeline (the current
+# product), not v9's buggy-retrieval ones. Override with an explicit path.
+fname = sys.argv[1] if len(sys.argv) > 1 else "results/raw/results-v12.json"
+data = json.load(open(fname if os.path.isabs(fname) else os.path.join(base, fname)))
 tasks_js = []
 blocks = []
 for ti, t in enumerate(data):
