@@ -356,3 +356,31 @@ final class MCPProcessTests: XCTestCase {
         XCTAssertTrue(r.stderr.contains("timed out") || r.stdout.contains("started"))
     }
 }
+
+final class ContextBundleTests: XCTestCase {
+    private func node(_ id: Int, slug: String, source: String) -> BrainNode {
+        BrainNode(id: id, slug: slug, type: "company", source: source,
+                  title: "", created: "2026-06-01", updated: "2026-06-01T00:00:00Z")
+    }
+
+    func testBuildDedupsBySlugAcrossSources() throws {
+        // Regression for the round-7 audit: a slug present in two enabled sources
+        // was injected twice (wasted budget, inflated pageCount). Must emit once.
+        let fm = FileManager.default
+        let dir = fm.temporaryDirectory.appendingPathComponent("glia-cbtest-\(getpid())")
+        try? fm.removeItem(at: dir)
+        try fm.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: dir) }
+        try "# Fountain\n\nreal body content for the page".write(
+            to: dir.appendingPathComponent("companies-fountain.md"), atomically: true, encoding: .utf8)
+
+        let nodes = [node(1, slug: "companies-fountain", source: "principal"),
+                     node(2, slug: "companies-fountain", source: "ea")]   // same slug, two sources
+        let bundle = ContextBundle.build(nodes: nodes, header: "test",
+                                         mirrors: ["principal": dir, "ea": dir])
+        XCTAssertEqual(bundle.pageCount, 1, "duplicate slug must be emitted once")
+        // the section marker must appear exactly once
+        let occurrences = bundle.text.components(separatedBy: "· companies-fountain*").count - 1
+        XCTAssertEqual(occurrences, 1)
+    }
+}
