@@ -85,9 +85,9 @@ Materials (the psyche + per-task context) are built from a real brain and are
 
 - [FINDINGS.md](FINDINGS.md) — narrative reading of both runs (read this first).
 - [REPORT.md](REPORT.md) / [v2](REPORT-v2.md) / [v3](REPORT-v3.md) / [v4](REPORT-v4.md)
-  / [v5](REPORT-v5.md) / [v6](REPORT-v6.md) / [v7](REPORT-v7.md) — raw metrics per run
-  (Borda, pairwise, rubric, cross-model, dose-response, cross-vendor, **task expansion**);
-  aggregate only, no private content.
+  / [v5](REPORT-v5.md) / [v6](REPORT-v6.md) / [v7](REPORT-v7.md) / [v8](REPORT-v8.md) — raw
+  metrics per run (Borda, pairwise, rubric, cross-model, dose-response, cross-vendor,
+  **task expansion**, **context-construction control**); aggregate only, no private content.
 - [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
   confound (a shorter arm beats a longer one on content in all three judge pools).
 - [SIGNIFICANCE.md](SIGNIFICANCE.md) — task-clustered uncertainty: direction is
@@ -98,16 +98,17 @@ Materials (the psyche + per-task context) are built from a real brain and are
 are** makes an agent sharper — but as a **complement** to what's relevant, not a
 replacement. The **both** arm is the top-ranked arm and beats identity-alone
 **75%** and no-injection **79%** — those are robust, reproduce across three judge
-vendors (Opus, Haiku, gpt-5), and survive a verbosity control. What v7 **tempered**:
-the marginal edge of identity *over retrieval alone* is modest — `best` beats
-`context` **59%** pooled (7/11 tasks, not significant), **down from the 7-task
-pilot's 71%.** Identity helps over retrieval **mainly when retrieval doesn't already
-surface the identity** (when it does — the task pulls your own essays — the psyche
-is redundant, which is why `prime_context` dedups). On neutral/technical tasks every
-arm ties, so the lift is identity-specific, not a global "try harder." Trust the
-ordering; read the marginal percentage as small and conditional
-(see [REPORT-v7.md](REPORT-v7.md) / [SIGNIFICANCE.md](SIGNIFICANCE.md) /
-[VERBOSITY-CHECK.md](VERBOSITY-CHECK.md)).
+vendors (Opus, Haiku, gpt-5), and survive a verbosity control. What v7/v8 **clarified**:
+the marginal edge of identity *over retrieval alone* is real but moderate and
+**construction-sensitive** — measured at 71% (7-task pilot), 33% (v7's essay-laden
+keyword context), and **~60% with production-realistic natural-query context (v8)**.
+Identity helps over retrieval **when retrieval doesn't already surface the identity**;
+when the task's retrieval pulls your own essays, the psyche is redundant (which is
+why `prime_context` dedups). On neutral/technical tasks every arm ties, so the lift
+is identity-specific, not a global "try harder." Trust the ordering and the
+conditionality; treat the exact percentage as ~55–65%, not a single point
+(see [REPORT-v7.md](REPORT-v7.md) / [REPORT-v8.md](REPORT-v8.md) /
+[SIGNIFICANCE.md](SIGNIFICANCE.md) / [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md)).
 
 **What v1 got wrong (kept in the repo on purpose):** the first, *non-blind* run
 claimed psyche *alone* beat the combination and that retrieval *diluted*

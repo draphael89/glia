@@ -388,14 +388,52 @@ Combined with v2/v3, that's **12 identity tasks / 73 blind judgments**. Numbers 
   querying with the *natural task sentence*, surfaces those essays far less often
   (measured dedup ~0% on natural prompts — see the dedup ledger entry below). So
   the exact best-vs-context number is sensitive to what retrieval happens to
-  surface — which is itself the point: identity's marginal value rides on whether
-  retrieval already carried it, and that varies with phrasing and brain content.
+  surface. **§ v8 below tests this directly — rebuilding these tasks' context the
+  production way recovers best-vs-context from 33% to 60%, so v7 partly
+  under-counted identity.**
 
 **Net after v7:** the durable claim is narrower and better-supported — *inject both;
 `best` is the top arm; identity beats naked and beats identity-alone.* The flashy
 "identity beats retrieval 71%" was a small-sample high; the real marginal effect is
 modest and **conditional on retrieval not already carrying the identity.** That
 conditionality is the product design, not a footnote to it.
+
+---
+
+# v8 — was the tempering a context-construction artifact? (partly — it recovers)
+
+v7 flagged its own confound and v8 tests it. v7 built each `context` file with a
+**keyword-rich** query that often pulled David's own essays into the retrieval
+arm; the *production* server queries with the **natural task sentence**, which
+(the dedup measurement below showed) surfaces those essays far less. v8 rebuilds
+the SAME 5 identity tasks' context with natural-task queries and re-runs
+generation + judging identically — only the context-query construction differs.
+[REPORT-v8.md](REPORT-v8.md).
+
+**The identity edge recovers — v7 partly under-counted it.**
+
+- `best` beats `context` on the 5 tasks: **33% with keyword context (v7) → 60%
+  with natural context (v8)**; best wins **1/5 → 3/5** tasks.
+- The mechanism is visible per task. **t14 "weekly rhythm"**: keyword context
+  pulled 4 essays (identity already present) → best **0%**; natural context pulled
+  **0** essays (operational) → best **80%** (+80pp). **t13 bio**: +80pp likewise.
+  Where a task genuinely retrieves essays *even* on a natural query (**t11 "why am
+  I stuck"**, 6 essays both ways) `best` stays suppressed (40%) — that part is
+  real, not artifact.
+- So production-realistic context puts the identity-over-retrieval edge around
+  **~60%** on these tasks — above v7's 59% headline (which used essay-laden keyword
+  context) and below the pilot's 71%. The truth is **construction-sensitive and
+  lands in between.**
+
+**Synthesis across v7+v8.** Two forces make identity genuinely additive in
+production, and v7's keyword context defeated both: (1) natural task queries rarely
+pull the identity essays, so `context` is operational and the psyche adds real
+identity; (2) the dedup strips essays on the rare occasions they *are* pulled. The
+durable claim, now triangulated across three constructions (pilot 71% / keyword
+33% / natural 60%): **`best` is the top arm; identity's marginal edge over
+retrieval is real and moderate (~55–65% production-realistic), and collapses only
+when retrieval already carries the identity.** The exact number was never the
+finding — the *conditionality* is.
 
 ---
 
