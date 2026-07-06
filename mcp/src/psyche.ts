@@ -1,7 +1,26 @@
-import { readFile, readdir } from "node:fs/promises";
+import { readFile, readdir, open } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "./config.js";
+
+/** Read a file but never pull more than `psycheMaxBytes` into memory, so a huge
+ *  or binary identity source can't blow memory / stall every prime call. Reads
+ *  only the first N bytes when the file is oversized. */
+async function readCapped(path: string): Promise<string> {
+  const cap = config.psycheMaxBytes;
+  let size = Infinity;
+  try { size = statSync(path).size; } catch { /* fall through to full read */ }
+  if (size <= cap) return readFile(path, "utf8");
+  const fh = await open(path, "r");
+  try {
+    const buf = Buffer.alloc(cap);
+    const { bytesRead } = await fh.read(buf, 0, cap, 0);
+    console.error(`glia-context: identity source ${path} is ${size}B > ${cap}B cap — reading first ${bytesRead}B only`);
+    return buf.subarray(0, bytesRead).toString("utf8");
+  } finally {
+    await fh.close();
+  }
+}
 
 /** Strip gbrain frontmatter + fact markers from a page body. */
 export function cleanBody(raw: string): string {
@@ -46,7 +65,7 @@ export interface PsycheResult {
 export async function loadPsyche(): Promise<PsycheResult> {
   try {
     if (existsSync(config.psycheFile)) {
-      const text = await readFile(config.psycheFile, "utf8");
+      const text = await readCapped(config.psycheFile);
       if (text.trim().length > 200) {
         let fileMtimeMs: number | undefined;
         try { fileMtimeMs = statSync(config.psycheFile).mtimeMs; } catch { /* best-effort */ }
@@ -73,7 +92,7 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
         // psycheSlugs can dedup retrieval against the built psyche too (not just
         // the canonical file).
         const slug = rel.replace(/\.md$/, "");
-        parts.push(`## Self\n*person · ${slug}*\n`, await readFile(p, "utf8"), "");
+        parts.push(`## Self\n*person · ${slug}*\n`, await readCapped(p), "");
         found++;
         break;
       }
@@ -84,7 +103,7 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
       if (files.length > 0) parts.push("## Essays\n");
       for (const f of files) {
         const slug = `originals/${f.replace(/\.md$/, "")}`;
-        parts.push(`### ${slug}\n*original · ${slug}*\n`, await readFile(join(originals, f), "utf8"), "\n---");
+        parts.push(`### ${slug}\n*original · ${slug}*\n`, await readCapped(join(originals, f)), "\n---");
         found++;
       }
     }

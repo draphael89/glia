@@ -59,6 +59,10 @@ export const config = {
   /** The identity self-page slug (rank-0 in the psyche). Env-overridable so the
    *  OSS multi-user build isn't hardcoded to one person. */
   selfSlug: (process.env.GLIA_SELF_SLUG || "people-david").trim().toLowerCase(),
+  /** Ceiling on a single identity-source read (psyche file, self-page, each
+   *  essay). Bounds memory if a psyche file is huge/binary — far above any real
+   *  psyche (~100-250KB) but blocks a pathological multi-MB read per prime. */
+  psycheMaxBytes: intEnv("GLIA_PSYCHE_MAX_BYTES", 2_000_000),
   /** GLIA_STRICT_STARTUP=1 → exit on any failed config check, not just fatal. */
   strictStartup: process.env.GLIA_STRICT_STARTUP === "1",
 };
