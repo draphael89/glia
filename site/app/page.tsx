@@ -1,4 +1,4 @@
-import { v2, v1, armColor, armLabel } from "./results";
+import { v2, v1, v7, armColor, armLabel } from "./results";
 
 const REPO = "https://github.com/draphael89/glia";
 
@@ -74,17 +74,18 @@ export default function Home() {
           <h2>The honest result (blind, 49 judgments)</h2>
           <div className="grid2" style={{ marginBottom: 30 }}>
             <div className="card">
-              <div className="stat gold">71%</div>
-              <div className="stat-label">
-                adding <span className="accent">who you are</span> to what&apos;s relevant beats
-                relevance alone, judged blind
-              </div>
-            </div>
-            <div className="card">
               <div className="stat gold">1st</div>
               <div className="stat-label">
                 <span style={{ color: armColor.best }}>both</span> tops the blind Borda ranking
-                <em> and</em> every rubric dimension
+                across <strong>12 tasks</strong> and every judge vendor (Opus, Haiku, gpt-5)
+              </div>
+            </div>
+            <div className="card">
+              <div className="stat gold">75 / 79%</div>
+              <div className="stat-label">
+                <span style={{ color: armColor.best }}>both</span> beats
+                <span style={{ color: armColor.psyche }}> identity-alone</span> 75% and
+                no-injection 79% — the robust, cross-vendor claims
               </div>
             </div>
           </div>
@@ -97,12 +98,17 @@ export default function Home() {
             <BordaChart data={v2.borda} />
           </div>
           <p className="muted" style={{ marginTop: 14 }}>
-            <span style={{ color: armColor.best }}>Both</span> wins — and it holds:
-            <span style={{ color: armColor.best }}> both</span> beats <span style={{ color: armColor.context }}>relevance</span> alone
-            in {v2.consistency.bestOverContext} of {v2.consistency.ofTasks} tasks (71% pairwise), and
-            <span style={{ color: armColor.context }}> relevance</span> alone still beats
-            <span style={{ color: armColor.psyche }}> psyche</span> alone. Identity is not a substitute
-            for grounding — it&apos;s what you add <em>on top</em>.
+            <span style={{ color: armColor.best }}>Both</span> wins the ranking, and
+            <span style={{ color: armColor.context }}> relevance</span> alone beats
+            <span style={{ color: armColor.psyche }}> psyche</span> alone — identity is not a
+            substitute for grounding, it&apos;s what you add <em>on top</em>. One honest caveat,
+            surfaced by the <a href="#kill">v7 expansion</a>: on this 7-task pilot
+            <span style={{ color: armColor.best }}> both</span> beat
+            <span style={{ color: armColor.context }}> relevance</span> alone 71%, but across
+            <strong> 12 tasks</strong> that margin fell to <strong>59%</strong> (not significant).
+            The durable claims are <span style={{ color: armColor.best }}>both</span> beating
+            identity-alone and no-injection; the extra lift <em>over</em> retrieval is real but small
+            and conditional.
           </p>
         </div>
       </section>
@@ -175,7 +181,7 @@ export default function Home() {
       </section>
 
       {/* The retraction */}
-      <section>
+      <section id="kill">
         <div className="wrap">
           <h2>What we retracted</h2>
           <h3>&ldquo;Psyche alone beats everything&rdquo; did not survive blind judging.</h3>
@@ -197,7 +203,26 @@ export default function Home() {
             gpt-5, judging blind: <span style={{ color: armColor.best }}>both</span> still wins (beats
             relevance 63%, identity-alone 67%) and the specificity/insight mechanism holds, though gpt-5
             is harsher on identity-alone. The headline survives a different vendor; the exact tail order
-            is judge-dependent. Still a small-n pilot — but one we&apos;ve tried hard, across vendors, to kill.
+            is judge-dependent.
+          </p>
+          <h3 style={{ marginTop: 28 }}>And the 7-task pilot oversold one number.</h3>
+          <p>
+            The pilot said <span style={{ color: armColor.best }}>both</span> beats
+            <span style={{ color: armColor.context }}> relevance</span> alone 71%. So we bought the one
+            thing a re-judge can&apos;t: <strong>more tasks</strong>. Seven fresh, pre-registered tasks,
+            generated and blind-judged identically ({v7.identityTasks} tasks / {v7.judgments} judgments
+            total). The ordering held and <span style={{ color: armColor.best }}>both</span> still beat
+            identity-alone ({v7.pairwise[1].rate}%) and no-injection ({v7.pairwise[0].rate}%) — but the
+            margin <em>over retrieval</em> fell to <strong>{v7.bestOverContext.pooledPct}%</strong>{" "}
+            ({v7.bestOverContext.tasks} of {v7.bestOverContext.ofTasks} tasks, not statistically
+            significant). The reason was instructive: on the tasks where adding identity <em>didn&apos;t</em>
+            help, retrieval had already surfaced the person&apos;s own essays — the identity was present,
+            so injecting it again was redundant. Identity helps over retrieval precisely when retrieval
+            <em> doesn&apos;t already carry it</em>. The durable claim is narrower and better for it.
+          </p>
+          <p className="muted">
+            Still a small-n pilot — but one we&apos;ve tried hard, across vendors and across a doubled
+            task set, to kill. When it broke, we wrote down how.
           </p>
         </div>
       </section>
@@ -206,7 +231,7 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>How hard we pushed on it</h2>
-          <h3>Five runs, each trying to break the last.</h3>
+          <h3>Seven runs, each trying to break the last.</h3>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>
             <table>
               <thead>
@@ -219,6 +244,7 @@ export default function Home() {
                 <tr><td className="mono">v4</td><td>a <strong>different model</strong> (Haiku 4.5) re-judges</td><td>reproduced the ordering → not self-preference; margin model-dependent</td></tr>
                 <tr><td className="mono">v5</td><td><strong>dose-response</strong> — psyche truncated to 4 budgets</td><td>a ~3k-token core reaches ~95% of peak; insight keeps climbing with more</td></tr>
                 <tr><td className="mono">v6</td><td>a <strong>different vendor</strong> (OpenAI gpt-5) re-judges</td><td><span style={{ color: armColor.best }}>both</span> still wins (beats context 64%, psyche 68%); mechanism holds → not self-preference</td></tr>
+                <tr><td className="mono">v7</td><td><strong>expansion</strong> — 7 fresh pre-registered tasks (→12 total)</td><td>ordering holds, but <span style={{ color: armColor.best }}>both</span>-over-<span style={{ color: armColor.context }}>relevance</span> tempered 71%→59% (n.s.); identity&apos;s edge is conditional on retrieval not already carrying it</td></tr>
               </tbody>
             </table>
           </div>

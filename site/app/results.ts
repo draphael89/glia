@@ -57,6 +57,29 @@ export const v2 = {
   controlsPassRate: 100,
 };
 
+// v7 — the EXPANSION run. The one thing a re-judge can't buy is more tasks, so we
+// added 7 fresh pre-registered tasks (t10-t16), generated + blind-judged identically
+// (strict per-arm isolation). Combined = 12 identity tasks / 73 judgments. It tempers
+// the pilot honestly: the ORDERING holds and both still beats identity-alone + naked,
+// but the marginal edge of identity OVER retrieval did not replicate.
+export const v7 = {
+  identityTasks: 12,
+  judgments: 73,
+  borda: [
+    { arm: "best", score: 156 },
+    { arm: "context", score: 134 },
+    { arm: "psyche", score: 91 },
+    { arm: "naked", score: 57 },
+  ],
+  pairwise: [
+    { a: "best", b: "naked", rate: 79 },
+    { a: "best", b: "psyche", rate: 75 },
+    { a: "best", b: "context", rate: 59 }, // down from the 7-task pilot's 71%
+  ],
+  // best beats context in 7 of 11 decidable tasks — sign test p=0.55, NOT significant
+  bestOverContext: { tasks: 7, ofTasks: 11, pooledPct: 59, pilotPct: 71 },
+};
+
 // v1 — the first, non-blind run. Judges saw the answers and scored a "personal fit"
 // dimension. Kept for the arc: it's what we then set out to break.
 export const v1 = {
