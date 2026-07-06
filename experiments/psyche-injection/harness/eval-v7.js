@@ -32,13 +32,18 @@ const OBJ_SCHEMA = { type:'object', properties:{
   rationale:{ type:'string' } },
   required:['perAnswer'] }
 
-// Identical to v2 — the arms read the same materials the same way.
+// Same materials as v2, but with EXPLICIT read-isolation. v2's prompt named the
+// file to read but didn't forbid exploring others; observed sporadic cross-arm
+// leakage (a psyche arm grepping the context files) would collapse arm separation.
+// Each arm now reads EXACTLY its assigned file(s) and nothing else — enforcing
+// what the arm definitions always intended.
+const ISOLATE = 'CRITICAL ISOLATION RULE: read EXACTLY the file(s) named above and NOTHING else. Do NOT list directories, do NOT grep/search the materials folder, do NOT open any other file. Your answer must rest only on the named file(s) plus your own general knowledge.'
 function genPrompt(task, cond) {
   const reads = {
-    naked: 'Answer directly from the task alone.',
-    context: `First read ${MATDIR}/${task.id}-context.md — relevant background from David's knowledge base. Ground the answer in it.`,
-    psyche: `First read ${MATDIR}/psyche.md — who David is: values, worldview, essays. Let who he is shape the answer.`,
-    best: `First read BOTH ${MATDIR}/${task.id}-context.md (background) AND ${MATDIR}/psyche.md (who David is). Use both.`,
+    naked: 'Answer from the task and your own general knowledge ALONE. Do NOT read any files, list any directory, or search — there are no materials for you.',
+    context: `Read ONLY this one file: ${MATDIR}/${task.id}-context.md — relevant background from David's knowledge base. Ground the answer in it. ${ISOLATE}`,
+    psyche: `Read ONLY this one file: ${MATDIR}/psyche.md — who David is: values, worldview, essays. Let who he is shape the answer. ${ISOLATE}`,
+    best: `Read ONLY these two files: ${MATDIR}/${task.id}-context.md (background) AND ${MATDIR}/psyche.md (who David is). Use both. ${ISOLATE}`,
   }[cond]
   return `You are answering on behalf of David. Produce the single best possible answer FOR HIM specifically. ${reads}
 
