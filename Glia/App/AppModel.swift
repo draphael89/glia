@@ -256,7 +256,7 @@ final class AppModel {
                 self.positions = final
                 self.isSettling = false
                 self.sceneDirty()
-                self.setContinuousRendering(false)
+                self.refreshContinuousRendering()   // don't cut an in-flight camera/selection animation
                 // Stable spatial memory extends across launches: come back
                 // to exactly where you were, not a re-fit.
                 if !self.restoreViewState() { self.fitView() }
@@ -528,6 +528,19 @@ final class AppModel {
         if !on { view.requestDraw() }   // flush the final state once
     }
 
+    /// Pause ONLY if nothing still needs frames. Several owners (settle, camera
+    /// flight, replay, selection-glow) drive continuous rendering; a raw
+    /// setContinuousRendering(false) from one used to freeze another's in-flight
+    /// animation. Route every "I'm done" through here so the view keeps rendering
+    /// while ANY reason remains, and pauses only when all are quiet.
+    private func refreshContinuousRendering() {
+        let stillAnimating = isSettling
+            || renderer.camera.isAnimating
+            || replay.isPlaying
+            || selectedIndex != nil            // selection glow breathes
+        setContinuousRendering(stillAnimating)
+    }
+
     private func frameTicked() {
         let inMotion = isSettling || renderer.camera.isAnimating || replay.isPlaying
         // Invalidate SwiftUI overlays only while something MOVES. Bumping
@@ -588,6 +601,7 @@ final class AppModel {
             selectedIndex = i
         }
         cameraChanged()
+        refreshContinuousRendering()   // a restored selection's glow must breathe, not sit static
         return true
     }
 
@@ -597,7 +611,7 @@ final class AppModel {
     }
 
     func replayChanged() { sceneDirty() }
-    func setReplayRendering(_ on: Bool) { setContinuousRendering(on) }
+    func setReplayRendering(_ on: Bool) { on ? setContinuousRendering(true) : refreshContinuousRendering() }
 
     func fitView() {
         guard !positions.isEmpty, let view else { return }
