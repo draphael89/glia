@@ -382,6 +382,14 @@ Combined with v2/v3, that's **12 identity tasks / 73 blind judgments**. Numbers 
   psyche against retrieval instead of stacking them.
 - **Controls stay clean.** On the checkable Bloom-filter task every arm scored
   100% objectively; identity adds nothing where an answer is just right-or-wrong.
+- **A construction caveat, stated plainly.** How identity-laden the `context` arm
+  is depends on how its material was retrieved. v7's context files were built with
+  keyword-rich queries, so t11/t14 pulled several essays; the *production* server,
+  querying with the *natural task sentence*, surfaces those essays far less often
+  (measured dedup ~0% on natural prompts — see the dedup ledger entry below). So
+  the exact best-vs-context number is sensitive to what retrieval happens to
+  surface — which is itself the point: identity's marginal value rides on whether
+  retrieval already carried it, and that varies with phrasing and brain content.
 
 **Net after v7:** the durable claim is narrower and better-supported — *inject both;
 `best` is the top arm; identity beats naked and beats identity-alone.* The flashy
@@ -396,11 +404,19 @@ conditionality is the product design, not a footnote to it.
 A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself
 (reusable harness: `harness/eval-inject-ab.js`). The honest ledger:
 
-- **Dedup retrieval against the psyche — kept (efficiency).** On identity-shaped
-  tasks ~**50%** of the top gbrain hits are pages *already in the injected psyche*
-  (your starred essays). Re-injecting them is pure waste. `prime_context` now
-  drops psyche-present pages from retrieval and **backfills** down the ranked list
-  to `topK` genuinely-new unique pages. A strict content-uniqueness / token win.
+- **Dedup retrieval against the psyche — kept (correctness safety), but it fires
+  less than first claimed.** `prime_context` drops psyche-present pages from
+  retrieval and **backfills** down the ranked list to `topK` genuinely-new unique
+  pages. An early note put the overlap at ~50%; instrumenting the shipped server
+  (`dedupedCount`, added after v7) and measuring 8 representative queries corrected
+  that: overlap is **query-phrasing-dependent and usually low** — **~0% on natural
+  task prompts** ("organize my week…", "why am I stuck…"), spiking to ~80% only
+  when the query literally names the essays ("loyalty to the future self…"). The
+  reason: the injected psyche is a small fixed core (~9 essays after the cap), and
+  gbrain's hybrid search on a *natural* task seldom returns those exact pages — it
+  returns operational/atom pages instead. So dedup is a cheap **correctness
+  guardrail** (never double-inject when overlap *does* happen), not the frequent
+  token win first advertised. Honest measurement shrank the claim.
 
 - **A model-facing "how to use this" directive — cut (no effect).** Adding an
   explicit "serve this specific person, reason from their frameworks…" directive
