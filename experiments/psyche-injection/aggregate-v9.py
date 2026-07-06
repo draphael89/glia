@@ -7,7 +7,7 @@ compiled MCP. The question: does the thing we actually SHIP reproduce the findin
 
 Reads results/raw/results-v9.json. Writes REPORT-v9.md. Aggregate only.
 """
-import json, os
+import json, os, sys
 from collections import defaultdict
 
 CONDS = ["naked", "context", "psyche", "best"]
@@ -48,9 +48,13 @@ def analyze(data):
 
 
 def main():
-    path = os.path.join(base, "results/raw/results-v9.json")
+    # optional arg: aggregate a different production-shape results file (e.g.
+    # results/raw/results-v12.json). Report name is derived from it.
+    fname = sys.argv[1] if len(sys.argv) > 1 else "results/raw/results-v9.json"
+    path = fname if os.path.isabs(fname) else os.path.join(base, fname)
+    tag = os.path.basename(path).replace("results-", "").replace(".json", "")  # e.g. "v9" / "v12"
     if not os.path.exists(path):
-        print("results-v9.json not present yet — run the v9 workflow first."); return
+        print(f"{fname} not present yet — run the workflow first."); return
     borda, pw, pt, rub, n, posfirst, per_task = analyze(json.load(open(path)))
     order = sorted(CONDS, key=lambda c: -borda[c])
     out = ["# Psyche Injection — v9 (production-pipeline: does the SHIPPED thing help?)\n"]
@@ -72,7 +76,7 @@ def main():
         out.append(f"- **{tid}**: {' > '.join(od)}  (winner {e['winner']}, {e['n']} judgments)")
 
     # Cross-vendor (gpt-5) block, if judged.
-    gpt5_path = os.path.join(base, "results/raw/results-v9-gpt5.json")
+    gpt5_path = os.path.join(base, f"results/raw/results-{tag}-gpt5.json")
     if os.path.exists(gpt5_path):
         gb, gpw, gpt, _, gn, gpos, _ = analyze(json.load(open(gpt5_path)))
         gorder = sorted(CONDS, key=lambda c: -gb[c])
@@ -100,7 +104,7 @@ def main():
     if pos_bias:
         out.append(f"- ⚠ position check: slot-first {dict(posfirst)} (uniform≈{n//4}) — some position bias.")
     out.append("\n---\n_Real prime_context output; Opus generator + judge; small-n (5 tasks). aggregate-v9.py; aggregate only._")
-    open(os.path.join(base, "REPORT-v9.md"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(base, f"REPORT-{tag}.md"), "w").write("\n".join(out) + "\n")
     print("\n".join(out))
 
 
