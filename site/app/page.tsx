@@ -193,9 +193,11 @@ export default function Home() {
             judgments) — the ordering tightened, holding in {v2.consistency.bestOverContext} of
             {" "}{v2.consistency.ofTasks} tasks. A fourth had a <em>different</em> model (Haiku&nbsp;4.5)
             re-judge the Opus-written answers: it reproduced the exact ordering — so this isn&apos;t a
-            model grading its own homework — though the fine <span style={{ color: armColor.best }}>best</span>-vs-<span style={{ color: armColor.context }}>relevance</span> margin
-            shrank to a near-tie under the smaller judge. Trust the ordering; treat the exact margin as a
-            hypothesis. Still a small-n pilot; a true cross-vendor judge is the next test.
+            model grading its own homework. And a sixth crossed <em>vendors</em> entirely — OpenAI&apos;s
+            gpt-5, judging blind: <span style={{ color: armColor.best }}>both</span> still wins (beats
+            relevance 63%, identity-alone 67%) and the specificity/insight mechanism holds, though gpt-5
+            is harsher on identity-alone. The headline survives a different vendor; the exact tail order
+            is judge-dependent. Still a small-n pilot — but one we&apos;ve tried hard, across vendors, to kill.
           </p>
         </div>
       </section>
@@ -216,12 +218,14 @@ export default function Home() {
                 <tr><td className="mono">v3</td><td><strong>7 judges</strong>/task (49 judgments)</td><td>held and tightened — consistent in 6 of 7 tasks</td></tr>
                 <tr><td className="mono">v4</td><td>a <strong>different model</strong> (Haiku 4.5) re-judges</td><td>reproduced the ordering → not self-preference; margin model-dependent</td></tr>
                 <tr><td className="mono">v5</td><td><strong>dose-response</strong> — psyche truncated to 4 budgets</td><td>a ~3k-token core reaches ~95% of peak; insight keeps climbing with more</td></tr>
+                <tr><td className="mono">v6</td><td>a <strong>different vendor</strong> (OpenAI gpt-5) re-judges</td><td><span style={{ color: armColor.best }}>both</span> still wins (beats context 63%, psyche 67%); mechanism holds → not self-preference</td></tr>
               </tbody>
             </table>
           </div>
           <p className="muted" style={{ marginTop: 12 }}>
-            The claims that survived every run: priming beats a bare prompt, and identity + retrieval
-            together lead the field. Every run&apos;s harness and aggregate numbers are in the repo.
+            The claims that survived every run — including a blind cross-vendor judge: priming beats a
+            bare prompt, and identity + retrieval together lead the field, because retrieval buys
+            specificity and identity buys insight. Every run&apos;s harness and aggregate numbers are in the repo.
           </p>
         </div>
       </section>

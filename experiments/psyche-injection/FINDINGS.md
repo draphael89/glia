@@ -261,6 +261,36 @@ identity (self-page + top essays) is the high-value core to keep — exactly the
 
 ---
 
+# v6 — the true cross-vendor judge (is it Anthropic self-preference?)
+
+v2/v3 judged with Opus; v4 with Haiku — both **Anthropic**. The one threat left
+open: maybe the whole family shares a preference for its own outputs. v6 settles
+it — a **non-Anthropic frontier model, gpt-5 (OpenAI)**, blind-judges the same
+FIXED Opus-4.8 answers. Numbers in [REPORT-v6.md](REPORT-v6.md).
+
+**It reproduces.** gpt-5 (27 blind judgments, position bias controlled) ranks
+**best first** (Borda: best 49 > context 42 > naked 39 > psyche 32) and beats
+context **63%**, psyche **67%** head-to-head. And the *mechanism* holds cleanly
+on its rubric: psyche-alone is **lowest on specificity** (7.1) but **top on
+insight** (8.6); `best` tops both (7.9 / 8.7) — exactly "retrieval buys
+specificity, identity buys insight." **A different vendor's frontier model agrees
+the combined arm is strongest — so the finding is not Anthropic self-preference.**
+
+**Honest divergence.** gpt-5 is harsher on psyche-*alone* (ranks it last, below
+naked) and kinder to concise naked answers than Opus was. So the ordering of the
+*weaker* arms (psyche vs naked) is judge-dependent; the **headline — inject BOTH,
+retrieval→specificity, identity→insight — survives cross-vendor, the exact tail
+order does not.**
+
+**Methodological catch.** gpt-4o was **unusable** as a judge here: it ranked
+whatever sat in slot A first **~90%** of the time (severe position bias) with
+near-flat content scores. Cross-vendor judging is confounded by judge-specific
+biases — a *discriminating* judge (gpt-5) is required, and a weaker model can
+silently fail to measure the effect at all. (Access: OpenAI API via the machine's
+own key; raw judgments gitignored, aggregate only.)
+
+---
+
 # Iteration loop — injection tuning (what moved the needle, what didn't)
 
 A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself
