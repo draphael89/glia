@@ -97,6 +97,13 @@ struct GliaApp: App {
                 .keyboardShortcut("d", modifiers: .command)
                 .disabled(model.selectedIndex == nil)
 
+                Button("Star Identity Core") {
+                    model.starIdentityCore()
+                }
+                .keyboardShortcut("d", modifiers: [.command, .shift])
+                .disabled(model.demoActive)
+                .help("Star your self-page + essays — the concentrated identity core the dose-response found carries most of the injection's value")
+
                 if model.demoActive {
                     Button("Exit Demo") { model.exitDemo() }
                 }

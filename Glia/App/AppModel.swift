@@ -885,6 +885,24 @@ final class AppModel {
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
 
+    /// One-click identity core: star the self-page + essays (ContextBundle
+    /// identityRank ≤ 1) — the concentrated core the dose-response found reaches
+    /// ~95% of the full psyche's blind ranking. Gives a new user a strong psyche
+    /// to inject without hunting. Returns how many nodes were added.
+    @discardableResult
+    func starIdentityCore() -> Int {
+        guard !demoActive else { return 0 }
+        let core = graph.nodes.filter { ContextBundle.identityRank($0) <= 1 }.map(\.slug)
+        guard !core.isEmpty else { return 0 }
+        let before = starredSlugs.count
+        starredSlugs.formUnion(core)
+        UserDefaults.standard.set(Array(starredSlugs), forKey: "starredSlugs")
+        sceneDirty()
+        view?.requestDraw()
+        scheduleLiveSync()
+        return starredSlugs.count - before
+    }
+
     var starredCount: Int { starredSlugs.count }
 
     // MARK: context bundle ("vault of mind" export)
