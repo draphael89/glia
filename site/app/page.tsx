@@ -253,9 +253,25 @@ export default function Home() {
             reader</strong> — but know that every number here bounds identity&apos;s value from
             <em> below</em>. Test what you ship, not a picture of it.
           </p>
+          <h3 style={{ marginTop: 28 }}>Then testing what we ship paid off — it flipped back.</h3>
+          <p>
+            Chasing <em>why</em> v9&apos;s retrieval was thin surfaced a real bug: the server searches the
+            whole brain but read page bodies from a <em>subset</em> mirror, silently dropping 7–8 of the
+            top 8 pages and starving the very arm under test. We fixed it (a live fallback fetch + a
+            noise filter) and re-ran the same tasks (v12). We predicted it would only help
+            <span style={{ color: armColor.context }}> retrieval</span> more — and it did the opposite:
+            with sound grounding, <span style={{ color: armColor.best }}>both</span> now
+            <strong> beats</strong> <span style={{ color: armColor.context }}>retrieval</span> alone,
+            cross-vendor — best-vs-context <strong>52%→64%</strong> (Opus) and <strong>30%→56%</strong>
+            (gpt-5, where <span style={{ color: armColor.best }}>both</span> went from last place to first).
+            <strong> v9 was a retrieval bug, not a thesis failure.</strong> Fix the grounding and the
+            shipped result snaps back to what the reconstructions said all along. The experiment didn&apos;t
+            just measure the product — it <em>found the bug</em>, and fixing it was the real win.
+          </p>
           <p className="muted">
             Small-n throughout — but tried hard, across vendors, a doubled task set, a construction
-            control, and the real shipped pipeline, to kill. Every time it bent, we wrote down how.
+            control, the real shipped pipeline, and a fact-check of the claims, to kill. Every time it
+            bent, we wrote down how — including the time it bent us.
           </p>
         </div>
       </section>
@@ -264,7 +280,7 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>How hard we pushed on it</h2>
-          <h3>Eleven runs, each trying to break the last.</h3>
+          <h3>Twelve runs, each trying to break the last.</h3>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>
             <table>
               <thead>
@@ -282,6 +298,7 @@ export default function Home() {
                 <tr><td className="mono">v9</td><td><strong>production pipeline</strong> — the ACTUALLY-shipped injection, not a reconstruction</td><td>blind judges (Opus + gpt-5) prefer <span style={{ color: armColor.context }}>retrieval</span> alone; injected <span style={{ color: armColor.best }}>both</span> doesn&apos;t beat it. A floor — the psyche-blind judge can&apos;t verify the identity (v6)</td></tr>
                 <tr><td className="mono">v10</td><td><strong>rebalance test</strong> — shrink the shipped identity core to recover <span style={{ color: armColor.best }}>both</span></td><td>hypothesis REFUTED: a smaller core made it worse, not better. More psyche helps; the shortfall isn&apos;t a config knob</td></tr>
                 <tr><td className="mono">v11</td><td><strong>floor check</strong> — fact-check the injected identity claims against ground truth</td><td>196 claims, <strong>98% accurate</strong>, 2% fabricated: the blind judges penalized real content they couldn&apos;t verify. Every number is a floor</td></tr>
+                <tr><td className="mono">v12</td><td><strong>fix the retrieval, retest</strong> — v9&apos;s retrieval was bugged (subset mirror dropped 7–8/8 top pages)</td><td>the finding <strong>FLIPS</strong>: <span style={{ color: armColor.best }}>both</span> now beats <span style={{ color: armColor.context }}>retrieval</span> alone, cross-vendor (52%→64% Opus, 30%→56% gpt-5). v9 was a bug, not a thesis failure</td></tr>
               </tbody>
             </table>
           </div>
