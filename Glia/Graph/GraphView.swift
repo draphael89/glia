@@ -90,13 +90,20 @@ final class GraphMTKView: MTKView {
     // MARK: gestures
 
     override func scrollWheel(with event: NSEvent) {
-        let dx = Float(event.scrollingDeltaX)
-        let dy = Float(event.scrollingDeltaY)
+        // A trackpad reports pixel deltas (tens per gesture); a classic mouse wheel
+        // reports line-based deltas of ~±1 per detent. Calibrating for one leaves the
+        // other unusable — so scale line deltas up (pan) / harder (zoom).
+        let precise = event.hasPreciseScrollingDeltas
         if event.modifierFlags.contains(.command) {
-            // ⌘-scroll zooms (mouse-wheel users)
-            let factor = exp2(dy / 240)
+            // ⌘-scroll zooms (mouse-wheel users). Pixel deltas ÷240; a mouse detent
+            // (~±1 line) should be a ~10% step, so scale line deltas much harder.
+            let dy = Float(event.scrollingDeltaY)
+            let factor = precise ? exp2(dy / 240) : exp2(dy * 0.14)
             model.renderer.camera.zoom(by: factor, anchorView: viewPoint(event), viewport: viewportSize)
         } else {
+            let scale: Float = precise ? 1 : 12   // make a wheel detent a visible pan nudge
+            let dx = Float(event.scrollingDeltaX) * scale
+            let dy = Float(event.scrollingDeltaY) * scale
             model.renderer.camera.pan(byViewDelta: SIMD2(-dx, -dy) * -1)
         }
         model.cameraChanged()
@@ -117,11 +124,22 @@ final class GraphMTKView: MTKView {
     }
 
     private var dragStarted = false
+    private var mouseDownLoc: NSPoint = .zero
 
-    override func mouseDown(with event: NSEvent) { dragStarted = false }
+    override func mouseDown(with event: NSEvent) {
+        dragStarted = false
+        mouseDownLoc = event.locationInWindow
+    }
 
     override func mouseDragged(with event: NSEvent) {
-        dragStarted = true
+        // Only begin panning once past a small slop threshold, so a click with a
+        // tiny finger tremor still selects the node instead of being eaten as a drag.
+        if !dragStarted {
+            let dx = Float(event.locationInWindow.x - mouseDownLoc.x)
+            let dy = Float(event.locationInWindow.y - mouseDownLoc.y)
+            if dx * dx + dy * dy < 16 { return }   // < 4px: treat as a click, not a drag
+            dragStarted = true
+        }
         model.renderer.camera.pan(byViewDelta: SIMD2(-Float(event.deltaX), -Float(event.deltaY)) * -1)
         model.cameraChanged()
     }
