@@ -1,7 +1,7 @@
 import { readFile, readdir, open } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { config } from "./config.js";
+import { config, selfSlugForms } from "./config.js";
 
 /** Read a file but never pull more than `psycheMaxBytes` into memory, so a huge
  *  or binary identity source can't blow memory / stall every prime call. Reads
@@ -31,8 +31,8 @@ export function cleanBody(raw: string): string {
 }
 
 /** Both slug forms of the identity self-page (people-david ↔ people/david),
- *  config-driven so the OSS multi-user build isn't hardcoded to one person. */
-const SELF_FORMS = new Set([config.selfSlug, config.selfSlug.replace("-", "/"), config.selfSlug.replace("/", "-")]);
+ *  from the shared config helper so build/retrieval/health can't drift apart. */
+const SELF_FORMS = new Set(selfSlugForms());
 
 /** Injection priority: self-page → essays → concepts → rest (mirrors Glia). */
 function identityRank(slug: string): number {

@@ -1,6 +1,6 @@
 import { accessSync, constants as FS, statSync } from "node:fs";
 import { delimiter, join } from "node:path";
-import { config } from "./config.js";
+import { config, selfSlugForms } from "./config.js";
 
 export type CheckStatus = "ok" | "warn" | "fail";
 export interface HealthCheck {
@@ -40,8 +40,11 @@ export function resolveCommand(cmd: string): string | null {
   return null;
 }
 
-function hasSelfPage(dir: string): boolean {
-  return isReadableFile(join(dir, "people-david.md")) || isReadableFile(join(dir, "people", "david.md"));
+export function hasSelfPage(dir: string): boolean {
+  // Derive candidates from config.selfSlug (GLIA_SELF_SLUG-aware) — NOT a hardcoded
+  // people-david, which mis-declared identity UNAVAILABLE (→ possible fatal exit) for
+  // any custom-slug build whose psyche builds only from the self-page.
+  return selfSlugForms().some((f) => isReadableFile(join(dir, `${f}.md`)));
 }
 
 let _retrievalMemo: boolean | null = null;

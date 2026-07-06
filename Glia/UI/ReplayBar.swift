@@ -48,6 +48,7 @@ struct ReplayBar: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(model.replay.isPlaying ? "Pause replay" : "Play replay")
 
             ScrubTrack(model: model)
                 .frame(width: 380, height: 34)
@@ -66,6 +67,7 @@ struct ReplayBar: View {
                     .foregroundStyle(.tertiary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Exit replay")
         }
         .padding(.horizontal, 16).padding(.vertical, 10)
         .panelBackground(cornerRadius: 14)
@@ -115,6 +117,29 @@ private struct ScrubTrack: View {
                     }
             )
         }
+        // The drag-to-seek track was invisible to VoiceOver and had no keyboard seek —
+        // the only way to scrub. Expose it as one adjustable element so assistive tech
+        // (and ⌃⌥←/→) can move the playhead in 5% steps.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Replay timeline")
+        .accessibilityValue(accessibilityValue)
+        .accessibilityAdjustableAction { direction in
+            let step = 0.05
+            let cur = model.replay.progress
+            switch direction {
+            case .increment: model.replay.scrub(to: min(1, cur + step))
+            case .decrement: model.replay.scrub(to: max(0, cur - step))
+            @unknown default: break
+            }
+        }
+    }
+
+    /// Spoken position for VoiceOver — the cursor date if we have one, else a percent.
+    private var accessibilityValue: String {
+        if let cursor = model.replay.cursor {
+            return cursor.formatted(.dateTime.year().month(.abbreviated).day())
+        }
+        return "\(Int((model.replay.progress * 100).rounded())) percent"
     }
 
     private func weeklyHistogram() -> [Double] {

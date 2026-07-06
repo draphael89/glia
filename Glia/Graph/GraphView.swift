@@ -53,9 +53,15 @@ final class GraphMTKView: MTKView {
     /// Called by AppModel when the selection changes — VoiceOver users
     /// hear what the camera flew to.
     func announceSelection(_ summary: String?) {
+        // Keep the canvas element's value in sync (read if the user navigates to it)…
         setAccessibilityValue(summary ?? "nothing selected")
         guard let summary else { return }
-        NSAccessibility.post(element: self, notification: .announcementRequested,
+        // …but POST the announcement on the window/app, per Apple's contract for
+        // .announcementRequested. Posted from an arbitrary child view it's the known
+        // silent-failure pattern — VoiceOver drops it — so selection would be spoken
+        // only if the user happened to be focused on the canvas.
+        let target: Any = window ?? NSApp as Any
+        NSAccessibility.post(element: target, notification: .announcementRequested,
                              userInfo: [.announcement: summary,
                                         .priority: NSAccessibilityPriorityLevel.high.rawValue])
     }

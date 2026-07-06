@@ -86,6 +86,15 @@ export const config = {
   strictStartup: process.env.GLIA_STRICT_STARTUP === "1",
 };
 
+/** All on-disk filename forms of the self-page slug (people-david ↔ people/david).
+ *  SINGLE source of truth so every module — psyche build, retrieval self-dedup, and
+ *  the health self-page probe — resolves identity the SAME GLIA_SELF_SLUG-aware way.
+ *  (A hardcoded copy in health.ts once drifted and could mark a custom-slug build's
+ *  identity UNAVAILABLE → fatal startup exit.) */
+export function selfSlugForms(): string[] {
+  return [...new Set([config.selfSlug, config.selfSlug.replace("-", "/"), config.selfSlug.replace("/", "-")])];
+}
+
 export function estimateTokens(text: string): number {
   return Math.ceil(text.length / config.charsPerToken);
 }

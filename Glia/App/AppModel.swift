@@ -1172,9 +1172,18 @@ final class AppModel {
         let node: BrainNode
     }
 
+    /// Memo for `searchHits`, keyed by graph identity + query. Untracked so writing it
+    /// from the getter never trips "modifying state during view update".
+    @ObservationIgnored private var _searchCache: (key: String, hits: [SearchHit])?
+
     var searchHits: [SearchHit] {
         let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
         guard q.count >= 2 else { return [] }
+        // Cache the scan: `body` reads searchHits, and each ↑/↓ keypress calls move()
+        // AND commit()/re-render, which would otherwise re-scan the whole graph 2× per
+        // key. Key on the graph's generatedAt stamp so a reload invalidates it.
+        let key = graph.generatedAt + "\u{1}" + q
+        if let c = _searchCache, c.key == key { return c.hits }
         var hits: [(Int, Int)] = []   // (index, rank)
         for (i, n) in graph.nodes.enumerated() {
             let slug = n.slug.lowercased()
@@ -1188,7 +1197,9 @@ final class AppModel {
             if hits.count > 400 { break }
         }
         hits.sort { ($0.1, -graph.degree[$0.0]) < ($1.1, -graph.degree[$1.0]) }
-        return hits.prefix(30).map { SearchHit(id: $0.0, node: graph.nodes[$0.0]) }
+        let result = hits.prefix(30).map { SearchHit(id: $0.0, node: graph.nodes[$0.0]) }
+        _searchCache = (key, result)
+        return result
     }
 }
 

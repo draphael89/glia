@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveCommand, isReadableFile, isReadableDir, isExecutableFile, validateConfig } from "./health.js";
+import { resolveCommand, isReadableFile, isReadableDir, isExecutableFile, validateConfig, hasSelfPage } from "./health.js";
+import { config } from "./config.js";
 
 // Hermetic env (from the `test` npm script):
 //   GLIA_PSYCHE=test-fixtures/psyche.md
@@ -27,6 +28,22 @@ test("readability helpers agree with the fixture layout", () => {
   assert.equal(isReadableDir("test-fixtures/psyche.md"), false); // a file is not a dir
   assert.equal(isExecutableFile("test-fixtures/gbrain-stub.sh"), true);
   assert.equal(isExecutableFile("test-fixtures/psyche.md"), false); // not executable
+});
+
+test("hasSelfPage honors a custom GLIA_SELF_SLUG (not a hardcoded people-david)", () => {
+  // Regression: a hardcoded people-david once made hasSelfPage return false for any
+  // GLIA_SELF_SLUG build → identity UNAVAILABLE → possible fatal startup exit.
+  const saved = config.selfSlug;
+  try {
+    config.selfSlug = "note-alpha";   // fixture mirror has note-alpha.md
+    assert.equal(hasSelfPage("test-fixtures/gbrain-source"), true, "custom self-slug page must be found");
+    config.selfSlug = "originals/telos";  // nested form → originals/telos.md exists in fixture
+    assert.equal(hasSelfPage("test-fixtures/gbrain-source"), true, "nested self-slug form must be found");
+    config.selfSlug = "nobody-here-at-all";
+    assert.equal(hasSelfPage("test-fixtures/gbrain-source"), false);
+  } finally {
+    config.selfSlug = saved;
+  }
 });
 
 test("validateConfig reports a fully-healthy config from the fixtures", () => {

@@ -175,7 +175,10 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
           ? `\nlive probe: FAILED — gbrain ${r.status}${r.detail ? ": " + r.detail : ""} (${r.elapsedMs}ms)`
           : `\nlive probe: round-trip OK — gbrain ran in ${r.elapsedMs}ms (${r.pages.length} match${r.pages.length === 1 ? "" : "es"} for the sentinel query${r.cached ? ", cached" : ""})`;
       }
-      return { content: [{ type: "text", text: renderHealthReport(report) + probe }], isError: report.overall === "fail" || probeFailed };
+      // `fatal` (nothing usable) can hold while `overall` is only "warn" — missing
+      // DEFAULT paths are warn by design — so an agent keying off isError must also
+      // see fatal, or it concludes the server is fine precisely when it is unusable.
+      return { content: [{ type: "text", text: renderHealthReport(report) + probe }], isError: report.overall === "fail" || report.fatal || probeFailed };
     }
     return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
   } catch (e: any) {
