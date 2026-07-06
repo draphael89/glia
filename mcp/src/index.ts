@@ -185,11 +185,19 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 {
   const argv = process.argv;
   const flag = (name: string) => { const i = argv.indexOf(name); return i !== -1 ? (argv[i + 1] ?? "") : null; };
+  // Flush-aware exit: process.exit() right after console.log can TRUNCATE large
+  // output when stdout is a pipe (async, non-TTY) — e.g. the app reads the ~28k-token
+  // --explain manifest through a pipe. AWAIT the write draining before exiting (and
+  // before the code below would otherwise start the server).
+  const printAndExit = async (text: string) => {
+    await new Promise<void>((resolve) => process.stdout.write(text + "\n", () => resolve()));
+    process.exit(0);
+  };
   const explain = flag("--explain");
   const prime = flag("--prime");
-  if (explain !== null) { console.log(renderManifest(await explainContext(explain))); process.exit(0); }
-  if (prime !== null) { console.log((await primeContext(prime)).text); process.exit(0); }
-  if (argv.includes("--health")) { console.log(renderHealthReport(validateConfig(true))); process.exit(0); }
+  if (explain !== null) await printAndExit(renderManifest(await explainContext(explain)));
+  if (prime !== null) await printAndExit((await primeContext(prime)).text);
+  if (argv.includes("--health")) await printAndExit(renderHealthReport(validateConfig(true)));
 }
 
 // Validate configuration at startup: log the health report to stderr (stdout is
