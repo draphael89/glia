@@ -35,13 +35,26 @@ psyche's blind ranking — though the very deepest *insight* keeps climbing with
 more identity, so the 40% cap is set to clear that knee comfortably at every
 budget while still leaving the majority of the window for retrieval.
 
+**Retrieval is deduped against the psyche.** On identity-shaped tasks ~50% of the
+top gbrain hits are pages *already in the psyche* (your starred essays) —
+re-injecting them wastes budget on content the model already has. So in `both`
+mode, retrieval drops pages present in the injected psyche and **backfills** down
+the ranked list to `topK` genuinely-new unique pages. And what actually happens
+is always reported: `prime_context` prepends a `> glia-context status: OK|DEGRADED`
+line naming the identity source and retrieval outcome (never silently empty).
+
 ## Tools
 
 | Tool | What it does |
 |---|---|
-| `prime_context` | The headline. Given the session's task, returns a context block: a concentrated **who you are** core + **relevant gbrain pages**. `mode`: `psyche` / `context` / `both` (default — the recipe v2 proved). Call it first. |
+| `prime_context` | The headline. Given the session's task, returns a context block: a concentrated **who you are** core + **relevant, deduped gbrain pages**. `mode`: `psyche` / `context` / `both` (default — the recipe v2 proved). Call it first. |
 | `who_am_i` | Just the psyche map — who you are, values, essays. |
 | `recall` | Pure relevance retrieval from gbrain for a query. |
+| `explain_context` | Preview *exactly* what `prime_context` would inject — identity sections + retrieved page slugs + token estimates — **without** the full content. See and trust what's loaded. |
+| `health` | Config health: are the psyche, gbrain command, and source reachable? `probe=true` runs a live retrieval round-trip. |
+
+The server also sends MCP `instructions` at initialize, nudging compliant clients
+to call `prime_context` at the start of a substantive session.
 
 ## Setup
 
