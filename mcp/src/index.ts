@@ -64,7 +64,10 @@ const TOOLS = [
       "Retrieve pages relevant to a query from the user's gbrain knowledge base (pure relevance, no identity). Use when you need specific facts/context the user has recorded.",
     inputSchema: {
       type: "object",
-      properties: { query: { type: "string" } },
+      properties: {
+        query: { type: "string" },
+        limit: { type: "number", description: "Max pages to return (1-20, default 6)." },
+      },
       required: ["query"],
     },
   },
@@ -133,7 +136,8 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       return { content: [{ type: "text", text: `${provenance}\n\n${capped}` }] };
     }
     if (name === "recall") {
-      const r = await retrieveContext(String(args?.query ?? ""));
+      const limit = typeof args?.limit === "number" ? Math.max(1, Math.min(20, Math.floor(args.limit))) : undefined;
+      const r = await retrieveContext(String(args?.query ?? ""), limit ? { topK: limit } : {});
       const failed = r.status === "timeout" || r.status === "error" || r.status === "disabled";
       // Never claim authoritative absence when retrieval merely FAILED — an agent
       // must not read "No relevant pages found" as "the user has nothing on X".
