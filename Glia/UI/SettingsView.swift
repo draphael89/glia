@@ -134,6 +134,14 @@ enum TuningConfig {
             try? data.write(to: url, options: .atomic)
         }
     }
+
+    /// The values currently on disk (numbers only), or nil if absent/unreadable — so the
+    /// panel reflects the REAL config.json rather than overwriting it on open.
+    static func read() -> [String: NSNumber]? {
+        guard let data = try? Data(contentsOf: fileURL), data.count < 1_000_000,
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+        return obj.compactMapValues { $0 as? NSNumber }
+    }
 }
 
 private struct TuningSettingsTab: View {
@@ -172,11 +180,22 @@ private struct TuningSettingsTab: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear(perform: persist)   // materialize the file from current values
+        .onAppear(perform: load)      // reflect the real config.json — never clobber it on open
         .onChange(of: fallbackMax) { _, _ in persist() }
         .onChange(of: psycheCore) { _, _ in persist() }
         .onChange(of: relFloor) { _, _ in persist() }
         .onChange(of: concurrency) { _, _ in persist() }
+    }
+
+    /// Load the on-disk values into the controls (clamped to the UI ranges) so the panel
+    /// shows what the server will actually use. A missing file keeps the @AppStorage
+    /// values, which equal the server defaults. We do NOT write here.
+    private func load() {
+        guard let d = TuningConfig.read() else { return }
+        if let n = d["GBRAIN_GET_FALLBACK_MAX"] { fallbackMax = min(max(n.intValue, 1), 16) }
+        if let n = d["GBRAIN_GET_CONCURRENCY"] { concurrency = min(max(n.intValue, 1), 8) }
+        if let n = d["GLIA_PSYCHE_CORE_MAX_TOKENS"] { psycheCore = min(max(n.intValue, 4_000), 48_000) }
+        if let n = d["GBRAIN_REL_SCORE_FLOOR"] { relFloor = min(max(n.doubleValue, 0), 0.9) }
     }
 
     private func persist() {
