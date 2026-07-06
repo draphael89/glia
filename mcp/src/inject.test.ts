@@ -100,6 +100,20 @@ test("retrieveContext excludes psyche slugs (dedup) before taking topK", async (
   assert.equal(r.status, "ok");
   assert.equal(r.pages.length, 1);
   assert.equal(r.pages[0].slug, "note-beta");
+  assert.equal(r.dedupedCount, 1);       // note-alpha dropped as already-in-identity
+});
+
+test("dedupedCount surfaces the v7 mechanism: all-overlap retrieval reads 'deduped', not 'empty'", async () => {
+  _clearRetrievalCache();
+  // exclude BOTH stub pages → retrieval is empty *because* everything is already
+  // in the identity (the identity-heavy case), not because gbrain found nothing.
+  const r = await retrieveContext("anything", { excludeSlugs: new Set(["note-alpha", "note-beta"]) });
+  assert.equal(r.pages.length, 0);
+  assert.equal(r.status, "empty");
+  assert.equal(r.dedupedCount, 2);       // distinguishes deduped-empty from genuinely-empty
+  _clearRetrievalCache();
+  const none = await retrieveContext("anything");   // no exclude → nothing deduped
+  assert.equal(none.dedupedCount, 0);
 });
 
 test("explainContext returns a truthful manifest (sections + retrieved slugs, deduped)", async () => {

@@ -42,10 +42,14 @@ function buildStatusLines(a: {
 
   if (a.mode !== "psyche") {
     const r = a.retrieval;
+    const dedup = r.dedupedCount > 0 ? ` (+${r.dedupedCount} already in your identity, deduped)` : "";
     // Retrieval found pages but the token budget left no room for them.
     if (r.pages.length > 0 && a.injectedPages === 0 && (r.status === "ok" || r.status === "empty")) {
       out.push(`retrieval: ${r.pages.length} pages found but dropped — no token budget left after identity`);
-    } else if (r.status === "ok") out.push(`retrieval: ${a.injectedPages} pages in ${r.elapsedMs}ms${r.cached ? " (cached)" : ""}`);
+    } else if (r.status === "ok") out.push(`retrieval: ${a.injectedPages} pages in ${r.elapsedMs}ms${r.cached ? " (cached)" : ""}${dedup}`);
+    // Empty *because* everything relevant is already in the psyche is expected and
+    // good on identity-shaped tasks (the v7 finding) — say so, don't imply failure.
+    else if (r.status === "empty" && r.dedupedCount > 0) out.push(`retrieval: all ${r.dedupedCount} relevant pages are already in your identity — nothing new to add (expected on identity-shaped tasks)`);
     else if (r.status === "empty") out.push(`retrieval: no relevant pages found (${r.elapsedMs}ms)`);
     else if (r.status === "timeout") out.push(`retrieval: TIMED OUT after ${config.gbrainTimeoutMs}ms — context may be incomplete (${a.injectedPages} partial pages)`);
     else if (r.status === "disabled") out.push(`retrieval: DISABLED — ${r.detail ?? "gbrain not configured"}`);
@@ -66,6 +70,7 @@ export interface ContextManifest {
   retrievalStatus: RetrievalStatus;
   retrievalPages: { slug: string; score: number }[];
   retrievalTokens: number;
+  retrievalDeduped: number;   // ranked pages dropped as already-in-identity
   totalTokens: number;
   degraded: boolean;
 }
@@ -94,6 +99,7 @@ export async function explainContext(
     retrievalStatus: a.retrieval.status,
     retrievalPages: pages,                            // only pages that survived truncation
     retrievalTokens: estimateTokens(a.contextText),  // actual injected context tokens
+    retrievalDeduped: a.retrieval.dedupedCount,
     totalTokens: estimateTokens(a.text),             // full rendered prime, incl. scaffolding
     degraded: a.degraded,
   };
@@ -108,10 +114,12 @@ export function renderManifest(m: ContextManifest): string {
     `## Identity (${m.psycheStatus}, ~${m.psycheTokens} tok) — ${m.psycheSource}`,
     m.psycheSections.length ? m.psycheSections.map((s) => `  · ${s}`).join("\n") : "  (no page sections parsed)",
     "",
-    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages)`,
+    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages${m.retrievalDeduped > 0 ? `, ${m.retrievalDeduped} deduped` : ""})`,
     m.retrievalPages.length
       ? m.retrievalPages.map((p) => `  · ${p.slug}  (${p.score.toFixed(2)})`).join("\n")
-      : "  (no pages)",
+      : (m.retrievalDeduped > 0
+          ? `  (all ${m.retrievalDeduped} relevant pages already in your identity — deduped, nothing new to add)`
+          : "  (no pages)"),
   ];
   return lines.join("\n");
 }
@@ -173,7 +181,7 @@ async function assembleInjection(
   }
 
   let contextText = "";
-  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task };
+  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task, dedupedCount: 0 };
   if (mode === "context" || mode === "both") {
     // Dedup against what was ACTUALLY injected (the truncated psycheText).
     const exclude = mode === "both" && psycheText ? psycheSlugs(psycheText) : undefined;
