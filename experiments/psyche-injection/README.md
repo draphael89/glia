@@ -113,16 +113,20 @@ conditionality; treat the exact percentage as ~55–65%, not a single point
 (see [REPORT-v7.md](REPORT-v7.md) / [REPORT-v8.md](REPORT-v8.md) /
 [SIGNIFICANCE.md](SIGNIFICANCE.md) / [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md)).
 
-**The sharpest honesty (v9/v10):** every result above measured a *reconstruction*
-of context. When we tested the **actually-shipped** `prime_context` output
-end-to-end, blind judges (Opus *and* gpt-5) preferred **retrieval-alone** — the
-injected `both` arm did **not** beat it, and shrinking the identity core (v10) made
-it *worse*, not better. That's a real signal — *don't assume identity injection
-beats good retrieval for a verification-blind reader* — but it's a **floor**: a
-psyche-blind judge penalizes the identity's real specifics as unverifiable (v6),
-and the one reader who *can* verify them, the actual user, isn't in the loop. The
-lesson we value most: test what you **ship**, and let it overturn your prediction
-(see [REPORT-v9.md](REPORT-v9.md)).
+**The sharpest arc (v9→v12), and why it's the best part:** every result above
+measured a *reconstruction* of context. Testing the **actually-shipped**
+`prime_context` end-to-end (v9) *overturned* it — blind judges preferred
+**retrieval-alone**; the injected `both` arm didn't beat it, and a config fix (v10)
+made it *worse*. But chasing *why* found the real cause: a **retrieval bug** — the
+server searched the whole brain yet read page bodies from a *subset* mirror,
+silently dropping 7–8 of the top 8 pages and starving the injected arm. Fix the
+retrieval and **v12 flips it back**: `both` beats retrieval-alone again,
+**cross-vendor** (best-vs-context 52%→64% Opus, 30%→56% gpt-5). So v9 was a bug,
+not a thesis failure — sound grounding reconciles the shipped product with the
+reconstruction. And v11 fact-checked the injected identity at **98% accurate**, so
+the win is real, not hallucinated. The lesson we value most: **test what you ship —
+it exposes the bugs a reconstruction hides, and fixing them is the actual win**
+(see [REPORT-v9.md](REPORT-v9.md) → [REPORT-v12.md](REPORT-v12.md)).
 
 **What v1 got wrong (kept in the repo on purpose):** the first, *non-blind* run
 claimed psyche *alone* beat the combination and that retrieval *diluted*
