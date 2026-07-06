@@ -99,6 +99,11 @@ Then, at the start of a session: *"prime_context with what I'm trying to do."*
 | `GLIA_PSYCHE` | `~/.glia/psyche.md` | Canonical psyche map (Glia writes this). Falls back to building from the gbrain source if absent. |
 | `GBRAIN_SOURCE_DIR` | `~/.gbrain/source-default` | Markdown mirror — page reads + fallback psyche. |
 | `GBRAIN_CMD` | `~/.hermes/scripts/gbrain-local.sh` | Command for `gbrain query`. Set to `gbrain` for a standard install. |
+| `GLIA_SELF_SLUG` | `people-david` | The identity self-page slug (rank-0 in the psyche). Override for a multi-user / OSS build so identity isn't hardcoded to one person. |
+| `GBRAIN_GET_FALLBACK_MAX` | `8` | The mirror is a *subset* of the queried brain, so top-ranked pages can be absent. For up to this many missing pages, read them live via `gbrain get` (measured: lifts top-page completeness 31%→99%). `0` disables. |
+| `GBRAIN_GET_CONCURRENCY` | `4` | Max concurrent `gbrain get` fallbacks — the misses are prefetched in parallel, so the cap above costs ~one batch of latency, not one round-trip per page. |
+| `GBRAIN_REL_SCORE_FLOOR` | `0.5` | Stop backfilling retrieval once a candidate scores below this fraction of the first readable page — keeps the topK from filling with weak pages. `0` disables. |
+| `GLIA_PSYCHE_CORE_MAX_TOKENS` | `24000` | Cap on the injected identity core in `both` mode. Validated: shrinking it made the combined arm *worse* — don't lower it expecting a win. |
 
 ## Tests
 
