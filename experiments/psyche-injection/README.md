@@ -99,6 +99,12 @@ Materials (the psyche + per-task context) are built from a real brain and are
   still swung 10 of 15 Borda — proving that at n=5×5 per-answer variance dominates. Reads
   as: v13 is underpowered, the completeness fix rests on direct measurement not this eval,
   and it tempers the exact percentages everywhere (direction holds; single points don't).
+- [REPORT-v16.md](REPORT-v16.md) — **variance reduction resolves the v13 null.** K=3
+  independent generations per arm, blind pairwise-judged, so the per-answer noise averages
+  out: `both` beats retrieval-alone **62%** at 99%-complete retrieval. But the real finding
+  is **task heterogeneity** — identity wins big on generative/self-shaped tasks (bio, weekly
+  structure, what-to-drop) and loses on the diagnostic one (retrieved facts already carry it).
+  "Does identity help?" → **depends on task shape.**
 - [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
   confound (a shorter arm beats a longer one on content in all three judge pools).
 - [SIGNIFICANCE.md](SIGNIFICANCE.md) — task-clustered uncertainty: direction is
@@ -145,6 +151,15 @@ inputs to two arms) swung 10 of 15 Borda**, showing that at this scale (n=5×5) 
 noise dominates. So v13 is a **null that maps the noise floor**: it doesn't overturn v12,
 but it does mean the *exact percentages* everywhere here are directional — trust the
 direction (identity is a complement; test what you ship), not the decimal.
+
+[v16](REPORT-v16.md) then *resolves* that null the right way — not by hoping, but by
+**averaging out the noise**: K=3 independent generations per arm, blind pairwise-judged.
+`both` beats retrieval-alone **62%** at complete retrieval, so the v12 direction survives
+both completeness and variance reduction. And the pooled number surfaces the sharpest
+refinement of the whole project: **it depends on task shape** — identity is a real
+complement when the answer is *synthesized from who you are* (a bio, a weekly structure,
+what to drop), and redundant when the answer is *just the relevant facts* (a diagnostic).
+That conditionality, not a headline percentage, is the honest finding.
 
 **What v1 got wrong (kept in the repo on purpose):** the first, *non-blind* run
 claimed psyche *alone* beat the combination and that retrieval *diluted*
