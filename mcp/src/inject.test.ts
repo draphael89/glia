@@ -170,6 +170,25 @@ test("parallel fallback recovers MULTIPLE mirror-missing pages (up to the cap)",
   }
 });
 
+test("fallback cap of 0 disables live-read recovery entirely", async () => {
+  // GBRAIN_GET_FALLBACK_MAX=0 must skip the prefetch and every fallback, so an
+  // all-miss query returns empty rather than silently spawning gbrain get.
+  const savedCmd = config.gbrainCmd;
+  const savedMax = config.gbrainGetFallbackMax;
+  config.gbrainCmd = "test-fixtures/gbrain-stub-multi-miss.sh";
+  config.gbrainGetFallbackMax = 0;
+  _clearRetrievalCache();
+  try {
+    const r = await retrieveContext("anything");
+    assert.equal(r.pages.length, 0, "cap=0 recovers nothing (all pages miss the mirror)");
+    assert.equal(r.status, "empty");
+  } finally {
+    config.gbrainCmd = savedCmd;
+    config.gbrainGetFallbackMax = savedMax;
+    _clearRetrievalCache();
+  }
+});
+
 test("fallback cap bounds how many mirror-missing pages are recovered", async () => {
   // With the cap at 2, only the top two misses are fetched; the third is dropped —
   // the loop's fallbackUsed guard and the prefetch window must agree on the bound.

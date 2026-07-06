@@ -575,10 +575,25 @@ finding at ~65% completeness; the product now runs at 99%.**
 v12's win was measured with retrieval still only ~65% complete, leaving a real doubt:
 was the psyche partly a *proxy* for the pages retrieval was dropping? v13 isolates it —
 a controlled 2×2 (`context`/`both` × `thin` cap-3 / `full` cap-8), all four arms judged
-blind together (`harness/eval-v13-completeness.js`, `aggregate-v13.py`). If `both_full`
-still beats `context_full`, identity is a genuine *complement*, not a retrieval-gap
-filler — the strongest form of the thesis. (p2 is a natural control: its mirror coverage
-was already complete, so its thin and full arms should tie.) Result in `REPORT-v13.md`.
+blind together (`harness/eval-v13-completeness.js`, `aggregate-v13.py`).
+
+**Result: an honest NULL — and the control is why (`REPORT-v13.md`).** Task p2 was a
+natural control: its mirror coverage was already complete, so its `context_thin` and
+`context_full` arms got the SAME six pages (identical slugs, scores, order). Yet their
+blind Borda differed by **10 of 15** (14 vs 4) — pure generation+judge variance, as large
+as most of the cross-arm gaps. **So at n=5×5 the per-answer noise dominates; v13 is
+underpowered.** The raw Borda order (`context_thin` on top) is NOT evidence that thinner
+retrieval is better. The one directional signal that survives the noise: the single
+genuinely-*starved* task (p1, thin cut to ~1.8k tok) favored `context_full`, while tasks
+whose thin arm's backfill already supplied enough text slightly favored thin (a
+length/diversity confound). Reading: **completeness matters when retrieval is actually
+starved, not when backfill already fills the gap.** Two consequences held honestly: (1)
+the completeness fix stands on its **direct** measurement (31%→99% readable pages), not on
+this eval; (2) this **tempers v12's precision** too — same small-n — so v12's *direction*
+(identity as complement) leans on the larger v2–v8 body + cross-vendor reproduction, and
+the exact percentages are directional. A cleaner test needs more tasks (to beat the ~10-Borda
+noise floor) and possibly a diversity-aware retrieval arm (MMR) to separate relevance from
+breadth — noted as future work, not built.
 
 ---
 

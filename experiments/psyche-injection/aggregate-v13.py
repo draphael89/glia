@@ -93,24 +93,39 @@ def main():
     out.append(line("Q4 identity helps under thin retrieval", "both_thin", "context_thin"))
     out.append("")
 
-    # Interpretation — data-driven
+    # Interpretation — noise-aware. The headline is the CONTROL, not the arm order.
     q1, _, _ = pct(pw, "context_full", "context_thin")
     q3, _, _ = pct(pw, "both_full", "context_full")
-    q4, _, _ = pct(pw, "both_thin", "context_thin")
-    out.append("## Reading\n")
+    CONTROL = os.environ.get("V13_CONTROL_TASK", "p2")
+    out.append("## Reading — signal vs noise (READ THIS FIRST)\n")
     msgs = []
-    if q1 > 50:
-        msgs.append(f"- Completeness **helps retrieval alone** ({q1:.0f}%) — the fix improves the product even before identity.")
-    else:
-        msgs.append(f"- Completeness did not clearly lift retrieval-alone here ({q1:.0f}%) — content changed more than quantity (full retrieval is higher-relevance, sometimes shorter).")
-    if q3 > 50:
-        msgs.append(f"- **Identity STILL helps at full retrieval** ({q3:.0f}%): the psyche is a genuine complement, not a proxy for missing pages. This is the strongest form of the thesis — it survives even when retrieval is complete.")
-    else:
-        msgs.append(f"- At full retrieval, identity's edge narrows to {q3:.0f}% — complete retrieval surfaces the identity essays itself, so a separate psyche is partly redundant (consistent with prime_context's dedup).")
-    if q4 > 50 and q3 > 50:
-        d = q4 - q3
-        rel = "larger" if d > 0 else "smaller"
-        msgs.append(f"- Identity's margin is {rel} under thin retrieval ({q4:.0f}%) than full ({q3:.0f}%) — some of the psyche's v12 value was compensating for starved retrieval, but a real complement remains at completeness.")
+    ctrl = per_task.get(CONTROL, {}).get("borda")
+    if ctrl:
+        gap = abs(ctrl["context_thin"] - ctrl["context_full"])
+        maxb = per_task[CONTROL]["n"] * 3
+        msgs.append(
+            f"- **Control task {CONTROL}: its `context_thin` and `context_full` arms received the SAME six pages** "
+            f"(identical slugs, scores, order — {CONTROL}'s mirror coverage was already complete). Their blind Borda "
+            f"still differ by **{gap} of {maxb}** ({ctrl['context_thin']} vs {ctrl['context_full']}). That gap is PURE "
+            f"generation+judge variance — and it is as large as most of the cross-arm differences in the table above.")
+        msgs.append(
+            f"- **So the honest headline is a NULL: at n=5×5 the per-answer noise dominates.** The Borda order "
+            f"(`{order[0]}` on top) is NOT evidence that thinner retrieval is better — the control shows identical "
+            f"inputs swing ~{gap} Borda. Read v13 as *underpowered*, not as a reversal of v12.")
+    msgs.append(
+        "- **The one directional signal that survives:** the single genuinely-STARVED task (p1, whose thin arm was "
+        "cut to ~1.8k tok) favored `context_full`; the tasks where the thin arm's backfill already supplied enough "
+        "text slightly favored thin (a length/diversity confound, within the control's noise band). Consistent with: "
+        "completeness matters when retrieval is *actually* starved, not when backfill already fills the gap.")
+    msgs.append(
+        "- **The completeness fix stands on its own DIRECT measurement** (31%→99% readable pages, "
+        "`REPORT-completeness.md`) — a fact about what retrieval returns, independent of this answer-quality eval. "
+        "v13 shows only that the downstream answer-quality effect is below this eval's resolution.")
+    msgs.append(
+        "- **This tempers v12's precision too** (same n=5×5 design): v12's *direction* (identity as complement) rests "
+        "on the larger v2–v8 body + cross-vendor reproduction; treat the exact percentages as directional. n=5 is a "
+        f"signal-finder, not a benchmark. (For the record, unweighted: Q1 completeness-vs-thin {q1:.0f}%, "
+        f"Q3 identity-at-full {q3:.0f}% — both well inside the control's noise band.)")
     out += msgs
 
     out.append("\n## Per-task (p2 is a natural control: its mirror coverage was already complete, so thin≈full)\n")
