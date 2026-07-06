@@ -21,40 +21,57 @@ function identityRank(slug: string): number {
   return 4;
 }
 
+/** Where the identity came from: the canonical Glia export, a live build from
+ *  the gbrain source, or nothing at all (identity unavailable). */
+export type PsycheStatus = "file" | "built" | "empty";
+export interface PsycheResult { text: string; source: string; status: PsycheStatus; }
+
 /**
  * The psyche map — "who you are". Prefers the canonical file Glia exports;
  * falls back to building it live from the gbrain source (self-page + essays)
  * so the server works standalone before Glia has written anything.
  */
-export async function loadPsyche(): Promise<{ text: string; source: string }> {
-  if (existsSync(config.psycheFile)) {
-    const text = await readFile(config.psycheFile, "utf8");
-    if (text.trim().length > 200) return { text, source: config.psycheFile };
+export async function loadPsyche(): Promise<PsycheResult> {
+  try {
+    if (existsSync(config.psycheFile)) {
+      const text = await readFile(config.psycheFile, "utf8");
+      if (text.trim().length > 200) return { text, source: config.psycheFile, status: "file" };
+    }
+  } catch {
+    // unreadable canonical file — fall through to building from source
   }
   return buildPsycheFromSource();
 }
 
 /** Fallback: assemble self-page + originals/ essays from the gbrain repo. */
-export async function buildPsycheFromSource(): Promise<{ text: string; source: string }> {
+export async function buildPsycheFromSource(): Promise<PsycheResult> {
   const dir = config.gbrainSourceDir;
   const parts: string[] = ["# Who I am — psyche map", ""];
-  const selfCandidates = ["people-david.md", "people/david.md"];
-  for (const rel of selfCandidates) {
-    const p = join(dir, rel);
-    if (existsSync(p)) {
-      parts.push("## Self\n", (await readFile(p, "utf8")), "");
-      break;
+  let found = 0;
+  try {
+    const selfCandidates = ["people-david.md", "people/david.md"];
+    for (const rel of selfCandidates) {
+      const p = join(dir, rel);
+      if (existsSync(p)) {
+        parts.push("## Self\n", await readFile(p, "utf8"), "");
+        found++;
+        break;
+      }
     }
-  }
-  const originals = join(dir, "originals");
-  if (existsSync(originals)) {
-    parts.push("## Essays\n");
-    const files = (await readdir(originals)).filter((f) => f.endsWith(".md")).sort();
-    for (const f of files) {
-      parts.push(`### ${f.replace(/\.md$/, "")}`, await readFile(join(originals, f), "utf8"), "\n---");
+    const originals = join(dir, "originals");
+    if (existsSync(originals)) {
+      const files = (await readdir(originals)).filter((f) => f.endsWith(".md")).sort();
+      if (files.length > 0) parts.push("## Essays\n");
+      for (const f of files) {
+        parts.push(`### ${f.replace(/\.md$/, "")}`, await readFile(join(originals, f), "utf8"), "\n---");
+        found++;
+      }
     }
+  } catch {
+    // unreadable source dir — degrade to empty rather than throw
   }
-  return { text: parts.join("\n"), source: `${dir} (self-page + essays)` };
+  if (found === 0) return { text: "", source: `${dir} (empty)`, status: "empty" };
+  return { text: parts.join("\n"), source: `${dir} (self-page + essays)`, status: "built" };
 }
 
 export { identityRank };

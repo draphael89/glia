@@ -8,7 +8,7 @@ import {
 import { primeContext, type InjectMode } from "./inject.js";
 import { loadPsyche } from "./psyche.js";
 import { retrieveContext, formatContext } from "./gbrain.js";
-import { estimateTokens } from "./config.js";
+import { validateConfig, renderHealthReport } from "./health.js";
 
 const server = new Server(
   { name: "glia-context", version: "0.1.0" },
@@ -57,6 +57,17 @@ const TOOLS = [
       required: ["query"],
     },
   },
+  {
+    name: "health",
+    description:
+      "Report glia-context configuration health: whether the psyche map, gbrain command, and source dir are reachable, and whether identity/retrieval will work. Pass probe=true to run a live retrieval round-trip.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        probe: { type: "boolean", description: "Run a live gbrain query to confirm retrieval end-to-end." },
+      },
+    },
+  },
 ];
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
@@ -76,6 +87,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
             text:
               `<!-- glia-context: mode=${r.mode}, ~${r.tokens} tokens ` +
               `(psyche ~${r.psycheTokens}, context ~${r.contextTokens} from ${r.contextPages} pages), ` +
+              `psyche=${r.psycheStatus}, retrieval=${r.retrievalStatus}, degraded=${r.degraded}, ` +
               `source=${r.source} -->\n\n${r.text}`,
           },
         ],
@@ -83,22 +95,44 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
     if (name === "who_am_i") {
       const p = await loadPsyche();
-      return { content: [{ type: "text", text: p.text }] };
+      const text = p.status === "empty"
+        ? "> glia-context status: DEGRADED\n> identity: UNAVAILABLE — no psyche file and no readable gbrain source."
+        : p.text;
+      return { content: [{ type: "text", text }] };
     }
     if (name === "recall") {
-      const pages = await retrieveContext(String(args?.query ?? ""));
-      const text = formatContext(pages) || "No relevant pages found.";
+      const r = await retrieveContext(String(args?.query ?? ""));
+      const body = formatContext(r.pages) || "No relevant pages found.";
+      const status = r.status === "ok"
+        ? `${r.pages.length} pages${r.cached ? ", cached" : ""}, ${r.elapsedMs}ms`
+        : `${r.status}${r.detail ? ": " + r.detail : ""}`;
       return {
-        content: [
-          { type: "text", text: `<!-- ${pages.length} pages, ~${estimateTokens(text)} tokens -->\n\n${text}` },
-        ],
+        content: [{ type: "text", text: `> glia-context recall: ${status}\n\n${body}` }],
       };
+    }
+    if (name === "health") {
+      const report = validateConfig(true);
+      let probe = "";
+      if (args?.probe === true) {
+        const r = await retrieveContext("glia self test");
+        probe = `\nlive probe: retrieval=${r.status} (${r.pages.length} pages, ${r.elapsedMs}ms${r.cached ? ", cached" : ""})${r.detail ? " — " + r.detail : ""}`;
+      }
+      return { content: [{ type: "text", text: renderHealthReport(report) + probe }], isError: report.overall === "fail" };
     }
     return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
   } catch (e: any) {
     return { content: [{ type: "text", text: `Error: ${e?.message ?? e}` }], isError: true };
   }
 });
+
+// Validate configuration at startup: log the health report to stderr (stdout is
+// the JSON-RPC channel), and exit only when nothing is usable (or strict mode).
+const report = validateConfig();
+console.error(renderHealthReport(report));
+if (report.exitWorthy) {
+  console.error("glia-context: fatal configuration error — exiting. See report above.");
+  process.exit(1);
+}
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

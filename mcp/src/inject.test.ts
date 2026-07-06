@@ -1,8 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { estimateTokens, truncateToTokens } from "./config.js";
-import { cleanBody, identityRank } from "./psyche.js";
+import { cleanBody, identityRank, buildPsycheFromSource } from "./psyche.js";
 import { primeContext } from "./inject.js";
+import { _clearRetrievalCache } from "./gbrain.js";
+
+// Tests run hermetically via the `test` npm script env:
+//   GLIA_PSYCHE=test-fixtures/psyche.md
+//   GBRAIN_SOURCE_DIR=test-fixtures/gbrain-source
+//   GBRAIN_CMD=test-fixtures/gbrain-stub.sh  (returns note-alpha, note-beta)
 
 test("token estimate ~4 chars/token", () => {
   assert.equal(estimateTokens("x".repeat(400)), 100);
@@ -35,6 +41,9 @@ test("primeContext psyche mode returns identity, no context section", async () =
   assert.ok(r.psycheTokens > 0);
   assert.equal(r.contextTokens, 0);
   assert.ok(r.text.includes("Who I am"));
+  assert.equal(r.psycheStatus, "file"); // GLIA_PSYCHE fixture present
+  assert.equal(r.retrievalStatus, "skipped"); // psyche mode does no retrieval
+  assert.ok(r.text.includes("FIXTURE-PSYCHE-MARKER"));
 });
 
 test("primeContext both mode budgets psyche first (identity survives)", async () => {
@@ -43,4 +52,35 @@ test("primeContext both mode budgets psyche first (identity survives)", async ()
   assert.ok(r.psycheTokens > 0);
   // total stays within a reasonable multiple of the budget
   assert.ok(r.tokens <= 3000 * 1.5);
+});
+
+test("primeContext both mode: retrieval works + reports OK status, not degraded", async () => {
+  _clearRetrievalCache();
+  const r = await primeContext("hermes architecture", { mode: "both", maxTokens: 60000 });
+  assert.equal(r.psycheStatus, "file");
+  assert.equal(r.retrievalStatus, "ok");
+  assert.equal(r.contextPages, 2); // stub returns note-alpha + note-beta
+  assert.equal(r.degraded, false);
+  assert.ok(r.text.includes("> glia-context status: OK"));
+  assert.ok(r.text.includes("## Relevant context"));
+  assert.ok(r.text.includes("FIXTURE-ALPHA-MARKER"));
+  // status lines name both components
+  assert.ok(r.statusLines.some((l) => l.startsWith("identity:")));
+  assert.ok(r.statusLines.some((l) => l.startsWith("retrieval:")));
+});
+
+test("retrieval is cached on a repeat query (second call marked cached)", async () => {
+  _clearRetrievalCache();
+  const a = await primeContext("caching probe query", { mode: "context", maxTokens: 60000 });
+  assert.equal(a.retrievalCached, false);
+  const b = await primeContext("caching probe query", { mode: "context", maxTokens: 60000 });
+  assert.equal(b.retrievalCached, true);
+  assert.equal(b.retrievalStatus, "ok");
+});
+
+test("buildPsycheFromSource assembles self-page + essays with status 'built'", async () => {
+  const p = await buildPsycheFromSource();
+  assert.equal(p.status, "built");
+  assert.ok(p.text.includes("FIXTURE-SELF-MARKER"));
+  assert.ok(p.text.includes("FIXTURE-ORIGINALS-MARKER"));
 });

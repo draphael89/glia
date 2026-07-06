@@ -1,6 +1,6 @@
 import { config, estimateTokens, truncateToTokens } from "./config.js";
-import { loadPsyche } from "./psyche.js";
-import { retrieveContext, formatContext, type RetrievedPage } from "./gbrain.js";
+import { loadPsyche, type PsycheStatus } from "./psyche.js";
+import { retrieveContext, formatContext, type RetrievalResult, type RetrievalStatus } from "./gbrain.js";
 
 export type InjectMode = "psyche" | "context" | "both";
 
@@ -12,7 +12,44 @@ export interface PrimeResult {
   contextTokens: number;
   contextPages: number;
   source: string;
+  /** Where identity came from, or "skipped" in context-only mode. */
+  psycheStatus: PsycheStatus | "skipped";
+  retrievalStatus: RetrievalStatus;
+  retrievalDetail?: string;
+  retrievalMs: number;
+  retrievalCached: boolean;
+  /** True if any component the caller asked for is missing/failed. */
+  degraded: boolean;
+  /** Human-readable status lines (also rendered into `text`). */
+  statusLines: string[];
 }
+
+/** Build the status lines that describe exactly what was (and wasn't) injected. */
+function buildStatusLines(a: {
+  mode: InjectMode;
+  psycheStatus: PsycheStatus | "skipped";
+  psycheSource: string;
+  retrieval: RetrievalResult;
+}): string[] {
+  const out: string[] = [];
+  if (a.psycheStatus === "file") out.push(`identity: loaded from ${a.psycheSource}`);
+  else if (a.psycheStatus === "built") out.push(`identity: built from gbrain source (canonical Glia export not found at ${config.psycheFile})`);
+  else if (a.psycheStatus === "empty") out.push("identity: UNAVAILABLE — no psyche file and no readable gbrain source; answer will NOT be personalized");
+  // "skipped" (context-only mode) → no identity line
+
+  if (a.mode !== "psyche") {
+    const r = a.retrieval;
+    if (r.status === "ok") out.push(`retrieval: ${r.pages.length} pages in ${r.elapsedMs}ms${r.cached ? " (cached)" : ""}`);
+    else if (r.status === "empty") out.push(`retrieval: no relevant pages found (${r.elapsedMs}ms)`);
+    else if (r.status === "timeout") out.push(`retrieval: TIMED OUT after ${config.gbrainTimeoutMs}ms — context may be incomplete (${r.pages.length} partial pages)`);
+    else if (r.status === "disabled") out.push(`retrieval: DISABLED — ${r.detail ?? "gbrain not configured"}`);
+    else if (r.status === "error") out.push(`retrieval: ERROR — ${r.detail ?? "unknown"} (${r.pages.length} pages)`);
+  }
+  return out;
+}
+
+const renderStatusBlock = (lines: string[], degraded: boolean) =>
+  [`> glia-context status: ${degraded ? "DEGRADED" : "OK"}`, ...lines.map((l) => `> ${l}`), ""].join("\n");
 
 /**
  * The core of the thesis: build the injection that primes the model with WHO
@@ -28,6 +65,9 @@ export interface PrimeResult {
  * identity core and hand the larger remainder to retrieval, so the answer stays
  * grounded. (v1's "retrieval dilutes identity" did not survive blind judging —
  * see experiments/psyche-injection/FINDINGS.md.)
+ *
+ * Never throws. Degrades gracefully AND reports it: a visible `> glia-context
+ * status:` block at the top of the returned text names any missing component.
  */
 export async function primeContext(
   task: string,
@@ -38,23 +78,28 @@ export async function primeContext(
 
   let psycheText = "";
   let psycheSource = "";
+  let psycheStatus: PsycheStatus | "skipped" = "skipped";
   if (mode === "psyche" || mode === "both") {
     const p = await loadPsyche();
     psycheSource = p.source;
+    psycheStatus = p.status;
     // Identity is high-density: a concentrated core carries the insight lift.
     // Cap it at 40% of budget in `both` mode so retrieval keeps room to ground.
     const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
-    psycheText = truncateToTokens(p.text, psycheBudget);
+    psycheText = p.status === "empty" ? "" : truncateToTokens(p.text, psycheBudget);
   }
 
   let contextText = "";
-  let pages: RetrievedPage[] = [];
+  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task };
   if (mode === "context" || mode === "both") {
-    pages = await retrieveContext(task);
-    const ctx = formatContext(pages);
+    retrieval = await retrieveContext(task);
+    const ctx = formatContext(retrieval.pages);
     const ctxBudget = mode === "context" ? budget : budget - estimateTokens(psycheText);
     contextText = ctxBudget > 500 ? truncateToTokens(ctx, ctxBudget) : "";
   }
+
+  const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, retrieval });
+  const degraded = psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status);
 
   const header = [
     "# Priming context for this session",
@@ -63,7 +108,7 @@ export async function primeContext(
     "",
   ].join("\n");
 
-  const blocks = [header];
+  const blocks = [header, renderStatusBlock(statusLines, degraded)];
   if (psycheText) blocks.push("## Who I am\n", psycheText, "");
   if (contextText) blocks.push(contextText);
   const text = blocks.join("\n");
@@ -74,7 +119,14 @@ export async function primeContext(
     tokens: estimateTokens(text),
     psycheTokens: estimateTokens(psycheText),
     contextTokens: estimateTokens(contextText),
-    contextPages: pages.length,
+    contextPages: retrieval.pages.length,
     source: psycheSource,
+    psycheStatus,
+    retrievalStatus: retrieval.status,
+    retrievalDetail: retrieval.detail,
+    retrievalMs: retrieval.elapsedMs,
+    retrievalCached: retrieval.cached,
+    degraded,
+    statusLines,
   };
 }
