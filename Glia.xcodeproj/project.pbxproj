@@ -47,6 +47,7 @@
 		606B278BE37C49C30F6EC0D5 /* ContextExportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63E367716ED3BB10B5A586B /* ContextExportSheet.swift */; };
 		613DCF29AA0E3E84B7B1C605 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A59F416E75A12CAE71494A /* GraphView.swift */; };
 		6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95988C6A7B90B9F04F77D76 /* RendererSnapshot.swift */; };
+		61F76757D9DCE5238E5A70B9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B6660DFC4231828B77CFA4 /* SettingsView.swift */; };
 		633266C24F2633467D52989A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
 		654A77C43124F2F577F2776F /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B362A215E6E815C51ECFE6 /* FilterPanel.swift */; };
 		66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CBB8EDC3535D052739F152 /* ReplayController.swift */; };
@@ -70,12 +71,14 @@
 		8C3895F67066617A61DD1A92 /* MCPProvision.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC66D316E68915B31D201FAE /* MCPProvision.swift */; };
 		8ED977CDC3C5529D7D720EA8 /* EnableMCPSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6A57E3C0A8F94C0F305C20 /* EnableMCPSheet.swift */; };
 		90D7E92506D2085BC144B187 /* ContextBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573D70E7E28D542C0E4B9089 /* ContextBundle.swift */; };
+		935CFB09EDA0758E793D46A1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B6660DFC4231828B77CFA4 /* SettingsView.swift */; };
 		93C9BE81C468A1814987F7BD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702448AC9BFAFC0D25C23143 /* ContentView.swift */; };
 		9855BDC23E23E3D0C571AFDE /* EnableMCPSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6A57E3C0A8F94C0F305C20 /* EnableMCPSheet.swift */; };
 		99BF6E584775B3783991EA3C /* StatsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */; };
 		9B0DB878257E7CBD0BFCA47A /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E56ED5176E5D3B8BA2C1B9 /* Intents.swift */; };
 		9C4B792073F98AE5BA57C662 /* Info-MAS.plist in Resources */ = {isa = PBXBuildFile; fileRef = CD80010A792AF0E8C3921BB5 /* Info-MAS.plist */; };
 		9F19ACAFEB88C5FB141DE852 /* BrainSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE1CDC7DAF83C2BFDBA8761 /* BrainSource.swift */; };
+		A024DD9F280E31B6B1A56FCF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B6660DFC4231828B77CFA4 /* SettingsView.swift */; };
 		A25D7817212816C61C5767B4 /* PsycheSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B92E5172F0B2385CDD5788E /* PsycheSync.swift */; };
 		A4C82F48BE41DED36C87550C /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A54A44929E3EBB59737CF3 /* InspectorPanel.swift */; };
 		A99F159FADE4DF154ECE6535 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4247F73BD76724775C0471 /* CommandPalette.swift */; };
@@ -138,6 +141,7 @@
 		8E6410EEDDB0B04037494BC8 /* Graph.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Graph.metal; sourceTree = "<group>"; };
 		93476D3743D2F64C976E58A9 /* BrainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainModel.swift; sourceTree = "<group>"; };
 		93DE22EDD72BDF074EB49168 /* BrainLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainLocation.swift; sourceTree = "<group>"; };
+		95B6660DFC4231828B77CFA4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9BE0ACCDC396FF223B728D78 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		A2F6411F518552B4053CA40C /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		A408FDFFEB9E66D38002EBE6 /* Glia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Glia.entitlements; sourceTree = "<group>"; };
@@ -214,6 +218,7 @@
 				D70EE71C59ABEC8A10AC6B21 /* LabelOverlay.swift */,
 				36FF813E2399101D2C3D1210 /* MarkdownPreview.swift */,
 				031F90C43E6019D333F1B38A /* ReplayBar.swift */,
+				95B6660DFC4231828B77CFA4 /* SettingsView.swift */,
 				F3E773F716D5EC45153CA7C2 /* ShortcutsSheet.swift */,
 				0EB1D193FE858B28FFEB3BF0 /* StatsBar.swift */,
 				C82F05B1BDB31E5B2CAE34E1 /* Theme.swift */,
@@ -482,6 +487,7 @@
 				FC0438368FB761B275F19CC6 /* RendererSnapshot.swift in Sources */,
 				042520996078D05D9B1DC73D /* ReplayBar.swift in Sources */,
 				E8C7A7037D4940459A1651FD /* ReplayController.swift in Sources */,
+				935CFB09EDA0758E793D46A1 /* SettingsView.swift in Sources */,
 				AB2EF948931E2B7A537578EC /* ShortcutsSheet.swift in Sources */,
 				E673274A2A114AAD6CCD860F /* SpotlightIndexer.swift in Sources */,
 				99BF6E584775B3783991EA3C /* StatsBar.swift in Sources */,
@@ -520,6 +526,7 @@
 				DED696A6BB47C8829F75D91D /* RendererSnapshot.swift in Sources */,
 				3CB3F20C1FD1C1C5A6B4ED96 /* ReplayBar.swift in Sources */,
 				7077C3C2B6946E2300569BE3 /* ReplayController.swift in Sources */,
+				61F76757D9DCE5238E5A70B9 /* SettingsView.swift in Sources */,
 				F9DCE9094CF1E5A0494F9134 /* ShortcutsSheet.swift in Sources */,
 				DB980FA8210C971372356D8B /* SpotlightIndexer.swift in Sources */,
 				C6CA3CCFCF061D81EB961488 /* StatsBar.swift in Sources */,
@@ -557,6 +564,7 @@
 				6151B81955445614C86D141F /* RendererSnapshot.swift in Sources */,
 				5B254889F8AC6039C546D58D /* ReplayBar.swift in Sources */,
 				66D27C29AE541D449E23A4A8 /* ReplayController.swift in Sources */,
+				A024DD9F280E31B6B1A56FCF /* SettingsView.swift in Sources */,
 				6939BFC63DFF94E98F99D24C /* ShortcutsSheet.swift in Sources */,
 				092C3C3C2DC674BDADE2328D /* SpotlightIndexer.swift in Sources */,
 				EF2FC7A4DC91AF4F3D9BB004 /* StatsBar.swift in Sources */,
