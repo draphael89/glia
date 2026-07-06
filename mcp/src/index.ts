@@ -87,6 +87,7 @@ const TOOLS = [
       properties: {
         task: { type: "string", description: "The task you'd prime for." },
         mode: { type: "string", enum: ["psyche", "context", "both"] },
+        maxTokens: { type: "number", description: "Token budget to preview against (default 60000) — must match your prime_context call to be accurate." },
       },
       required: ["task"],
     },
@@ -136,6 +137,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     if (name === "explain_context") {
       const m = await explainContext(String(args?.task ?? ""), {
         mode: args?.mode as InjectMode | undefined,
+        maxTokens: typeof args?.maxTokens === "number" ? args.maxTokens : undefined,
       });
       return { content: [{ type: "text", text: renderManifest(m) }] };
     }

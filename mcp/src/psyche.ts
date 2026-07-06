@@ -53,7 +53,11 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
     for (const rel of selfCandidates) {
       const p = join(dir, rel);
       if (existsSync(p)) {
-        parts.push("## Self\n", await readFile(p, "utf8"), "");
+        // Emit the same `*<type> · <slug>*` marker Glia's ContextBundle uses, so
+        // psycheSlugs can dedup retrieval against the built psyche too (not just
+        // the canonical file).
+        const slug = rel.replace(/\.md$/, "");
+        parts.push(`## Self\n*person · ${slug}*\n`, await readFile(p, "utf8"), "");
         found++;
         break;
       }
@@ -63,7 +67,8 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
       const files = (await readdir(originals)).filter((f) => f.endsWith(".md")).sort();
       if (files.length > 0) parts.push("## Essays\n");
       for (const f of files) {
-        parts.push(`### ${f.replace(/\.md$/, "")}`, await readFile(join(originals, f), "utf8"), "\n---");
+        const slug = `originals/${f.replace(/\.md$/, "")}`;
+        parts.push(`### ${slug}\n*original · ${slug}*\n`, await readFile(join(originals, f), "utf8"), "\n---");
         found++;
       }
     }
@@ -74,12 +79,12 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
   return { text: parts.join("\n"), source: `${dir} (self-page + essays)`, status: "built" };
 }
 
-/** Page slugs present in an injected psyche block — Glia's ContextBundle format
- *  writes each page as `*<type> · <slug>*`. Used to dedup retrieval against what
- *  the psyche already injects. Lowercased for case-insensitive matching. */
+/** Page slugs present in an injected psyche block — each page is written as
+ *  `*<type> · <slug>*`. Anchored on the leading `*<type>` so it won't false-match
+ *  ordinary prose like `foo · bar *baz*`. Lowercased for case-insensitive match. */
 export function psycheSlugs(text: string): Set<string> {
   const out = new Set<string>();
-  for (const m of text.matchAll(/·\s+([^\s*]+)\s*\*/g)) out.add(m[1].toLowerCase());
+  for (const m of text.matchAll(/\*[^*·\n]+·\s+([^\s*]+)\*/g)) out.add(m[1].toLowerCase());
   return out;
 }
 

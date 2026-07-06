@@ -80,36 +80,22 @@ export async function explainContext(
   task: string,
   opts: { mode?: InjectMode; maxTokens?: number } = {},
 ): Promise<ContextManifest> {
-  const mode = opts.mode ?? "both";
-  const budget = opts.maxTokens ?? 60_000;
-
-  let psycheText = "";
-  let psycheSource = "";
-  let psycheStatus: PsycheStatus | "skipped" = "skipped";
-  if (mode === "psyche" || mode === "both") {
-    const p = await loadPsyche();
-    psycheSource = p.source;
-    psycheStatus = p.status;
-    const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
-    psycheText = p.status === "empty" ? "" : truncateToTokens(p.text, psycheBudget);
-  }
-  const sections = [...psycheSlugs(psycheText)];
-
-  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task };
-  if (mode === "context" || mode === "both") {
-    const exclude = mode === "both" && psycheText ? psycheSlugs(psycheText) : undefined;
-    retrieval = await retrieveContext(task, { excludeSlugs: exclude });
-  }
-  const psycheTokens = estimateTokens(psycheText);
-  const retrievalTokens = estimateTokens(formatContext(retrieval.pages));
-
+  // Same assembler as primeContext, so the preview is truthful for ANY budget:
+  // same psyche cap, same dedup, same context truncation, same scaffolding.
+  const a = await assembleInjection(task, opts);
+  const scoreBySlug = new Map(a.retrieval.pages.map((p) => [p.slug, p.score]));
+  const pages = a.injectedPageSlugs.map((slug) => ({ slug, score: scoreBySlug.get(slug) ?? 0 }));
   return {
-    mode, psycheStatus, psycheSource, psycheTokens, psycheSections: sections,
-    retrievalStatus: retrieval.status,
-    retrievalPages: retrieval.pages.map((p) => ({ slug: p.slug, score: p.score })),
-    retrievalTokens,
-    totalTokens: psycheTokens + retrievalTokens,
-    degraded: psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status),
+    mode: a.mode,
+    psycheStatus: a.psycheStatus,
+    psycheSource: a.psycheSource,
+    psycheTokens: estimateTokens(a.psycheText),
+    psycheSections: a.psycheSections,
+    retrievalStatus: a.retrieval.status,
+    retrievalPages: pages,                            // only pages that survived truncation
+    retrievalTokens: estimateTokens(a.contextText),  // actual injected context tokens
+    totalTokens: estimateTokens(a.text),             // full rendered prime, incl. scaffolding
+    degraded: a.degraded,
   };
 }
 
@@ -130,28 +116,48 @@ export function renderManifest(m: ContextManifest): string {
   return lines.join("\n");
 }
 
+interface Assembled {
+  mode: InjectMode;
+  text: string;
+  psycheText: string;
+  contextText: string;
+  psycheStatus: PsycheStatus | "skipped";
+  psycheSource: string;
+  psycheSections: string[];
+  retrieval: RetrievalResult;
+  injectedPages: number;
+  injectedPageSlugs: string[];
+  degraded: boolean;
+  statusLines: string[];
+}
+
+/** Slugs that survived context truncation — formatContext writes each page as
+ *  `### <slug>  _(relevance ...)_`, so the injected subset is what's left. */
+function injectedPageSlugsFrom(contextText: string): string[] {
+  const out: string[] = [];
+  for (const m of contextText.matchAll(/^### (\S+)  _\(relevance/gm)) out.push(m[1]);
+  return out;
+}
+
 /**
  * The core of the thesis: build the injection that primes the model with WHO
- * YOU ARE (psyche) and, optionally, WHAT'S RELEVANT (gbrain context).
+ * YOU ARE (psyche) and, optionally, WHAT'S RELEVANT (gbrain context). This is
+ * the SINGLE source of truth shared by primeContext (the real prime) and
+ * explainContext (the preview), so the two can never drift.
  *
  * Budgeting reflects the blind-judge findings: identity and relevance are
  * COMPLEMENTS, not substitutes. Retrieval is what makes an answer specific and
- * actionable; identity is what makes it insightful. The winning arm carried
- * both. And identity is high-density — a dose-response run found a ~3k-token
- * core (self-page + top essays) reaches ~95% of the full psyche's blind ranking,
- * so it doesn't need the whole file (deepest insight does keep climbing with
- * more, so the cap leaves headroom). So in `both` mode we front-load a CAPPED
- * identity core and hand the larger remainder to retrieval, so the answer stays
- * grounded. (v1's "retrieval dilutes identity" did not survive blind judging —
- * see experiments/psyche-injection/FINDINGS.md.)
- *
- * Never throws. Degrades gracefully AND reports it: a visible `> glia-context
- * status:` block at the top of the returned text names any missing component.
+ * actionable; identity is what makes it insightful. Identity is high-density —
+ * a dose-response run found a ~3k-token core (self-page + top essays) reaches
+ * ~95% of the full psyche's blind ranking — so in `both` mode we front-load a
+ * CAPPED identity core (40% of budget) and hand the remainder to retrieval, and
+ * dedup retrieval against the injected psyche (~50% overlap). Never throws;
+ * degrades gracefully AND reports it via a visible `> glia-context status:` block.
  */
-export async function primeContext(
+async function assembleInjection(
   task: string,
-  opts: { mode?: InjectMode; maxTokens?: number } = {},
-): Promise<PrimeResult> {
+  opts: { mode?: InjectMode; maxTokens?: number },
+): Promise<Assembled> {
   const mode = opts.mode ?? "both";
   const budget = opts.maxTokens ?? 60_000;
 
@@ -162,8 +168,6 @@ export async function primeContext(
     const p = await loadPsyche();
     psycheSource = p.source;
     psycheStatus = p.status;
-    // Identity is high-density: a concentrated core carries the insight lift.
-    // Cap it at 40% of budget in `both` mode so retrieval keeps room to ground.
     const psycheBudget = mode === "psyche" ? budget : Math.floor(budget * 0.4);
     psycheText = p.status === "empty" ? "" : truncateToTokens(p.text, psycheBudget);
   }
@@ -171,27 +175,24 @@ export async function primeContext(
   let contextText = "";
   let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task };
   if (mode === "context" || mode === "both") {
-    // Dedup: don't spend retrieval budget re-injecting pages the psyche already
-    // carries (e.g. a starred essay) — measured ~50% overlap. Only exclude what
-    // was ACTUALLY injected (the truncated psycheText), not the full psyche.
+    // Dedup against what was ACTUALLY injected (the truncated psycheText).
     const exclude = mode === "both" && psycheText ? psycheSlugs(psycheText) : undefined;
     retrieval = await retrieveContext(task, { excludeSlugs: exclude });
     const ctx = formatContext(retrieval.pages);
     const ctxBudget = mode === "context" ? budget : budget - estimateTokens(psycheText);
     contextText = ctxBudget > 500 ? truncateToTokens(ctx, ctxBudget) : "";
   }
-  // Pages that ACTUALLY made it into the text (may be 0 if the budget dropped
-  // the block even though retrieval succeeded) — so status never over-claims.
-  const injectedPages = contextText ? retrieval.pages.length : 0;
+
+  // Truncation-aware: the pages that actually survived into contextText.
+  const injectedPageSlugs = injectedPageSlugsFrom(contextText);
+  const injectedPages = injectedPageSlugs.length;
 
   const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, retrieval, injectedPages });
   const degraded = psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status);
 
-  // NB: a visible "how to use this" directive + closing instruction was A/B-tested
-  // (GLIA_NO_DIRECTIVE toggle) and came out a dead 50/50 tie with a strong judge —
-  // a capable model already serves the specific person from the identity+context,
-  // so we DON'T ship the extra tokens. The "call prime_context first / reason from
-  // it" guidance lives at the protocol level via the server `instructions` instead.
+  // NB: a visible "how to use this" directive was A/B-tested (GLIA_NO_DIRECTIVE)
+  // and came out a dead 50/50 tie with a strong judge, so we don't ship the extra
+  // tokens; the "prime first" nudge lives in the server `instructions` instead.
   const header = [
     "# Priming context for this session",
     "<!-- Injected by glia-context. Below is who I am, then what's relevant to the task.",
@@ -205,19 +206,31 @@ export async function primeContext(
   const text = blocks.join("\n");
 
   return {
-    text,
-    mode,
-    tokens: estimateTokens(text),
-    psycheTokens: estimateTokens(psycheText),
-    contextTokens: estimateTokens(contextText),
-    contextPages: injectedPages,
-    source: psycheSource,
-    psycheStatus,
-    retrievalStatus: retrieval.status,
-    retrievalDetail: retrieval.detail,
-    retrievalMs: retrieval.elapsedMs,
-    retrievalCached: retrieval.cached,
-    degraded,
-    statusLines,
+    mode, text, psycheText, contextText, psycheStatus, psycheSource,
+    psycheSections: [...psycheSlugs(psycheText)], retrieval, injectedPages, injectedPageSlugs,
+    degraded, statusLines,
+  };
+}
+
+export async function primeContext(
+  task: string,
+  opts: { mode?: InjectMode; maxTokens?: number } = {},
+): Promise<PrimeResult> {
+  const a = await assembleInjection(task, opts);
+  return {
+    text: a.text,
+    mode: a.mode,
+    tokens: estimateTokens(a.text),
+    psycheTokens: estimateTokens(a.psycheText),
+    contextTokens: estimateTokens(a.contextText),
+    contextPages: a.injectedPages,
+    source: a.psycheSource,
+    psycheStatus: a.psycheStatus,
+    retrievalStatus: a.retrieval.status,
+    retrievalDetail: a.retrieval.detail,
+    retrievalMs: a.retrieval.elapsedMs,
+    retrievalCached: a.retrieval.cached,
+    degraded: a.degraded,
+    statusLines: a.statusLines,
   };
 }

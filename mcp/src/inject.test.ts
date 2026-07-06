@@ -110,3 +110,25 @@ test("explainContext returns a truthful manifest (sections + retrieved slugs, de
   assert.ok(m.retrievalPages.some((p) => p.slug === "note-alpha"));
   assert.ok(m.totalTokens >= m.psycheTokens);
 });
+
+test("psycheSlugs is anchored — no false-positive on prose (review fix #2)", () => {
+  // bare "· word *emphasis*" in body prose must NOT be parsed as a page marker
+  assert.equal(psycheSlugs("we weigh · design *matters*, judges **blind** ranked").size, 0);
+  // the real ContextBundle marker still parses
+  const s = psycheSlugs("*person · people-david*\n*original · originals/telos*");
+  assert.ok(s.has("people-david") && s.has("originals/telos"));
+});
+
+test("built psyche emits parseable slug markers so dedup works in built mode (fix #1)", async () => {
+  const p = await buildPsycheFromSource();
+  const slugs = psycheSlugs(p.text);
+  assert.ok(slugs.has("people-david"), "self-page slug marker present");
+  assert.ok(slugs.has("originals/telos"), "essay slug marker present");
+});
+
+test("explainContext mirrors primeContext budgeting for any maxTokens (fix #3)", async () => {
+  // the manifest must reflect the SAME assembly (psyche cap ≤ 40% of budget)
+  const m = await explainContext("hermes", { mode: "both", maxTokens: 400 });
+  assert.ok(m.psycheTokens <= 400 * 0.4 + 1, `psyche capped to budget (got ${m.psycheTokens})`);
+  assert.ok(m.totalTokens >= m.psycheTokens + m.retrievalTokens, "total includes scaffolding");
+});
