@@ -495,6 +495,22 @@ reader.* The `psycheCoreMaxTokens` knob stays (default 24k, now validated over 4
 no default change. **The biggest lesson of the whole arc: test what you SHIP, and
 let it overturn your prediction — v10 did.**
 
+**v11 — is it really a floor? MEASURED: yes.** The floor claim needs teeth: are
+the injected answers' specifics actually *real* (blind judges wrongly penalizing
+them), or *fabricated* (blind judges rightly penalizing them)? v11 fact-checked
+**every** specific claim about the user in the v9 `best`+`psyche` answers against
+the psyche, with an *informed* Opus checker (psyche stays internal — no privacy
+line crossed). **196 identity claims: 89% supported by the psyche, 9% unverifiable,
+just 2% contradicted. Of the *verifiable* claims, 98% are accurate.** So the
+injected identity is **overwhelmingly true** — the v9/v10 blind judges preferred
+retrieval while marking down identity content that is, in fact, 98% correct. That
+is the fabrication penalty made quantitative: **the verification-blind measurement
+UNDERSTATES identity, and it is a floor, not a hallucination problem** (2%
+fabrication is negligible). The one reader who can verify these accurate specifics
+— the user — is exactly the one no LLM judge can stand in for. **This is where the
+autonomous arc honestly ends: LLM judges bound identity's value from *below*; the
+true value needs a human who can verify. Every number here is a floor.**
+
 ---
 
 # Iteration loop — injection tuning (what moved the needle, what didn't)
