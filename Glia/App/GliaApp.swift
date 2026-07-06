@@ -142,7 +142,11 @@ struct MenuBarContent: View {
                 .disabled(model.demoActive)
             Button("Open Glia") {
                 NSApp.activate(ignoringOtherApps: true)
-                NSApp.windows.first(where: { $0.canBecomeMain })?.makeKeyAndOrderFront(nil)
+                // The single `Window` scene is DESTROYED when closed (⌘W / red
+                // button) while the menu-bar app keeps running — an NSApp.windows
+                // lookup then finds nothing and the app is unreachable. openWindow
+                // re-creates it (or brings the existing one forward).
+                openWindow(id: "main")
             }
             Divider()
             Button("Quit Glia") { NSApp.terminate(nil) }
