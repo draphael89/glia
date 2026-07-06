@@ -35,6 +35,11 @@ export const config = {
   gbrainNegativeCacheTtlMs: intEnv("GBRAIN_NEG_CACHE_TTL_MS", 5_000),
   /** execFile stdout ceiling for a retrieval. */
   gbrainMaxBuffer: 8 * 1024 * 1024,
+  /** Skip a retrieved page whose source file exceeds this (only the first
+   *  ~6000 chars are injected anyway; this just avoids reading pathological
+   *  multi-hundred-KB raw dumps). Was an over-aggressive 40KB that dropped
+   *  high-value ranked pages. */
+  gbrainMaxPageBytes: intEnv("GBRAIN_MAX_PAGE_BYTES", 500_000),
   /** GLIA_STRICT_STARTUP=1 → exit on any failed config check, not just fatal. */
   strictStartup: process.env.GLIA_STRICT_STARTUP === "1",
 };
