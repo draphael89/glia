@@ -242,11 +242,16 @@ export default function Home() {
             better. Prediction refuted, in public.
           </p>
           <p>
-            The honest read: this is a <strong>floor</strong>, not a refutation. A psyche-<em>blind</em>
-            judge penalizes real identity specifics it can&apos;t verify (the same effect v6 found), and
-            the one reader who <em>can</em> verify them — you — isn&apos;t in the loop. But the product
-            lesson is real and we&apos;re keeping it: <strong>don&apos;t assume identity injection beats
-            good retrieval for a verification-blind reader.</strong> Test what you ship, not a picture of it.
+            The honest read: this is a <strong>floor</strong>, not a refutation — and we measured it
+            (v11). We fact-checked <strong>every</strong> specific claim about the user in those injected
+            answers against the ground-truth identity file: <strong>196 claims, 98% accurate, 2%
+            fabricated.</strong> So the blind judges preferred retrieval while marking down identity
+            content that is overwhelmingly <em>true</em> — they penalized real specifics they simply
+            couldn&apos;t verify (the same effect v6 found). The one reader who <em>can</em> verify them —
+            you — isn&apos;t in the loop, and no LLM judge can stand in for that. The product lesson we keep:
+            <strong> don&apos;t assume identity injection beats good retrieval for a verification-blind
+            reader</strong> — but know that every number here bounds identity&apos;s value from
+            <em> below</em>. Test what you ship, not a picture of it.
           </p>
           <p className="muted">
             Small-n throughout — but tried hard, across vendors, a doubled task set, a construction
@@ -259,7 +264,7 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>How hard we pushed on it</h2>
-          <h3>Ten runs, each trying to break the last.</h3>
+          <h3>Eleven runs, each trying to break the last.</h3>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>
             <table>
               <thead>
@@ -276,6 +281,7 @@ export default function Home() {
                 <tr><td className="mono">v8</td><td><strong>construction control</strong> — rebuild context with natural (production) queries</td><td>edge recovered 33%→60%: v7&apos;s keyword context over-pulled essays; honest range ~55–65%, construction-sensitive</td></tr>
                 <tr><td className="mono">v9</td><td><strong>production pipeline</strong> — the ACTUALLY-shipped injection, not a reconstruction</td><td>blind judges (Opus + gpt-5) prefer <span style={{ color: armColor.context }}>retrieval</span> alone; injected <span style={{ color: armColor.best }}>both</span> doesn&apos;t beat it. A floor — the psyche-blind judge can&apos;t verify the identity (v6)</td></tr>
                 <tr><td className="mono">v10</td><td><strong>rebalance test</strong> — shrink the shipped identity core to recover <span style={{ color: armColor.best }}>both</span></td><td>hypothesis REFUTED: a smaller core made it worse, not better. More psyche helps; the shortfall isn&apos;t a config knob</td></tr>
+                <tr><td className="mono">v11</td><td><strong>floor check</strong> — fact-check the injected identity claims against ground truth</td><td>196 claims, <strong>98% accurate</strong>, 2% fabricated: the blind judges penalized real content they couldn&apos;t verify. Every number is a floor</td></tr>
               </tbody>
             </table>
           </div>
