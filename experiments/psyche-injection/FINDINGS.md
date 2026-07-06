@@ -258,3 +258,33 @@ climb while still reserving the majority of the window for retrieval. The knee
 being ~3k also means: if the window is *tight*, ~3k tokens of front-loaded
 identity (self-page + top essays) is the high-value core to keep — exactly the
 `identityRank` ordering the exporter already front-loads.
+
+---
+
+# Iteration loop — injection tuning (what moved the needle, what didn't)
+
+A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself
+(reusable harness: `harness/eval-inject-ab.js`). The honest ledger:
+
+- **Dedup retrieval against the psyche — kept (efficiency).** On identity-shaped
+  tasks ~**50%** of the top gbrain hits are pages *already in the injected psyche*
+  (your starred essays). Re-injecting them is pure waste. `prime_context` now
+  drops psyche-present pages from retrieval and **backfills** down the ranked list
+  to `topK` genuinely-new unique pages. A strict content-uniqueness / token win.
+
+- **A model-facing "how to use this" directive — cut (no effect).** Adding an
+  explicit "serve this specific person, reason from their frameworks…" directive
+  (+closing line) to the prime was a **dead 50/50 tie** over 6 tasks × 2 blind
+  judges. A capable model already personalizes from the identity+context, so the
+  extra tokens buy nothing. Reverted. (The "call prime_context first" nudge lives
+  at the protocol level via the server `instructions` instead — a different lever,
+  about *whether* the agent primes, not answer quality.)
+
+- **The lesson.** For a strong model, injection *format* is largely neutral —
+  what matters is the *content* (identity present, retrieval present, and the
+  right, non-duplicated pages). So the durable wins were content (dedup/backfill)
+  and usage (server `instructions`, the `explain_context` preview tool), not
+  prose. Query-aware psyche truncation was scoped but *declined*: with the psyche
+  front-loaded by `identityRank`, the 24k cap already keeps the self-page + top
+  essays (v5: ≈ full psyche on Borda), so reordering within the surviving core is
+  a predicted tie — not worth the complexity. Measure, keep the win, cut the wash.
