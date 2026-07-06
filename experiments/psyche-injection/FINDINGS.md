@@ -305,6 +305,30 @@ own key; raw judgments gitignored, aggregate only.)
 
 ---
 
+# Robustness — is the lift just verbosity? (no)
+
+The obvious confound: maybe injected answers win because they're *longer* and
+judges reward length, not insight. Checked directly against the existing answers
+(`verbosity-check.py` → [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md)), two
+task-controlled tests, across all three judge vendors.
+
+- **Length barely differs.** Mean words/arm: naked 362, context 376, psyche 388,
+  best 393 — a ~**8%** spread (every arm answered the same prompt under the same
+  instruction). Whatever identity injection does, it isn't padding the answer.
+- **Length weakly predicts score.** Spearman(length, per-answer Borda) is
+  **+0.19** (Opus), **+0.17** (Haiku), **+0.07** (gpt-5) — all weak; the longer
+  answer wins ~**60%** of within-task pairs. A mild association, expected because
+  a genuinely insightful answer *tends* to run slightly longer — correlation, not
+  cause.
+- **Decisive: a shorter arm beats a longer one on content.** In **every** judge
+  pool, `psyche` is *longer* than `context` (388 vs 376 words) yet ranks **below**
+  it (e.g. Opus Borda 65 < 83); under gpt-5, `psyche` even outruns `naked` and
+  still loses. If length drove the ranking these inversions couldn't happen. **The
+  `best`-first ordering survives controlling for verbosity** — content, not word
+  count, is doing the work.
+
+---
+
 # Iteration loop — injection tuning (what moved the needle, what didn't)
 
 A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself

@@ -87,6 +87,8 @@ Materials (the psyche + per-task context) are built from a real brain and are
 - [REPORT.md](REPORT.md) / [v2](REPORT-v2.md) / [v3](REPORT-v3.md) / [v4](REPORT-v4.md)
   / [v5](REPORT-v5.md) / [v6](REPORT-v6.md) — raw metrics per run (Borda, pairwise,
   rubric, cross-model, dose-response, cross-vendor); aggregate only, no private content.
+- [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
+  confound (a shorter arm beats a longer one on content in all three judge pools).
 
 **Honest headline (v2/v3, blind):** injecting **who you are** makes an agent
 measurably sharper — but as a **complement** to what's relevant, not a
