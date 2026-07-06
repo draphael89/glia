@@ -89,13 +89,20 @@ Materials (the psyche + per-task context) are built from a real brain and are
   rubric, cross-model, dose-response, cross-vendor); aggregate only, no private content.
 - [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
   confound (a shorter arm beats a longer one on content in all three judge pools).
+- [SIGNIFICANCE.md](SIGNIFICANCE.md) — task-clustered uncertainty: direction is
+  robust (6/7 tasks, 3 vendors), but n=7 limits significance — ordering is solid,
+  exact percentages are directional.
 
 **Honest headline (v2/v3, blind):** injecting **who you are** makes an agent
 measurably sharper — but as a **complement** to what's relevant, not a
 replacement. The **both** arm wins the blind ranking and beats relevance-alone
-71%; identity's specific contribution is **insight** (retrieval buys specificity
-and actionability). On neutral technical tasks every arm ties at ceiling, so the
-lift is specific to identity-shaped work, not a global "try harder" effect.
+71% (6/7 tasks); identity's specific contribution is **insight** (retrieval buys
+specificity and actionability). On neutral technical tasks every arm ties at
+ceiling, so the lift is specific to identity-shaped work, not a global "try
+harder" effect. The **ordering** is robust — it reproduces across three judge
+vendors (Opus, Haiku, gpt-5) and survives a verbosity control — but this is a
+**7-task pilot**: trust the ordering, read the exact percentages as directional
+(see [SIGNIFICANCE.md](SIGNIFICANCE.md) / [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md)).
 
 **What v1 got wrong (kept in the repo on purpose):** the first, *non-blind* run
 claimed psyche *alone* beat the combination and that retrieval *diluted*

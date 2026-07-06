@@ -329,6 +329,29 @@ task-controlled tests, across all three judge vendors.
 
 ---
 
+# How certain is it? (task-clustered significance)
+
+The pooled counts (49, 28 judgments) look big, but they re-rate answers to just
+**7 tasks** — the honest unit of independence is the *task*, not the judgment.
+`significance.py` → [SIGNIFICANCE.md](SIGNIFICANCE.md) does the cluster-correct
+tests, and the result tempers the headline honestly:
+
+- **Direction is robust.** `best` beats `context` in **6/7** Opus tasks (pooled
+  71%) and **beats `naked` 88%**; retrieval beats naked 82%. The ordering
+  reproduces across all three judge vendors (Opus, Haiku, gpt-5) and survives the
+  verbosity control above.
+- **But significance is n-limited, and we say so.** The conservative across-task
+  sign test is **p ≈ 0.125** even at 6/7 (not < 0.05), and the cross-vendor
+  (gpt-5) task-clustered 95% CIs for best-vs-context **include 50%**. A
+  task-clustered bootstrap on the Opus data does exclude 50% ([53%, 88%]), but it
+  over-credits correlated re-judgments of the same fixed answers — when the two
+  disagree, believe the sign test.
+- **So:** trust the **ordering**; treat the **exact percentages** as directional.
+  The only thing a re-judge can't buy is more tasks — this is a 7-task pilot, and
+  the numbers are stated so nobody over-reads the big judgment totals.
+
+---
+
 # Iteration loop — injection tuning (what moved the needle, what didn't)
 
 A `/loop` round of improve → blind-A/B → keep-or-cut on the injection itself
