@@ -94,6 +94,11 @@ Materials (the psyche + per-task context) are built from a real brain and are
 - [REPORT-completeness.md](REPORT-completeness.md) — **measures the bug behind the flip**:
   69% of top-ranked pages were missing from the read mirror (31% → 99% readable with the
   fix, +67 points; 12/15 queries starved). The quantitative root cause of v9.
+- [REPORT-v13.md](REPORT-v13.md) — **an honest null that maps the eval's noise floor.** A
+  controlled completeness×identity 2×2 whose *control* task (identical inputs to two arms)
+  still swung 10 of 15 Borda — proving that at n=5×5 per-answer variance dominates. Reads
+  as: v13 is underpowered, the completeness fix rests on direct measurement not this eval,
+  and it tempers the exact percentages everywhere (direction holds; single points don't).
 - [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
   confound (a shorter arm beats a longer one on content in all three judge pools).
 - [SIGNIFICANCE.md](SIGNIFICANCE.md) — task-clustered uncertainty: direction is
@@ -133,6 +138,13 @@ reconstruction. And v11 fact-checked the injected identity at **98% accurate**, 
 the win is real, not hallucinated. The lesson we value most: **test what you ship —
 it exposes the bugs a reconstruction hides, and fixing them is the actual win**
 (see [REPORT-v9.md](REPORT-v9.md) → [REPORT-v12.md](REPORT-v12.md)).
+
+And the honest coda — [v13](REPORT-v13.md) pushed retrieval to 99% complete and re-ran a
+controlled 2×2, expecting to sharpen the flip; instead its **control task (identical
+inputs to two arms) swung 10 of 15 Borda**, showing that at this scale (n=5×5) per-answer
+noise dominates. So v13 is a **null that maps the noise floor**: it doesn't overturn v12,
+but it does mean the *exact percentages* everywhere here are directional — trust the
+direction (identity is a complement; test what you ship), not the decimal.
 
 **What v1 got wrong (kept in the repo on purpose):** the first, *non-blind* run
 claimed psyche *alone* beat the combination and that retrieval *diluted*
