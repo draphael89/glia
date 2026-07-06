@@ -347,8 +347,47 @@ tests, and the result tempers the headline honestly:
   over-credits correlated re-judgments of the same fixed answers — when the two
   disagree, believe the sign test.
 - **So:** trust the **ordering**; treat the **exact percentages** as directional.
-  The only thing a re-judge can't buy is more tasks — this is a 7-task pilot, and
-  the numbers are stated so nobody over-reads the big judgment totals.
+  The only thing a re-judge can't buy is more tasks — so [§ v7](#v7--the-expansion-run-buy-the-tasks) below *buys them*, and the result tempers the pilot.
+
+---
+
+# v7 — the expansion run (buy the tasks)
+
+The significance section said the one fix a re-judge can't buy is more tasks. So
+we bought them: **7 fresh tasks (t10–t16)**, predictions **pre-registered before
+generation**, generated and blind-judged **identically** to v2 (same prompts,
+schemas, blind protocol; 5 judges/task) — with one tightening: strict per-arm
+read isolation, after live QA caught a `psyche` arm grepping the context files.
+Combined with v2/v3, that's **12 identity tasks / 73 blind judgments**. Numbers in
+[REPORT-v7.md](REPORT-v7.md), builder in `harness/build-context.py`.
+
+**And it tempers the headline — honestly.**
+
+- **The ordering holds.** `best > context > psyche > naked` on all 12 tasks; `best`
+  is Borda-first and still beats **psyche-alone 75%** and **naked 79%**. Injecting
+  identity+retrieval beats identity-alone, and beats nothing — those are solid.
+- **But the marginal edge of identity *over* retrieval did not replicate.** `best`
+  beats `context` in only **7/11 tasks, 59% pooled** (sign test p = 0.55, n.s.) —
+  **down from the pilot's 71%.** On the fresh tasks `best` won t10 but *lost* to
+  `context` on t11, t13, t14. **The 7-task pilot overstated best-vs-context; the
+  honest estimate is coin-flip-plus, not a clear win.**
+- **Why — and it's the dedup rationale, caught in the wild.** The fresh tasks where
+  `best` lost (t11 "why am I stuck", t14 "weekly rhythm") are exactly the ones
+  whose *retrieval* pulled David's **own essays** (telos-is-velocity,
+  daimon-charter) as the context — so the identity was *already present* and adding
+  the psyche on top was redundant. Where retrieval was operational, not
+  identity-laden (t10 product strategy), `best` beat `context` 80%. **Identity
+  injection helps over retrieval precisely when retrieval doesn't already surface
+  the identity** — which is exactly why the production `prime_context` dedups the
+  psyche against retrieval instead of stacking them.
+- **Controls stay clean.** On the checkable Bloom-filter task every arm scored
+  100% objectively; identity adds nothing where an answer is just right-or-wrong.
+
+**Net after v7:** the durable claim is narrower and better-supported — *inject both;
+`best` is the top arm; identity beats naked and beats identity-alone.* The flashy
+"identity beats retrieval 71%" was a small-sample high; the real marginal effect is
+modest and **conditional on retrieval not already carrying the identity.** That
+conditionality is the product design, not a footnote to it.
 
 ---
 

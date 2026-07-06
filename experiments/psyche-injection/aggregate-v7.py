@@ -39,9 +39,11 @@ def load(files):
             if t.get("objective"): e["objective"] = t["objective"]
             for j in t.get("blindJudgments", []):
                 r = j.get("ranking")
-                if not r or len(r) != 4: continue
+                if not r or len(r) != 4 or len(set(r)) != 4: continue   # must be a clean A/B/C/D permutation
                 sm = {L[k]: CONDS[PERMS[j["permIdx"]][k]] for k in range(4)}
-                e["rankings"].append([sm[x] for x in r])
+                order = [sm[x] for x in r]
+                if set(order) != set(CONDS): continue
+                e["rankings"].append(order)
     return tasks
 
 
@@ -99,9 +101,11 @@ def main():
     eff = ntask - ties
     p = binom_two_sided(wins, eff)
     out.append(f"\n- **`best` beats `context` in {wins}/{eff} tasks** (sign test, two-sided p = "
-               f"**{p:.3f}**{' ✅ significant' if p < 0.05 else ' — still n-limited' })")
-    out.append(f"- vs the v2/v3-only pilot (6/7, p=0.125): more tasks → "
-               + ("**crosses significance**" if p < 0.05 else "tighter but not yet <0.05"))
+               f"**{p:.3f}**{' — significant' if p < 0.05 else ', n.s.'})")
+    out.append(f"- vs the v2/v3-only pilot (6/7, p=0.125): adding fresh tasks made best-vs-context "
+               + ("cross significance." if p < 0.05 else "**WEAKER, not stronger** — the pilot was optimistic. "
+                  "The fresh tasks split (best won t10, lost t11/t13/t14), so the marginal identity-over-"
+                  "retrieval effect is smaller and more task-dependent than 7 tasks suggested."))
 
     # ---- prediction calibration (fresh v7 tasks only) ----
     out.append("\n## Pre-registered prediction calibration (v7 tasks)\n")
@@ -134,14 +138,29 @@ def main():
             line += " | objective pass: " + ", ".join(f"{c} {rates[c]*100:.0f}%" for c in CONDS)
         out.append(line)
 
-    out.append("\n## Verdict\n")
-    out.append(f"- The ordering **{' > '.join(order)}** holds on the combined "
-               f"{ntask}-task set ({njudg} judgments).")
-    out.append(f"- Task-level significance: best>context in {wins}/{eff} tasks, "
-               f"p={p:.3f} — {'now below 0.05, upgrading the pilot from directional to significant.' if p < 0.05 else 'tighter than the 7-task pilot but still sample-limited; direction robust.'}")
-    out.append("- Neutral/control tasks show near-tied arms (identity doesn't help where it shouldn't), "
-               "replicating the mechanism-isolation on fresh tasks.")
-    out.append("\n---\n_Opus generator + judge; fresh tasks pre-registered. aggregate-v7.py; aggregate only._")
+    bc_pool = 100*winrate(allrank, "best", "context")
+    bp_pool = 100*winrate(allrank, "best", "psyche")
+    bn_pool = 100*winrate(allrank, "best", "naked")
+    out.append("\n## Verdict — honest, and it tempers the pilot\n")
+    out.append(f"- **Ordering holds**: `{' > '.join(order)}` on the combined {ntask}-task set "
+               f"({njudg} judgments); `best` is Borda-first and beats **psyche-alone {bp_pool:.0f}%** "
+               f"and **naked {bn_pool:.0f}%** — injecting identity+retrieval clearly beats identity-alone "
+               "and beats nothing. Those hold up.")
+    out.append(f"- **But the marginal edge of identity OVER retrieval did NOT replicate.** `best` beats "
+               f"`context` in only **{wins}/{eff}** fresh+old tasks ({bc_pool:.0f}% pooled, sign-test "
+               f"p={p:.3f}, n.s.) — down from the 7-task pilot's 71%. The pilot **overstated** "
+               "best-vs-context; the honest estimate is a coin-flip-plus, not a clear win.")
+    out.append("- **Why — the dedup rationale, observed.** On the fresh tasks where `best` lost to "
+               "`context` (t11, t14), retrieval had already surfaced David's *own essays* (telos, "
+               "daimon-charter) as the context — so the psyche was redundant and adding it didn't help. "
+               "Where context was operational, not identity-laden (t10), `best` beat `context` 80%. "
+               "Identity injection helps over retrieval **exactly when retrieval doesn't already surface "
+               "the identity** — which is precisely why the production MCP dedups psyche against retrieval.")
+    out.append("- **Controls**: on the checkable Bloom-filter task every arm scored 100% objectively — "
+               "identity adds nothing where the answer is just correct-or-not (blind quality ranks on "
+               "neutral tasks are noise).")
+    out.append("\n---\n_Opus generator + judge; fresh tasks pre-registered; strict per-arm read isolation. "
+               "aggregate-v7.py; aggregate only._")
     open(os.path.join(base, "REPORT-v7.md"), "w").write("\n".join(out) + "\n")
     print("\n".join(out))
 
