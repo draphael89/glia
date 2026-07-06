@@ -34,6 +34,21 @@ struct EnableMCPSheet: View {
         }
     }
 
+    /// Shown in the sandboxed App Store build, which can't provision.
+    private var masCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Sandboxed build", systemImage: "lock.shield")
+                .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.accent)
+            Text("The Mac App Store build can't modify Claude's configuration. Get the direct build for one-click setup, or run this in Terminal:")
+                .font(.system(size: 11.5)).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("cd mcp && ./install.sh")
+                .font(.system(size: 11, design: .monospaced))
+                .padding(8).frame(maxWidth: .infinity, alignment: .leading)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
+        }
+    }
+
 #if !MAS
     private var s: MCPStatus { model.mcpStatus }
 
@@ -77,20 +92,6 @@ struct EnableMCPSheet: View {
 
         Text("Direct build only — writes ~/.claude.json and Claude Desktop's config. Or run `cd mcp && ./install.sh`.")
             .font(.system(size: 9.5)).foregroundStyle(.tertiary)
-    }
-
-    private var masCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Sandboxed build", systemImage: "lock.shield")
-                .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.accent)
-            Text("The Mac App Store build can't modify Claude's configuration. Get the direct build for one-click setup, or run this in Terminal:")
-                .font(.system(size: 11.5)).foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Text("cd mcp && ./install.sh")
-                .font(.system(size: 11, design: .monospaced))
-                .padding(8).frame(maxWidth: .infinity, alignment: .leading)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
-        }
     }
 
     // state → text/ok

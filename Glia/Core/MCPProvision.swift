@@ -44,9 +44,12 @@ enum MCPProvision {
 
     // MARK: process
 
-    /// Run an executable, draining both pipes BEFORE waitUntilExit (the 64KB
-    /// pipe buffer would otherwise deadlock on large npm/claude output).
-    nonisolated static func runProcess(_ url: URL, _ args: [String], env extra: [String: String]? = nil) async -> ShellResult {
+    /// Run an executable and return a Sendable result. Drains stdout and stderr
+    /// CONCURRENTLY (draining them sequentially deadlocks if the child fills one
+    /// pipe buffer while we're blocked reading the other), and a watchdog
+    /// terminates a wedged child so the call can never hang forever.
+    nonisolated static func runProcess(_ url: URL, _ args: [String], env extra: [String: String]? = nil,
+                                       timeout: TimeInterval = 30) async -> ShellResult {
         await Task.detached(priority: .userInitiated) {
             let p = Process()
             p.executableURL = url
@@ -59,9 +62,21 @@ enum MCPProvision {
             let out = Pipe(); let err = Pipe()
             p.standardOutput = out; p.standardError = err
             do { try p.run() } catch { return ShellResult(status: -1, stdout: "", stderr: "\(error)") }
-            let o = out.fileHandleForReading.readDataToEndOfFile()
-            let r = err.fileHandleForReading.readDataToEndOfFile()
+
+            // Watchdog: terminate a child that never exits (Process.terminate is
+            // safe to call from another thread).
+            let watchdog = DispatchWorkItem { if p.isRunning { p.terminate() } }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: watchdog)
+
+            // Drain both pipes concurrently (each read blocks until its EOF) so a
+            // full buffer on one can't deadlock the read of the other.
+            let outHandle = out.fileHandleForReading
+            let errHandle = err.fileHandleForReading
+            async let oData: Data = Task.detached { outHandle.readDataToEndOfFile() }.value
+            async let rData: Data = Task.detached { errHandle.readDataToEndOfFile() }.value
+            let (o, r) = await (oData, rData)
             p.waitUntilExit()
+            watchdog.cancel()
             return ShellResult(status: p.terminationStatus,
                                stdout: String(decoding: o, as: UTF8.self),
                                stderr: String(decoding: r, as: UTF8.self))
@@ -132,10 +147,19 @@ enum MCPProvision {
             let current = try? String(contentsOf: marker, encoding: .utf8)
             let distExists = fm.fileExists(atPath: dest.appendingPathComponent("dist/index.js").path)
             if current != version || !distExists {
-                if fm.fileExists(atPath: dest.path) { try? fm.removeItem(at: dest) }
-                try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try fm.copyItem(at: res, to: dest)
-                try? version.write(to: marker, atomically: true, encoding: .utf8)
+                // Stage into a temp sibling, then swap atomically — so a failed
+                // copy never destroys the live ~/.glia/mcp the clients point at.
+                let parent = dest.deletingLastPathComponent()
+                try fm.createDirectory(at: parent, withIntermediateDirectories: true)
+                let tmp = parent.appendingPathComponent(".mcp-staging-\(version)")
+                if fm.fileExists(atPath: tmp.path) { try? fm.removeItem(at: tmp) }
+                try fm.copyItem(at: res, to: tmp)
+                try? version.write(to: tmp.appendingPathComponent(".staged-version"), atomically: true, encoding: .utf8)
+                if fm.fileExists(atPath: dest.path) {
+                    _ = try fm.replaceItemAt(dest, withItemAt: tmp)   // atomic; old removed only on success
+                } else {
+                    try fm.moveItem(at: tmp, to: dest)
+                }
             }
             return dest.appendingPathComponent("dist/index.js").path
         }.value
@@ -194,10 +218,23 @@ enum MCPProvision {
             let fm = FileManager.default
             let dir = fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Claude", isDirectory: true)
             let cfg = dir.appendingPathComponent("claude_desktop_config.json")
+            let fileExists = fm.fileExists(atPath: cfg.path)
             let existing = try? Data(contentsOf: cfg)
-            if let existing, !isParseableJSON(existing) {
-                try? fm.copyItem(at: cfg, to: cfg.appendingPathExtension("glia-backup"))
-                return .failed("existing Claude Desktop config isn't valid JSON — backed up to .glia-backup, not modified")
+
+            // Exists but unreadable → don't risk clobbering it.
+            if fileExists && existing == nil {
+                return .failed("Claude Desktop config exists but couldn't be read (permissions?) — not modified")
+            }
+            // Present but not a valid JSON OBJECT (unparseable, or an array/scalar),
+            // or its mcpServers isn't an object → back up and ABORT, never destroy.
+            if let existing {
+                let obj = try? JSONSerialization.jsonObject(with: existing)
+                let dict = obj as? [String: Any]
+                let mcpBad = (dict?["mcpServers"]).map { !($0 is [String: Any]) } ?? false
+                if obj == nil || dict == nil || mcpBad {
+                    try? fm.copyItem(at: cfg, to: cfg.appendingPathExtension("glia-backup"))
+                    return .failed("existing Claude Desktop config isn't a JSON object we can safely merge — backed up to .glia-backup, not modified")
+                }
             }
             guard let out = mergeDesktopConfig(existing: existing, node: node, dist: dist) else {
                 return .failed("couldn't encode config")

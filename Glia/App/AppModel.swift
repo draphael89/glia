@@ -85,11 +85,12 @@ final class AppModel {
         renderer.onFrame = { [weak self] _ in self?.frameTicked() }
         replay.attach(model: self)
         AppModel.shared = self
-        // Snapshot mode must not depend on a window ever appearing (the
-        // accessory activation policy may keep SwiftUI from presenting one):
-        // drive the load → settle → render pipeline directly.
+        // Headless/automation runs must not depend on a window ever appearing
+        // (the accessory activation policy may keep SwiftUI from presenting
+        // one): drive the load → settle → render pipeline directly.
         Markers.drop("model.init")
-        if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil {
+        let env = ProcessInfo.processInfo.environment
+        if env["GLIA_SNAPSHOT"] != nil || env["GLIA_ENABLE_MCP"] != nil || env["GLIA_EXPORT_CONTEXT"] != nil {
             start()
         }
     }
@@ -150,28 +151,30 @@ final class AppModel {
             let g = try await source.loadGraph()
             Markers.drop("loaded nodes=\(g.nodes.count)")
             apply(graph: g, animateInsertions: false)
-            // GLIA_EXPORT_CONTEXT=<scope>:<path> — headless bundle export for
-            // verification/automation (identity|everything|selection).
-            if let spec = ProcessInfo.processInfo.environment["GLIA_EXPORT_CONTEXT"],
-               let colon = spec.firstIndex(of: ":") {
-                let scope = ContextScope(rawValue: String(spec[..<colon])) ?? .identity
-                let path = String(spec[spec.index(after: colon)...])
-                let b = buildContextBundle(scope)
-                try? b.text.data(using: .utf8)?.write(to: URL(fileURLWithPath: path))
-                print("glia: context \(b.pageCount) pages, ~\(b.tokenEstimate) tokens -> \(path)")
-                exit(0)
-            }
-            // GLIA_ENABLE_MCP=1 — headless one-click enable (register Claude Code
-            // + Desktop) for automation/verification; prints the outcome + exits.
-            if ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil {
-                await enableMCP()
-                print("glia: enableMCP node=\(mcpStatus.node) code=\(mcpStatus.claudeCode) desktop=\(mcpStatus.claudeDesktop) dist=\(mcpStatus.distPath ?? "-") phase=\(mcpStatus.phase)")
-                exit(0)
-            }
         } catch {
             loadError = "Couldn't read the brain: \(error.localizedDescription)"
             // error state is a first-class screen — verifiable like the rest
             snapshotIfRequested()
+        }
+        // Headless automation hooks run OUTSIDE the do/catch so a load failure
+        // can't skip them and leave a scripted (windowless) process hanging.
+        // GLIA_EXPORT_CONTEXT=<scope>:<path> — headless bundle export.
+        if let spec = ProcessInfo.processInfo.environment["GLIA_EXPORT_CONTEXT"],
+           let colon = spec.firstIndex(of: ":") {
+            let scope = ContextScope(rawValue: String(spec[..<colon])) ?? .identity
+            let path = String(spec[spec.index(after: colon)...])
+            let b = buildContextBundle(scope)
+            try? b.text.data(using: .utf8)?.write(to: URL(fileURLWithPath: path))
+            print("glia: context \(b.pageCount) pages, ~\(b.tokenEstimate) tokens -> \(path)")
+            exit(0)
+        }
+        // GLIA_ENABLE_MCP=1 — headless one-click enable (register Claude Code +
+        // Desktop). Registration doesn't need the graph, so it runs even if the
+        // brain failed to load; the psyche sync just no-ops on an empty graph.
+        if ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil {
+            await enableMCP()
+            print("glia: enableMCP node=\(mcpStatus.node) code=\(mcpStatus.claudeCode) desktop=\(mcpStatus.claudeDesktop) dist=\(mcpStatus.distPath ?? "-") phase=\(mcpStatus.phase)")
+            exit(0)
         }
     }
 
@@ -705,7 +708,7 @@ final class AppModel {
             .appendingPathComponent(".glia/psyche.md")
     }
 
-    private struct PsycheWriteResult: Sendable { let pageCount: Int; let bytes: Int; let modified: Date? }
+    private struct PsycheWriteResult: Sendable { let pageCount: Int; let bytes: Int; let modified: Date?; let wrote: Bool }
 
     /// Debounced live sync — called from `toggleStar` and the first-settle seed.
     /// Coalesces a burst of star toggles into a single atomic write 700ms later.
@@ -724,29 +727,64 @@ final class AppModel {
         return await performSync(scope: scope)
     }
 
-    /// The worker: resolve scope + gather Sendable inputs on the main actor, do
-    /// the build + atomic write + stat off the main actor, then publish status.
+    // Serialize syncs: `cancel()` can't stop a debounced write already past its
+    // sleep, so a manual sync could otherwise run concurrently with it and
+    // publish status that disagrees with the bytes on disk. Instead, coalesce —
+    // a request arriving mid-write records a re-run with the newest scope, and
+    // the in-flight sync loops once more so the LAST write always wins.
+    private var syncInFlight = false
+    private var syncRerunPending = false
+    private var syncRerunScope: ContextScope?
+
     @discardableResult
     private func performSync(scope: ContextScope? = nil) async -> Int {
         guard !demoActive else { psycheStatus.phase = .skipped; return 0 }
+        if syncInFlight {
+            syncRerunPending = true
+            syncRerunScope = scope
+            return psycheStatus.pageCount
+        }
+        syncInFlight = true
+        defer { syncInFlight = false }
+        var currentScope = scope
+        var pages = 0
+        while true {
+            pages = await runOneSync(scope: currentScope)
+            if syncRerunPending {
+                syncRerunPending = false
+                currentScope = syncRerunScope
+                syncRerunScope = nil
+                continue
+            }
+            break
+        }
+        return pages
+    }
+
+    /// One sync pass: gather Sendable inputs on the main actor, do the build +
+    /// atomic write + stat off the main actor, then publish status that reflects
+    /// what actually landed on disk.
+    @discardableResult
+    private func runOneSync(scope: ContextScope?) async -> Int {
         let resolved = scope ?? (starredSlugs.isEmpty ? .identity : .collection)
         let nodes = contextNodes(resolved)
-        guard !nodes.isEmpty else { return 0 }
+        guard !nodes.isEmpty else { psycheStatus.phase = .idle; return 0 }  // never wedge at .pending
         let header = contextHeader(resolved)
         let mirrors = sourceMirrors(for: nodes)
         let url = Self.psycheFileURL
         psycheStatus.phase = .syncing
         let out = await Task.detached { () -> PsycheWriteResult in
             let bundle = ContextBundle.build(nodes: nodes, header: header, mirrors: mirrors)
-            guard bundle.pageCount > 0 else { return .init(pageCount: 0, bytes: 0, modified: nil) }
+            guard bundle.pageCount > 0 else { return .init(pageCount: 0, bytes: 0, modified: nil, wrote: false) }
             try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                                      withIntermediateDirectories: true)
             let data = Data(bundle.text.utf8)
-            try? data.write(to: url, options: .atomic)
-            let mtime = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
-            return .init(pageCount: bundle.pageCount, bytes: data.count, modified: mtime)
+            let wrote = ((try? data.write(to: url, options: .atomic)) != nil)   // report the real outcome
+            var mtime: Date? = nil
+            if wrote { mtime = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date }
+            return .init(pageCount: wrote ? bundle.pageCount : 0, bytes: data.count, modified: mtime, wrote: wrote)
         }.value
-        if out.pageCount > 0 {
+        if out.wrote && out.pageCount > 0 {
             psycheStatus.phase = .synced
             psycheStatus.pageCount = out.pageCount
             psycheStatus.source = resolved == .collection ? .collection

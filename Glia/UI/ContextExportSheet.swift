@@ -78,6 +78,7 @@ struct ContextExportSheet: View {
                     }
                     .buttonStyle(.bordered)
                 }
+#if !MAS
                 Button {
                     Task {
                         synced = await model.syncPsycheToMCP(scope: scope)
@@ -91,6 +92,7 @@ struct ContextExportSheet: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(Theme.accent)
                 .help("Write \(AppModel.psycheFileURL.path) so any agent using the glia-context MCP injects this")
+#endif
             } else {
                 Button {
                     building = true
@@ -111,20 +113,26 @@ struct ContextExportSheet: View {
                 .disabled(building || scopeEmpty)
             }
 
+#if !MAS
             Divider().opacity(0.4)
             mcpStatusFooter
+#endif
         }
         .padding(20)
         .frame(width: 380)
         .background(Theme.background)
+#if !MAS
         .task {
             await model.refreshPsycheStatusFromDisk()
             await model.refreshServerRegistration()
         }
+#endif
     }
 
+#if !MAS
     /// Persistent readout of whether the glia-context MCP will actually inject
-    /// what the app writes — the trust signal for the loop.
+    /// what the app writes — the trust signal for the loop. (Direct build only:
+    /// the sandboxed MAS build can't reach the real ~/.glia or Claude config.)
     @ViewBuilder private var mcpStatusFooter: some View {
         let reach = model.psycheReachability
         VStack(alignment: .leading, spacing: 4) {
@@ -156,6 +164,7 @@ struct ContextExportSheet: View {
             .foregroundStyle(color)
             .fixedSize(horizontal: false, vertical: true)
     }
+#endif
 
     private func hint(_ text: String) -> some View {
         Label(text, systemImage: "info.circle")

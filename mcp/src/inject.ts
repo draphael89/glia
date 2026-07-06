@@ -24,12 +24,15 @@ export interface PrimeResult {
   statusLines: string[];
 }
 
-/** Build the status lines that describe exactly what was (and wasn't) injected. */
+/** Build the status lines that describe exactly what was (and wasn't) injected.
+ *  `injectedPages` is what actually made it into the text (may be < what was
+ *  retrieved, if the budget dropped the context block). */
 function buildStatusLines(a: {
   mode: InjectMode;
   psycheStatus: PsycheStatus | "skipped";
   psycheSource: string;
   retrieval: RetrievalResult;
+  injectedPages: number;
 }): string[] {
   const out: string[] = [];
   if (a.psycheStatus === "file") out.push(`identity: loaded from ${a.psycheSource}`);
@@ -39,11 +42,14 @@ function buildStatusLines(a: {
 
   if (a.mode !== "psyche") {
     const r = a.retrieval;
-    if (r.status === "ok") out.push(`retrieval: ${r.pages.length} pages in ${r.elapsedMs}ms${r.cached ? " (cached)" : ""}`);
+    // Retrieval found pages but the token budget left no room for them.
+    if (r.pages.length > 0 && a.injectedPages === 0 && (r.status === "ok" || r.status === "empty")) {
+      out.push(`retrieval: ${r.pages.length} pages found but dropped — no token budget left after identity`);
+    } else if (r.status === "ok") out.push(`retrieval: ${a.injectedPages} pages in ${r.elapsedMs}ms${r.cached ? " (cached)" : ""}`);
     else if (r.status === "empty") out.push(`retrieval: no relevant pages found (${r.elapsedMs}ms)`);
-    else if (r.status === "timeout") out.push(`retrieval: TIMED OUT after ${config.gbrainTimeoutMs}ms — context may be incomplete (${r.pages.length} partial pages)`);
+    else if (r.status === "timeout") out.push(`retrieval: TIMED OUT after ${config.gbrainTimeoutMs}ms — context may be incomplete (${a.injectedPages} partial pages)`);
     else if (r.status === "disabled") out.push(`retrieval: DISABLED — ${r.detail ?? "gbrain not configured"}`);
-    else if (r.status === "error") out.push(`retrieval: ERROR — ${r.detail ?? "unknown"} (${r.pages.length} pages)`);
+    else if (r.status === "error") out.push(`retrieval: ERROR — ${r.detail ?? "unknown"} (${a.injectedPages} pages)`);
   }
   return out;
 }
@@ -97,8 +103,11 @@ export async function primeContext(
     const ctxBudget = mode === "context" ? budget : budget - estimateTokens(psycheText);
     contextText = ctxBudget > 500 ? truncateToTokens(ctx, ctxBudget) : "";
   }
+  // Pages that ACTUALLY made it into the text (may be 0 if the budget dropped
+  // the block even though retrieval succeeded) — so status never over-claims.
+  const injectedPages = contextText ? retrieval.pages.length : 0;
 
-  const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, retrieval });
+  const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, retrieval, injectedPages });
   const degraded = psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status);
 
   const header = [
@@ -119,7 +128,7 @@ export async function primeContext(
     tokens: estimateTokens(text),
     psycheTokens: estimateTokens(psycheText),
     contextTokens: estimateTokens(contextText),
-    contextPages: retrieval.pages.length,
+    contextPages: injectedPages,
     source: psycheSource,
     psycheStatus,
     retrievalStatus: retrieval.status,
