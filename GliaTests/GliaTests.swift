@@ -35,6 +35,36 @@ final class BrainGraphTests: XCTestCase {
         XCTAssertTrue(g.links.isEmpty)
         XCTAssertEqual(g.degree, [0])
     }
+
+    // Guards the bug CLASS that four audit rounds kept surfacing: cross-poll state
+    // (selection, hover, replay blooms) must be remapped by STABLE node.id, never
+    // by array index — because a poll re-parses the whole graph in fresh JSON order.
+    func testIndexByIDReflectsNodeOrderSoIdRemapSurvivesReorder() {
+        // Same three pages, but a later poll returns them in a DIFFERENT order
+        // (e.g. a new page inserted ahead shifts everyone's array index).
+        let first = BrainGraph(generatedAt: "1",
+            nodes: [node(10, "a"), node(20, "b"), node(30, "c")], links: [])
+        let reordered = BrainGraph(generatedAt: "2",
+            nodes: [node(20, "b"), node(30, "c"), node(10, "a")], links: [])
+
+        // The user had node id=10 selected — at index 0 in `first`.
+        XCTAssertEqual(first.indexByID[10], 0)
+        // After the reorder, INDEX 0 is a different page (id=20) — an index-keyed
+        // selection would silently jump. The id remap must land back on id=10.
+        XCTAssertEqual(reordered.nodes[0].id, 20)                 // index 0 moved
+        XCTAssertEqual(reordered.indexByID[10], 2)                // id 10 is now index 2
+        XCTAssertEqual(reordered.nodes[reordered.indexByID[10]!].slug, "a")  // same page
+    }
+
+    func testIndexByIDDropsRemovedNodeSoRemapClears() {
+        let before = BrainGraph(generatedAt: "1",
+            nodes: [node(10, "a"), node(20, "b")], links: [])
+        let after = BrainGraph(generatedAt: "2", nodes: [node(20, "b")], links: [])
+        XCTAssertNotNil(before.indexByID[10])
+        // A poll that removed the selected page → id absent → remap yields nil
+        // (selection correctly cleared, not pointed at the wrong node).
+        XCTAssertNil(after.indexByID[10])
+    }
 }
 
 final class CameraTests: XCTestCase {
