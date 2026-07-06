@@ -46,7 +46,8 @@ const TOOLS = [
         },
         maxTokens: {
           type: "number",
-          description: "Approx token budget for the injection (default 60000).",
+          minimum: 1,
+          description: "Approx token budget for the injection (default 60000). Must be positive; a non-positive value falls back to the default.",
         },
       },
       required: ["task"],
@@ -66,7 +67,7 @@ const TOOLS = [
       type: "object",
       properties: {
         query: { type: "string" },
-        limit: { type: "number", description: "Max pages to return (1-20, default 6)." },
+        limit: { type: "number", minimum: 1, maximum: 20, description: "Max pages to return (1-20, default 6)." },
       },
       required: ["query"],
     },
@@ -91,7 +92,7 @@ const TOOLS = [
       properties: {
         task: { type: "string", description: "The task you'd prime for." },
         mode: { type: "string", enum: ["psyche", "context", "both"] },
-        maxTokens: { type: "number", description: "Token budget to preview against (default 60000) — must match your prime_context call to be accurate." },
+        maxTokens: { type: "number", minimum: 1, description: "Token budget to preview against (default 60000) — must match your prime_context call to be accurate." },
       },
       required: ["task"],
     },
