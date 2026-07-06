@@ -1,1 +1,6 @@
-{ "buildCommand": "next build", "outputDirectory": "out", "framework": "nextjs" }
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "next build",
+  "outputDirectory": "out",
+  "framework": null
+}

@@ -43,6 +43,9 @@ tried to break our own result. Under judges **blind** to how each answer was mad
 - A first, non-blind run overclaimed (psyche *alone* dominates); that didn't survive
   blind judging. The correction is kept in the repo — [read the arc](experiments/psyche-injection/FINDINGS.md).
 
+**Live write-up + results: [glia-sandy.vercel.app](https://glia-sandy.vercel.app)** ·
+the full method, the honest arc, and the robustness ledger.
+
 Star the pages that are the truest map of you (⌘D), export the psyche, and prime any
 agent with it. See [`mcp/`](mcp/) to install the server (`cd mcp && ./install.sh`).
 

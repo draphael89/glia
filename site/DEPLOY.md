@@ -1,8 +1,14 @@
 # Deploying the site
 
+**Live: https://glia-sandy.vercel.app** (Vercel project `draphael89s-projects/glia`).
+
 The site is a static Next.js export (`output: 'export'` → `out/`). It contains
-**only aggregate experiment numbers** — no private brain content. Verified
-deploy-ready: `next build` succeeds and exports 4 static pages.
+**only aggregate experiment numbers** — no private brain content.
+
+> Note: `vercel.json` sets `"framework": null` on purpose. With `output: 'export'`,
+> declaring the Next.js framework *and* an `out` output dir makes Vercel's builder
+> look for `routes-manifest.json` and fail; `null` serves `out/` as a plain static
+> site, which is what an export is.
 
 ## Vercel (one command)
 
