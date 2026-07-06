@@ -470,12 +470,30 @@ focused retrieval of the same identity content.
 **Honest caveats:** small n (5 tasks); p1's capture hit a cold-query retrieval
 miss so its `both` arm was psyche-only (degenerate — it dragged `best` down, but
 the result holds on p2–p5 too); single shipped config. This measures the *current
-shipped configuration*, not the thesis: it says the 40%-cap + aggressive-dedup
-`both` mode **under-serves retrieval**, which is a **fixable product problem**, and
-the actionable hypothesis is v10 — a rebalanced `both` (a small focused ~3–4k
-identity core + the *full* retrieval the `context` arm gets) should recover the
-combined arm. This is the most important thing the whole arc surfaced: *test what
-you ship, not a reconstruction of it.*
+shipped configuration*, not the thesis.
+
+**v10 — the rebalance hypothesis, tested and REFUTED.** I predicted the shortfall
+was config: shrink the identity core to ~4k (which also un-dedups retrieval so
+`best` keeps the relevant pages as focused ranked context) and `best` should
+recover. It did the **opposite**. Re-running the same 5 tasks with a 4k core (only
+the `both` injection changed): `best`-vs-`context` **fell 52% → 24%**, and
+`context`'s Borda lead *grew*. So a *smaller* core is *worse*, not better — more
+psyche helps the combined arm (consistent with v5's dose-response), and the shipped
+24k is the better of the two. The production shortfall is **not** a core-size knob.
+
+**What v9+v10 actually establish — the honest, doubly-confirmed conclusion.** On
+the *shipped* pipeline, blind judges (Opus and gpt-5) prefer **retrieval-alone**,
+and adding identity on top doesn't beat it *at any core size*. WHY matters: the v6
+finding was that a psyche-*blind* judge penalizes the identity answers' real
+specifics as "fabricated" because it can't verify them. Production `context`
+(natural-query retrieval) is focused, ranked, and *verifiable-looking*; the psyche
+adds specifics the blind judge discounts. **So this is a FLOOR, not a refutation of
+the thesis** — the one evaluator who *can* verify the identity (the actual user)
+is exactly the one not in the loop. The blind, product-realistic measurement says:
+*don't assume identity injection beats good retrieval for a verification-blind
+reader.* The `psycheCoreMaxTokens` knob stays (default 24k, now validated over 4k);
+no default change. **The biggest lesson of the whole arc: test what you SHIP, and
+let it overturn your prediction — v10 did.**
 
 ---
 
