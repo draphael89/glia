@@ -84,6 +84,7 @@ export interface ContextManifest {
   retrievalPages: { slug: string; score: number }[];
   retrievalTokens: number;
   retrievalDeduped: number;   // ranked pages dropped as already-in-identity
+  retrievalLiveFetched: number;   // pages read live from the full brain (missed the mirror)
   totalTokens: number;
   degraded: boolean;
 }
@@ -113,6 +114,7 @@ export async function explainContext(
     retrievalPages: pages,                            // only pages that survived truncation
     retrievalTokens: estimateTokens(a.contextText),  // actual injected context tokens
     retrievalDeduped: a.retrieval.dedupedCount,
+    retrievalLiveFetched: a.retrieval.liveFetched,
     totalTokens: estimateTokens(a.text),             // full rendered prime, incl. scaffolding
     degraded: a.degraded,
   };
@@ -127,7 +129,7 @@ export function renderManifest(m: ContextManifest): string {
     `## Identity (${m.psycheStatus}, ~${m.psycheTokens} tok) — ${m.psycheSource}`,
     m.psycheSections.length ? m.psycheSections.map((s) => `  · ${s}`).join("\n") : "  (no page sections parsed)",
     "",
-    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages${m.retrievalDeduped > 0 ? `, ${m.retrievalDeduped} deduped` : ""})`,
+    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages${m.retrievalDeduped > 0 ? `, ${m.retrievalDeduped} deduped` : ""}${m.retrievalLiveFetched > 0 ? `, ${m.retrievalLiveFetched} live-fetched` : ""})`,
     m.retrievalPages.length
       ? m.retrievalPages.map((p) => `  · ${p.slug}  (${p.score.toFixed(2)})`).join("\n")
       : (m.retrievalDeduped > 0
@@ -206,7 +208,7 @@ async function assembleInjection(
   }
 
   let contextText = "";
-  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task, dedupedCount: 0 };
+  let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task, dedupedCount: 0, liveFetched: 0 };
   if (mode === "context" || mode === "both") {
     // Dedup against what was ACTUALLY injected (the truncated psycheText).
     const exclude = mode === "both" && psycheText ? psycheSlugs(psycheText) : undefined;

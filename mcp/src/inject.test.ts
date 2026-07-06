@@ -184,6 +184,7 @@ test("parallel fallback recovers MULTIPLE mirror-missing pages (up to the cap)",
   try {
     const r = await retrieveContext("anything");
     assert.equal(r.pages.length, 3, "all three mirror-missing pages recovered via parallel get");
+    assert.equal(r.liveFetched, 3, "all three counted as live-fetched (mirror-missing)");
     assert.deepEqual(r.pages.map((p) => p.slug), ["miss-one", "miss-two", "miss-three"]);
     assert.match(r.pages[0].body, /first live-only/);
     assert.match(r.pages[2].body, /third live-only/);
