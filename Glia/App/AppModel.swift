@@ -589,7 +589,11 @@ final class AppModel {
         let stillAnimating = isSettling
             || renderer.camera.isAnimating
             || replay.isPlaying
-            || selectedIndex != nil            // selection glow breathes
+            // selection glow breathes — but under Reduce Motion the glow (and the
+            // starfield twinkle) should be STILL, so a selection isn't a reason to
+            // keep redrawing forever (accessibility + battery). Sampling u.time only
+            // on draw means ceasing to render freezes the pulse to a static frame.
+            || (selectedIndex != nil && !Camera.reduceMotion)
         setContinuousRendering(stillAnimating)
     }
 
@@ -991,6 +995,15 @@ final class AppModel {
 #endif
     }
 
+    /// Drop a stale injection preview. The sheet's `previewTask` field is view-local
+    /// @State that resets to "" every time the sheet is re-presented, but the preview
+    /// itself lives here and would otherwise linger — showing a manifest with no
+    /// visible originating query (and possibly reflecting a since-changed psyche.md).
+    /// Clear it on sheet appear so a preview only ever shows for a task typed this session.
+    func clearInjectionPreview() {
+        injectionPreview = nil
+    }
+
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }
 
     /// One-click identity core: star the self-page + essays (ContextBundle
@@ -1099,7 +1112,9 @@ final class AppModel {
 
     func click(atView p: SIMD2<Float>, viewport: SIMD2<Float>) {
         selectedIndex = pick(atView: p, viewport: viewport)
-        if selectedIndex != nil { setContinuousRendering(true) }   // glow breathing
+        // glow breathing — but under Reduce Motion the glow is static, and selectedIndex's
+        // didSet already redraws the selection once, so don't spin continuous rendering.
+        if selectedIndex != nil && !Camera.reduceMotion { setContinuousRendering(true) }
     }
 
     func flyToNode(atView p: SIMD2<Float>, viewport: SIMD2<Float>) {
@@ -1110,7 +1125,9 @@ final class AppModel {
     func select(index: Int) {
         selectedIndex = index
         renderer.camera.fly(to: positions[index], zoom: max(renderer.camera.zoom, 9))
-        setContinuousRendering(true)
+        // Under Reduce Motion the flight snaps (Camera.fly) and the glow is static, so a
+        // selection isn't a reason to keep redrawing; selectedIndex's didSet draws it once.
+        if !Camera.reduceMotion { setContinuousRendering(true) }
         let node = graph.nodes[index]
         view?.announceSelection(
             "\(node.displayTitle), \(node.type), \(graph.degree[index]) connections")

@@ -52,10 +52,16 @@ static inline float hash21(float2 p) {
 // than the graph — the brain floats in front of a deeper sky.
 static float starLayer(float2 fragPx, constant Uniforms& u,
                        float depth, float cellPx, float seed) {
-    // world position of this fragment, at a layer that tracks the camera
-    // at `depth` speed and zooms at sqrt(zoom) so stars never blow up.
+    // world position of this fragment, at a layer that zooms at sqrt(zoom) so stars
+    // never blow up in SIZE. But size and PAN must be decoupled: a star's screen pan
+    // rate is (pan coeff)·layerZoom, so panning at `u.center·depth` gives depth·sqrt(zoom)·8,
+    // whose ratio to the graph's own pan rate (u.zoom) is depth·8/sqrt(zoom) — that
+    // exceeds 1 at normal zoom, so the "distant sky" slid FASTER than the brain. Drive
+    // the pan by the graph's zoom instead (÷layerZoom cancels the size scaling), so the
+    // on-screen rate is exactly depth·u.zoom — a depth<1 layer always pans slower.
     float layerZoom = max(sqrt(u.zoom) * 8.0, 0.001);
-    float2 world = (fragPx - u.viewport * 0.5) / layerZoom + u.center * depth;
+    float2 world = (fragPx - u.viewport * 0.5) / layerZoom
+                 + u.center * depth * (u.zoom / layerZoom);
     float2 cell = floor(world / cellPx);
     float h = hash21(cell + seed);
     if (h > 0.22) return 0.0;                       // sparse

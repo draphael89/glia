@@ -125,6 +125,7 @@ struct ContextExportSheet: View {
         .background(Theme.background)
 #if !MAS
         .task {
+            model.clearInjectionPreview()   // don't show a preview from a prior session with a blank field
             await model.refreshPsycheStatusFromDisk()
             await model.refreshServerRegistration()
         }
