@@ -128,10 +128,19 @@ final class AppModel {
         if BrainLocation.chooseFolder() { reloadFromLocation() }
     }
 
+    /// A deep link that arrived before the graph finished loading (cold launch via
+    /// Spotlight / glia://), retried once the brain is installed.
+    private var pendingNodeID: Int?
+
     /// Deep-link entry: glia://node/<id> or Spotlight "node:<id>".
     func open(nodeID: Int) {
-        guard let i = graph.indexByID[nodeID] else { return }
-        select(index: i)
+        if let i = graph.indexByID[nodeID] {
+            pendingNodeID = nil
+            select(index: i)
+        } else {
+            // Graph not loaded yet (cold start) — remember it; apply() retries.
+            pendingNodeID = nodeID
+        }
     }
 
     func attach(view: GraphMTKView) {
@@ -234,6 +243,12 @@ final class AppModel {
         runSettle(config: config, pinNothing: full || placed.isEmpty)
         if selectedIndex.map({ $0 >= newGraph.nodes.count }) == true { selectedIndex = nil }
         if hoveredIndex.map({ $0 >= newGraph.nodes.count }) == true { hoveredIndex = nil }
+        // A cold-launch deep link (Spotlight / glia://) that arrived before the
+        // graph loaded now resolves against the freshly-installed brain.
+        if let pending = pendingNodeID, let i = graph.indexByID[pending] {
+            pendingNodeID = nil
+            select(index: i)
+        }
     }
 
     private func runSettle(config: LayoutEngine.Config, pinNothing: Bool) {
@@ -457,8 +472,9 @@ final class AppModel {
             var vis = typeOn
             if vis && hideOrphans && isOrphan { dust = true }
             // The selected node is always fully visible, whatever the filters:
-            // search must never fly the camera to nothing.
-            if i == selectedIndex && typeOn { vis = true; dust = false }
+            // search / Spotlight / glia:// can target a node whose type or source
+            // is filtered off, and the camera must never fly to nothing.
+            if i == selectedIndex { vis = true; dust = false }
             // ...but time wins: during replay, nothing exists before its
             // birth date — selection included.
             if let replayCursor, let created = createdDates[i], created > replayCursor {
