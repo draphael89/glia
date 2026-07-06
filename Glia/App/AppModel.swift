@@ -35,6 +35,9 @@ final class AppModel {
     private(set) var mcpStatus = MCPStatus()
     /// Live preview of what the MCP would inject for a task (nil until previewed).
     private(set) var injectionPreview: String?
+    /// Retrieval-completeness readout for the Settings panel (nil until checked).
+    private(set) var retrievalHealth: String?
+    private(set) var checkingRetrieval = false
     private(set) var previewingInjection = false
     /// Slugs the user has starred as core-identity — the curated "who I am"
     /// set that becomes a Context Bundle scope. Persisted across launches.
@@ -1029,6 +1032,42 @@ final class AppModel {
     /// Clear it on sheet appear so a preview only ever shows for a task typed this session.
     func clearInjectionPreview() {
         injectionPreview = nil
+    }
+
+    /// Probe retrieval completeness for the Settings panel: run a representative
+    /// identity query through the server's --explain and read the manifest's Retrieval
+    /// line (pages + how many were `live-fetched` because they missed the local mirror).
+    /// A high live-fetched share means the mirror is thin but the fallback is covering it.
+    func checkRetrievalHealth() async {
+#if MAS
+        return
+#else
+        checkingRetrieval = true
+        defer { checkingRetrieval = false }
+        guard let manifest = await MCPProvision.previewInjection(task: "what matters most to me and how I actually work"),
+              let line = manifest.split(separator: "\n").first(where: { $0.hasPrefix("## Retrieval") }).map(String.init) else {
+            retrievalHealth = "Couldn't run the probe — is the server built? (Enable MCP…)"
+            return
+        }
+        // "## Retrieval (ok, ~2271 tok, 6 pages, 1 deduped, 5 live-fetched)" — robust,
+        // comma-token parse (no regex), tolerant of the optional deduped/live-fetched parts.
+        func count(_ suffix: String) -> Int? {
+            for part in line.replacingOccurrences(of: ")", with: "").split(separator: ",") {
+                let t = part.trimmingCharacters(in: .whitespaces)
+                if t.hasSuffix(suffix) { return Int(t.dropLast(suffix.count).trimmingCharacters(in: .whitespaces)) }
+            }
+            return nil
+        }
+        guard let pages = count("pages") else { retrievalHealth = "No retrieval in the probe."; return }
+        let live = count("live-fetched") ?? 0
+        if pages == 0 {
+            retrievalHealth = "Retrieval returned no pages — check GBRAIN_CMD / source."
+        } else if live == 0 {
+            retrievalHealth = "\(pages) pages · your mirror covers the top pages ✓"
+        } else {
+            retrievalHealth = "\(pages) pages · \(live) live-fetched from the full brain (mirror is thin — the fallback is covering it)"
+        }
+#endif
     }
 
     func toggleStarSelected() { if let s = selectedIndex { toggleStar(s) } }

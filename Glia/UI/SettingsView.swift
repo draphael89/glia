@@ -50,6 +50,26 @@ private struct MCPSettingsTab: View {
                 let r = model.psycheReachability
                 statusRow(scopeLabel, detail: fileDetail(r), ok: r.file == .usable)
             }
+            Section("Retrieval completeness") {
+                HStack(spacing: 8) {
+                    if let h = model.retrievalHealth {
+                        Image(systemName: h.contains("✓") ? "checkmark.circle.fill"
+                                        : (h.contains("live-fetched") ? "arrow.down.circle.fill" : "exclamationmark.triangle"))
+                            .foregroundStyle(h.contains("✓") ? Color.green
+                                           : (h.contains("live-fetched") ? Theme.accent : .orange))
+                        Text(h).font(.system(size: 11)).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text("Check whether your local mirror covers the pages retrieval ranks top.")
+                            .font(.system(size: 11)).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button(model.checkingRetrieval ? "Checking…" : "Check") {
+                        Task { await model.checkRetrievalHealth() }
+                    }
+                    .disabled(model.checkingRetrieval)
+                }
+            }
             Section {
                 HStack(spacing: 10) {
                     Button(anyRegistered ? "Re-register" : "Enable MCP") {
