@@ -489,7 +489,7 @@ final class AppModel {
             if i == hoveredIndex { f += 2 }
             if !inFocus.isEmpty && !inFocus.contains(i) { f += 4 }
             // birth bloom: pop in bright and settle over ~0.9s
-            if let birth = replay.birthTimes[i] {
+            if let birth = replay.birthTimes[graph.nodes[i].id] {
                 let age = Float(now - birth)
                 if age < 0.9 {
                     let t = 1 - age / 0.9

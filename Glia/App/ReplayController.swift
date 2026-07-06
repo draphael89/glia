@@ -12,8 +12,14 @@ final class ReplayController {
     private(set) var cursor: Date?
     private(set) var range: ClosedRange<Date>?
 
-    /// node index -> birth moment expressed as media time, for bloom-in
+    /// node.ID -> birth moment (media time), for bloom-in. Keyed by STABLE node id,
+    /// NOT array index: apply() replaces `graph` (JSON order) on every live poll, so
+    /// an index key would light the wrong pages after any insert/remove/reorder.
     private(set) var birthTimes: [Int: CFTimeInterval] = [:]
+
+    /// Bumped by user actions (play/scrub) so a post-completion auto-exit scheduled
+    /// earlier can tell it's stale and not wipe a scrub made during the hold window.
+    private var generation = 0
 
     private var timer: Timer?
     private weak var model: AppModel?
@@ -59,6 +65,7 @@ final class ReplayController {
             birthTimes.removeAll()
         }
         isPlaying = true
+        generation += 1
         model.setReplayRendering(true)
         // align the playhead with wherever the cursor currently sits
         if let current = cursor {
@@ -81,21 +88,24 @@ final class ReplayController {
         model.replayChanged()
         if playhead >= Double(sortedDates.count) {
             pause()
-            // hold the completed picture; keep blooms fading naturally
+            // hold the completed picture; keep blooms fading naturally. Capture the
+            // generation so a scrub during the hold (which pauses too) cancels this.
+            let gen = generation
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(2))
-                if !self.isPlaying { self.exitReplay() }
+                if self.generation == gen && !self.isPlaying { self.exitReplay() }
             }
         }
     }
 
     /// Live mode: bloom pages that just arrived from the backend poll.
     func noteLiveBirths(indices: [Int]) {
-        guard !indices.isEmpty else { return }
+        guard !indices.isEmpty, let model else { return }
         let now = CACurrentMediaTime()
-        for i in indices { birthTimes[i] = now }
-        model?.setReplayRendering(true)
-        model?.replayChanged()
+        // Resolve to stable ids against the just-installed graph.
+        for i in indices where i < model.graph.nodes.count { birthTimes[model.graph.nodes[i].id] = now }
+        model.setReplayRendering(true)
+        model.replayChanged()
         // wind the render loop back down once the blooms settle
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(1.2))
@@ -106,9 +116,9 @@ final class ReplayController {
     private func markBirths(from: Date, to: Date) {
         guard let model else { return }
         let now = CACurrentMediaTime()
-        for (i, node) in model.graph.nodes.enumerated() {
+        for node in model.graph.nodes {
             guard let d = node.createdDate else { continue }
-            if d > from && d <= to { birthTimes[i] = now }
+            if d > from && d <= to { birthTimes[node.id] = now }
         }
         // keep the dictionary from growing unbounded during long scrubs
         if birthTimes.count > 800 {
@@ -128,6 +138,7 @@ final class ReplayController {
         if range == nil { recomputeRange() }
         guard let range else { return }
         pause()
+        generation += 1   // cancel any pending post-completion auto-exit
         let total = range.upperBound.timeIntervalSince(range.lowerBound)
         cursor = range.lowerBound.addingTimeInterval(total * fraction.clamped(to: 0...1))
         model.setReplayRendering(true)
