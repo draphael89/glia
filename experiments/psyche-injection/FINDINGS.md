@@ -282,6 +282,20 @@ naked) and kinder to concise naked answers than Opus was. So the ordering of the
 retrieval→specificity, identity→insight — survives cross-vendor, the exact tail
 order does not.**
 
+**The deepest catch — blind judging *understates* identity.** Reading gpt-5's
+rationales explains its harshness on the psyche arm: it repeatedly penalizes the
+identity-informed answers' **real** specifics as *fabrication* — "D and C
+introduce fabricated details that weaken correctness," "over-specific with
+invented details" (5/27 judgments). But those details aren't invented — they're
+David's actual projects, people, and priorities, pulled from his brain. **A judge
+blind to the psyche can't verify them, so it marks down the very specificity that
+identity injection exists to provide.** The real user — who *can* verify — would
+value exactly what the blind judge punishes. So every blind result here, v2
+through v6, likely *understates* identity injection's real-world value; the effect
+we measured is a floor, not a ceiling. (This is why the winning arm is `both`:
+retrieval supplies specifics a blind judge *will* credit, alongside the identity
+it won't.)
+
 **Methodological catch.** gpt-4o was **unusable** as a judge here: it ranked
 whatever sat in slot A first **~90%** of the time (severe position bias) with
 near-flat content scores. Cross-vendor judging is confounded by judge-specific

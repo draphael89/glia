@@ -227,6 +227,12 @@ export default function Home() {
             bare prompt, and identity + retrieval together lead the field, because retrieval buys
             specificity and identity buys insight. Every run&apos;s harness and aggregate numbers are in the repo.
           </p>
+          <p className="muted" style={{ marginTop: 10 }}>
+            One subtlety the cross-vendor run exposed: a judge <em>blind to who you are</em> penalizes
+            the identity-informed answers&apos; real specifics — your actual projects and people — as
+            &ldquo;fabricated,&rdquo; because it can&apos;t verify them. The real user can. So these blind
+            numbers are a <strong>floor</strong> on identity&apos;s value, not a ceiling.
+          </p>
         </div>
       </section>
 
