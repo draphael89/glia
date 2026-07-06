@@ -273,6 +273,33 @@ export default function Home() {
             control, the real shipped pipeline, and a fact-check of the claims, to kill. Every time it
             bent, we wrote down how — including the time it bent us.
           </p>
+
+          <h3 style={{ marginTop: 28 }}>We measured the bug — then resolved the last doubt honestly.</h3>
+          <p>
+            How bad was the starvation? We measured it across 15 real queries: <strong>69% of the
+            top-ranked pages were missing</strong> from the read mirror — only 31% readable. A bounded,
+            parallel live-read fallback lifts that to <strong>99%</strong>. So the product now runs at
+            near-complete retrieval, not the ~31% that starved v9.
+          </p>
+          <p>
+            One doubt remained: was <span style={{ color: armColor.best }}>identity</span> only helping
+            because retrieval was <em>incomplete</em>? We pushed retrieval to 99% and re-ran a controlled
+            2×2 (v13). It came back a <strong>null</strong> — but for an honest reason a control task
+            exposed: with <em>identical</em> inputs to two arms, blind judges still swung 10 of 15 points.
+            At this scale, single-generation <em>noise</em> dominates. v13 doesn&apos;t overturn anything;
+            it maps the noise floor.
+          </p>
+          <p>
+            v16 resolves it the right way — by <strong>averaging the noise out</strong>: three independent
+            generations per arm, blind pairwise-judged.{" "}
+            <span style={{ color: armColor.best }}>Both</span> beats{" "}
+            <span style={{ color: armColor.context }}>retrieval</span> alone <strong>62%</strong> at
+            complete retrieval. And the pooled number surfaces the sharpest, most useful finding of the
+            whole project: <strong>it depends on the task&apos;s shape.</strong> Identity is a real
+            complement when the answer is <em>synthesized from who you are</em> — a bio, a weekly plan,
+            what to drop — and redundant when the answer is <em>just the relevant facts</em>. Not a
+            headline percentage. A condition.
+          </p>
         </div>
       </section>
 
@@ -280,7 +307,7 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>How hard we pushed on it</h2>
-          <h3>Twelve runs, each trying to break the last.</h3>
+          <h3>Run after run, each trying to break the last.</h3>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>
             <table>
               <thead>
