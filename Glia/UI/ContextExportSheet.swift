@@ -86,7 +86,7 @@ struct ContextExportSheet: View {
                         await model.refreshPsycheStatusFromDisk()
                     }
                 } label: {
-                    Label(synced > 0 ? "Synced \(synced) pages to MCP" : "Sync to glia-context MCP",
+                    Label(synced > 0 ? "Synced \(synced) page\(synced == 1 ? "" : "s") to MCP" : "Sync to glia-context MCP",
                           systemImage: synced > 0 ? "checkmark.circle" : "arrow.triangle.2.circlepath")
                         .font(.system(size: 11))
                 }

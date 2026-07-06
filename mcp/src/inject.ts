@@ -179,8 +179,14 @@ async function assembleInjection(
   task: string,
   opts: { mode?: InjectMode; maxTokens?: number },
 ): Promise<Assembled> {
-  const mode = opts.mode ?? "both";
-  const budget = opts.maxTokens ?? 60_000;
+  // Validate client-supplied opts at the trust boundary (?? only catches null/undefined,
+  // not a garbage value the MCP SDK forwards un-validated). An out-of-enum mode would
+  // leave BOTH assembly branches unentered — an empty prime whose header still promises
+  // identity+context and whose status falsely reads OK. A non-positive maxTokens would
+  // make truncateToTokens return the WHOLE psyche instead of a capped core. Coerce both.
+  const mode: InjectMode =
+    opts.mode === "psyche" || opts.mode === "context" || opts.mode === "both" ? opts.mode : "both";
+  const budget = typeof opts.maxTokens === "number" && opts.maxTokens > 0 ? opts.maxTokens : 60_000;
 
   let psycheText = "";
   let psycheSource = "";

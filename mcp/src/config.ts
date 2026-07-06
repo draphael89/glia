@@ -100,6 +100,11 @@ export function estimateTokens(text: string): number {
 }
 
 export function truncateToTokens(text: string, maxTokens: number): string {
+  // A non-positive budget must yield NOTHING, never the whole text: with maxChars<=0,
+  // lastIndexOf returns -1 and the paragraph-boundary heuristic below would slice(0,-1)
+  // and leak nearly the entire input. (Callers should pass a positive budget; this is
+  // the last-line guard.)
+  if (maxTokens <= 0) return "";
   const maxChars = maxTokens * config.charsPerToken;
   if (text.length <= maxChars) return text;
   // cut on a paragraph boundary when possible

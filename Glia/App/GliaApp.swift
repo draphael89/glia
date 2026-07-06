@@ -10,6 +10,7 @@ struct GliaApp: App {
         // out of the Dock and never steal focus from whatever the user is doing.
         if ProcessInfo.processInfo.environment["GLIA_SNAPSHOT"] != nil
             || ProcessInfo.processInfo.environment["GLIA_ENABLE_MCP"] != nil
+            || ProcessInfo.processInfo.environment["GLIA_EXPORT_CONTEXT"] != nil
             || ProcessInfo.processInfo.environment["GLIA_PREVIEW"] != nil {
             NSApplication.shared.setActivationPolicy(.accessory)
         }

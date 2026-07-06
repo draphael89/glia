@@ -14,6 +14,9 @@ final class AppModel {
     private(set) var positions: [SIMD2<Float>] = []
     private(set) var isSettling = false
     private(set) var loadError: String?
+    /// True once the first load attempt finishes (success — even an empty graph — or
+    /// error), so the UI can distinguish "still loading" from "loaded but empty".
+    private(set) var didCompleteInitialLoad = false
 
     var hideOrphans = true { didSet { sceneDirty() } }
     var enabledSources: Set<String> = [] { didSet { sceneDirty() } }
@@ -171,6 +174,7 @@ final class AppModel {
             // error state is a first-class screen — verifiable like the rest
             snapshotIfRequested()
         }
+        didCompleteInitialLoad = true
         // Headless automation hooks run OUTSIDE the do/catch so a load failure
         // can't skip them and leave a scripted (windowless) process hanging.
         // GLIA_EXPORT_CONTEXT=<scope>:<path> — headless bundle export.
@@ -915,6 +919,13 @@ final class AppModel {
         if psycheStatus.lastSyncedAt == nil { psycheStatus.lastSyncedAt = p.mtime }
         if psycheStatus.pageCount == 0 {
             psycheStatus.pageCount = UserDefaults.standard.integer(forKey: "psycheLastPageCount")
+        }
+        // Restore the last-synced SCOPE too (runOneSync persists it but nothing read it
+        // back), so a returning user whose ~/.glia/psyche.md already exists sees the real
+        // "Live sync: starred collection" instead of the default "identity map".
+        if let raw = UserDefaults.standard.string(forKey: "psycheLastSource"),
+           let s = PsycheSyncStatus.Source(rawValue: raw) {
+            psycheStatus.source = s
         }
         if psycheStatus.phase == .idle, p.mtime != nil { psycheStatus.phase = .synced }
     }

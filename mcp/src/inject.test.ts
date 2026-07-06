@@ -54,6 +54,29 @@ test("primeContext both mode budgets psyche first (identity survives)", async ()
   assert.ok(r.tokens <= 3000 * 1.5);
 });
 
+test("truncateToTokens returns nothing for a non-positive budget (never the whole text)", () => {
+  const text = "para one\n\npara two\n\npara three that is quite a bit longer than the rest";
+  assert.equal(truncateToTokens(text, 0), "");
+  assert.equal(truncateToTokens(text, -1000), "");
+});
+
+test("out-of-enum mode coerces to both, not a falsely-OK empty prime", async () => {
+  _clearRetrievalCache();
+  const r = await primeContext("anything", { mode: "identity" as any, maxTokens: 60000 });
+  assert.equal(r.mode, "both", "invalid mode falls back to both");
+  assert.ok(r.psycheTokens > 0, "identity is still injected (not an empty prime)");
+  assert.ok(r.contextPages > 0, "retrieval is still injected");
+  _clearRetrievalCache();
+});
+
+test("non-positive maxTokens keeps the psyche capped, doesn't dump the whole file", async () => {
+  const r = await primeContext("anything", { mode: "psyche", maxTokens: -1000 });
+  // budget coerced to the 60k default → psyche mode injects up to the file, but the
+  // point is it's bounded/non-degenerate, not the truncate-bug's whole-2MB leak.
+  assert.ok(r.psycheTokens > 0 && r.psycheTokens < 1_000_000, "psyche tokens are bounded");
+  assert.equal(r.mode, "psyche");
+});
+
 test("primeContext both mode: retrieval works + reports OK status, not degraded", async () => {
   _clearRetrievalCache();
   const r = await primeContext("hermes architecture", { mode: "both", maxTokens: 60000 });

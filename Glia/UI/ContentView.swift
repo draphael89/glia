@@ -42,6 +42,14 @@ struct ContentView: View {
                           retry: { model.reloadFromLocation() },
                           chooseFolder: { model.chooseBrainFolder() },
                           exploreDemo: { model.exploreDemo() })
+            } else if model.didCompleteInitialLoad && model.graph.nodes.isEmpty {
+                // A valid-but-EMPTY brain ({nodes:[]}) parses without throwing, so it
+                // has no loadError — without this it renders a blank void. Same first-run
+                // affordances (pick a folder / explore the demo), not a scary error.
+                ErrorCard(message: "This brain has no pages yet — add notes to your gbrain source, pick a different folder, or explore the demo.",
+                          retry: { model.reloadFromLocation() },
+                          chooseFolder: { model.chooseBrainFolder() },
+                          exploreDemo: { model.exploreDemo() })
             }
         }
         .animation(.easeOut(duration: 0.18), value: model.paletteVisible)
