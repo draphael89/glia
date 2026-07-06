@@ -615,6 +615,18 @@ points** (K=3 only partly tames the noise), 5 tasks, one generator/judge family 
 direction + the per-task pattern, not the decimal. This is the most decisive the LLM-judge arc
 gets; the last mile is still human eval (only David can verify the specifics).
 
+## v17 — pre-registered replication of the task-shape finding (`REPORT-v17.md`)
+
+v16's task-shape split (identity helps generative, not diagnostic) came from the *same* 5
+tasks, so it could be task-specific noise. v17 tests it honestly, **pre-registered** before
+the result: 8 *fresh* tasks, 4 classified **generative** (mission statement, talk opener,
+ideal-day structure, personal manifesto — the answer is synthesized from who you are) and 4
+**diagnostic** (NIL decisions, meeting summary, Reflections-graph risks, gates-vs-AI reasoning
+— the answer is the retrieved facts), captured at complete retrieval, variance-reduced (K=3
+gens/arm) blind pairwise both-vs-context. **Prediction (stated before the run): generative
+both-win rate ≫ diagnostic; a large positive gap replicates the finding, a small/negative gap
+refutes it and we walk the heterogeneity claim back.** Result in `REPORT-v17.md`.
+
 ---
 
 # Iteration loop — injection tuning (what moved the needle, what didn't)
