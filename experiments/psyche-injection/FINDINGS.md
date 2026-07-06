@@ -516,6 +516,15 @@ fabrication is negligible). The one reader who can verify these accurate specifi
 autonomous arc honestly ends: LLM judges bound identity's value from *below*; the
 true value needs a human who can verify. Every number here is a floor.**
 
+*Postscript — the pipeline got better after v9.* Probing why v9's retrieval was
+thin surfaced a real bug: `gbrain query` searches the full brain but the MCP read
+bodies from a *subset* mirror, so 7–8 of the top 8 pages were silently dropped on
+some queries. Fixed (bounded live `gbrain get` fallback + an operational-snapshot
+noise filter) — retrieval on the reflections task went 0→5 substantive pages.
+This *strengthens* the strong arm, so it only reinforces v9's direction (retrieval
+wins); the human-eval tool (`harness/generate-human-eval.py`) is the one open
+thread, and it needs a verifier no LLM can stand in for.
+
 ---
 
 # Iteration loop — injection tuning (what moved the needle, what didn't)
