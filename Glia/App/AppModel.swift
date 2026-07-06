@@ -28,6 +28,9 @@ final class AppModel {
     var enableMCPVisible = false
     /// State of registering glia-context with Claude Code + Desktop (sheet observes).
     private(set) var mcpStatus = MCPStatus()
+    /// Live preview of what the MCP would inject for a task (nil until previewed).
+    private(set) var injectionPreview: String?
+    private(set) var previewingInjection = false
     /// Slugs the user has starred as core-identity — the curated "who I am"
     /// set that becomes a Context Bundle scope. Persisted across launches.
     private(set) var starredSlugs: Set<String> = []
@@ -880,6 +883,21 @@ final class AppModel {
 
         await syncPsycheToMCP()   // ensure ~/.glia/psyche.md exists so the server has data
         mcpStatus.phase = .done
+#endif
+    }
+
+    /// Preview what the glia-context MCP would inject for a task (identity +
+    /// retrieval), by running the server's --explain CLI. Direct build only.
+    func previewInjection(task: String) async {
+#if MAS
+        return
+#else
+        let t = task.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty else { return }
+        previewingInjection = true
+        injectionPreview = await MCPProvision.previewInjection(task: t)
+            ?? "Couldn't run the preview — is the glia-context server built and Node installed? (Enable MCP…)"
+        previewingInjection = false
 #endif
     }
 

@@ -15,6 +15,7 @@ struct ContextExportSheet: View {
     @State private var building = false
     @State private var copied = false
     @State private var synced = 0
+    @State private var previewTask = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -116,6 +117,7 @@ struct ContextExportSheet: View {
 #if !MAS
             Divider().opacity(0.4)
             mcpStatusFooter
+            injectionPreview
 #endif
         }
         .padding(20)
@@ -163,6 +165,39 @@ struct ContextExportSheet: View {
             .font(.system(size: 10.5))
             .foregroundStyle(color)
             .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// See EXACTLY what the MCP would inject for a task (identity + retrieval).
+    @ViewBuilder private var injectionPreview: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                TextField("Preview injection for a task…", text: $previewTask)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 11))
+                    .onSubmit { Task { await model.previewInjection(task: previewTask) } }
+                Button {
+                    Task { await model.previewInjection(task: previewTask) }
+                } label: {
+                    if model.previewingInjection { ProgressView().controlSize(.small) }
+                    else { Image(systemName: "eye").font(.system(size: 11)) }
+                }
+                .buttonStyle(.bordered)
+                .disabled(previewTask.trimmingCharacters(in: .whitespaces).isEmpty || model.previewingInjection)
+                .help("Run the glia-context server's preview for this task")
+            }
+            if let preview = model.injectionPreview {
+                ScrollView {
+                    Text(preview)
+                        .font(.system(size: 9.5, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 150)
+                .padding(6)
+                .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 6))
+            }
+        }
     }
 #endif
 

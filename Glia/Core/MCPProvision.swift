@@ -267,6 +267,17 @@ enum MCPProvision {
         }.value
     }
 
+    /// Run the registered server's `--explain` CLI to preview EXACTLY what
+    /// prime_context would inject for a task (identity sections + retrieved pages
+    /// + tokens). Returns the manifest text, or nil if node/the server isn't ready.
+    nonisolated static func previewInjection(task: String) async -> String? {
+        guard let node = await resolveExecutable("node") else { return nil }
+        let dist: String
+        do { dist = try await ensureStaged() } catch { return nil }
+        let r = await runProcess(URL(fileURLWithPath: node), [dist, "--explain", task], timeout: 20)
+        return r.status == 0 && !r.stdout.isEmpty ? r.stdout : nil
+    }
+
     // MARK: status (fast, no spawning)
 
     /// Read both client configs + cheap-probe node for the initial sheet state.
