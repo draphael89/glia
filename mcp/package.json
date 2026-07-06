@@ -10,7 +10,9 @@
     "start": "node dist/index.js",
     "test": "GLIA_PSYCHE=test-fixtures/psyche.md GBRAIN_SOURCE_DIR=test-fixtures/gbrain-source GBRAIN_CMD=test-fixtures/gbrain-stub.sh node --test dist/*.test.js",
     "test:e2e": "node test-e2e.mjs",
-    "test:all": "npm run build && npm test && npm run test:e2e"
+    "test:golden": "node test-golden.mjs",
+    "test:update-golden": "UPDATE_GOLDEN=1 node test-golden.mjs",
+    "test:all": "npm run build && npm test && npm run test:e2e && npm run test:golden"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"

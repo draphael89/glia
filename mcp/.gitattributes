@@ -1,0 +1,4 @@
+test-fixtures/** text eol=lf
+test-golden/** text eol=lf
+*.sh text eol=lf
+*.mjs text eol=lf
