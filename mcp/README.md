@@ -50,7 +50,7 @@ line naming the identity source and retrieval outcome (never silently empty).
 | `prime_context` | The headline. Given the session's task, returns a context block: a concentrated **who you are** core + **relevant, deduped gbrain pages**. `mode`: `psyche` / `context` / `both` (default — the recipe v2 proved). Call it first. |
 | `who_am_i` | Just the psyche map — who you are, values, essays. |
 | `recall` | Pure relevance retrieval from gbrain for a query. |
-| `explain_context` | Preview *exactly* what `prime_context` would inject — identity sections + retrieved page slugs + token estimates — **without** the full content. See and trust what's loaded. |
+| `explain_context` | Preview *exactly* what `prime_context` would inject — identity sections + retrieved page slugs + token estimates — **without** the full content. The retrieval line also reports how many pages were `deduped` (already in your identity) and `live-fetched` (read from the full brain because they missed the local mirror), so you can see completeness at a glance. |
 | `health` | Config health: are the psyche, gbrain command, and source reachable? `probe=true` runs a live retrieval round-trip. |
 
 The server also sends MCP `instructions` at initialize, nudging compliant clients
