@@ -15,6 +15,10 @@ enum ClientState: Sendable, Equatable {
     case clientMissing            // the app isn't installed
     case cliMissing               // the `claude` CLI isn't on PATH
     case failed(String)
+
+    var isRegistered: Bool {
+        self == .registered || self == .registeredNeedsRestart
+    }
 }
 
 struct MCPStatus: Sendable, Equatable {
@@ -261,7 +265,11 @@ enum MCPProvision {
             }
             do {
                 try fm.createDirectory(at: dir, withIntermediateDirectories: true)
-                try out.write(to: cfg, options: .atomic)
+                // Write to the symlink TARGET, not the link. An atomic write is
+                // temp-file + rename(), which would replace a symlinked config
+                // (dotfiles setups) with a regular file and silently break the link.
+                let writeTarget = cfg.resolvingSymlinksInPath()
+                try out.write(to: writeTarget, options: .atomic)
             } catch { return .failed("\(error)") }
             return .registeredNeedsRestart
         }.value
@@ -289,13 +297,20 @@ enum MCPProvision {
             st.desktopInstalled = desktopInstalled
             st.node = probeNodePath().map { NodeState.found($0) } ?? .unknown
 
-            func hasGlia(_ url: URL) -> Bool {
-                guard let d = try? Data(contentsOf: url), let s = String(data: d, encoding: .utf8) else { return false }
-                return s.contains("glia-context")
+            // Only report "registered" if glia-context is present AND its recorded
+            // dist still exists on disk — a substring match would show green for a
+            // stale registration pointing at a deleted/moved dist (which won't run).
+            func registeredAndUsable(_ url: URL) -> Bool {
+                guard let d = try? Data(contentsOf: url),
+                      let root = try? JSONSerialization.jsonObject(with: d) as? [String: Any],
+                      let servers = root["mcpServers"] as? [String: Any],
+                      let g = servers["glia-context"] as? [String: Any],
+                      let args = g["args"] as? [String], let dist = args.last else { return false }
+                return fm.fileExists(atPath: dist)
             }
-            st.claudeCode = hasGlia(home.appendingPathComponent(".claude.json")) ? .registered : .unknown
+            st.claudeCode = registeredAndUsable(home.appendingPathComponent(".claude.json")) ? .registered : .unknown
             if desktopInstalled {
-                st.claudeDesktop = hasGlia(home.appendingPathComponent("Library/Application Support/Claude/claude_desktop_config.json"))
+                st.claudeDesktop = registeredAndUsable(home.appendingPathComponent("Library/Application Support/Claude/claude_desktop_config.json"))
                     ? .registered : .unknown
             } else {
                 st.claudeDesktop = .clientMissing

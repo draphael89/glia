@@ -937,7 +937,13 @@ final class AppModel {
         mcpStatus.claudeDesktop = await MCPProvision.registerClaudeDesktop(node: node, dist: dist, desktopInstalled: desktopInstalled)
 
         await syncPsycheToMCP()   // ensure ~/.glia/psyche.md exists so the server has data
-        mcpStatus.phase = .done
+        // Don't claim success if nothing was actually registered (no Claude CLI AND
+        // no Claude Desktop) — surface it instead of a silent green ".done".
+        if mcpStatus.claudeCode.isRegistered || mcpStatus.claudeDesktop.isRegistered {
+            mcpStatus.phase = .done
+        } else {
+            mcpStatus.phase = .error("No MCP client was registered — Claude Code CLI not found and Claude Desktop not installed.")
+        }
 #endif
     }
 
