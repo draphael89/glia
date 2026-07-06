@@ -1059,8 +1059,13 @@ final class AppModel {
             return nil
         }
         guard let pages = count("pages") else { retrievalHealth = "No retrieval in the probe."; return }
-        let live = count("live-fetched") ?? 0
-        if pages == 0 {
+        let deduped = count("deduped") ?? 0
+        let live = min(count("live-fetched") ?? 0, pages)   // never claim more live-fetched than injected
+        if pages == 0 && deduped > 0 {
+            // Healthy + EXPECTED on identity-shaped queries: retrieval ranked your own
+            // essays top and they were deduped against the injected psyche — NOT a misconfig.
+            retrievalHealth = "\(deduped) relevant pages already in your identity — deduped ✓ (expected on identity queries)"
+        } else if pages == 0 {
             retrievalHealth = "Retrieval returned no pages — check GBRAIN_CMD / source."
         } else if live == 0 {
             retrievalHealth = "\(pages) pages · your mirror covers the top pages ✓"

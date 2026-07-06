@@ -175,20 +175,24 @@ private struct TuningSettingsTab: View {
     @AppStorage("glia.tuning.psycheCore") private var psycheCore = TuningConfig.dPsycheCore
     @AppStorage("glia.tuning.relFloor") private var relFloor = TuningConfig.dRelFloor
     @AppStorage("glia.tuning.concurrency") private var concurrency = TuningConfig.dConcurrency
+    /// Set while load() hydrates from disk, so the resulting onChange cascade doesn't
+    /// persist (which would clobber a hand-set on-disk value with the clamped one).
+    @State private var isLoading = false
 
     var body: some View {
         Form {
             Section {
-                Stepper("Completeness fallback: **\(fallbackMax)** pages", value: $fallbackMax, in: 1...16)
+                Stepper(fallbackMax == 0 ? "Completeness fallback: **off**" : "Completeness fallback: **\(fallbackMax)** pages",
+                        value: $fallbackMax, in: 0...16)
                 Stepper("Parallel fetches: **\(concurrency)**", value: $concurrency, in: 1...8)
             } header: { Text("Retrieval") } footer: {
-                Text("The local mirror is a subset of your brain, so top-ranked pages can be missing. This is how many to re-read live from the full brain (measured: raises top-page completeness 31%→99%), and how many at once. Higher = more complete, slightly slower.")
+                Text("The local mirror is a subset of your brain, so top-ranked pages can be missing. This is how many to re-read live from the full brain (measured: raises top-page completeness 31%→99%; 0 = off), and how many at once. Higher = more complete, slightly slower.")
             }
             Section {
                 Stepper("Identity core: **\(psycheCore / 1000)k** tokens", value: $psycheCore, in: 4_000...24_000, step: 2_000)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Relevance floor: **\(relFloor, format: .number.precision(.fractionLength(2)))**")
-                    Slider(value: $relFloor, in: 0...0.9)
+                    Slider(value: $relFloor, in: 0...1)
                 }
             } header: { Text("Injection") } footer: {
                 Text("The identity core in ‘both’ mode is capped at 40% of the token budget (24k under the default), so 24k is the validated best — lowering it trades identity for more retrieval room (v10 found that generally worse). And the minimum relevance — as a fraction of the top page — for a retrieved page to be injected.")
@@ -215,16 +219,22 @@ private struct TuningSettingsTab: View {
 
     /// Load the on-disk values into the controls (clamped to the UI ranges) so the panel
     /// shows what the server will actually use. A missing file keeps the @AppStorage
-    /// values, which equal the server defaults. We do NOT write here.
+    /// values, which equal the server defaults. We do NOT write here — and we suppress the
+    /// onChange cascade these assignments cause, so opening the tab can't clobber the file.
+    /// Ranges match config.ts's accepted domains (fallback 0 = off; floor 0…1) so a
+    /// hand-set sentinel isn't silently narrowed.
     private func load() {
         guard let d = TuningConfig.read() else { return }
-        if let n = d["GBRAIN_GET_FALLBACK_MAX"] { fallbackMax = min(max(n.intValue, 1), 16) }
+        isLoading = true
+        if let n = d["GBRAIN_GET_FALLBACK_MAX"] { fallbackMax = min(max(n.intValue, 0), 16) }
         if let n = d["GBRAIN_GET_CONCURRENCY"] { concurrency = min(max(n.intValue, 1), 8) }
         if let n = d["GLIA_PSYCHE_CORE_MAX_TOKENS"] { psycheCore = min(max(n.intValue, 4_000), 24_000) }
-        if let n = d["GBRAIN_REL_SCORE_FLOOR"] { relFloor = min(max(n.doubleValue, 0), 0.9) }
+        if let n = d["GBRAIN_REL_SCORE_FLOOR"] { relFloor = min(max(n.doubleValue, 0), 1) }
+        DispatchQueue.main.async { isLoading = false }   // after the onChange handlers run
     }
 
     private func persist() {
+        guard !isLoading else { return }   // don't write while hydrating from disk
         TuningConfig.write(fallbackMax: fallbackMax, psycheCore: psycheCore, relFloor: relFloor, concurrency: concurrency)
     }
 }

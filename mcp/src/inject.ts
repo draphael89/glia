@@ -129,7 +129,11 @@ export function renderManifest(m: ContextManifest): string {
     `## Identity (${m.psycheStatus}, ~${m.psycheTokens} tok) — ${m.psycheSource}`,
     m.psycheSections.length ? m.psycheSections.map((s) => `  · ${s}`).join("\n") : "  (no page sections parsed)",
     "",
-    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages${m.retrievalDeduped > 0 ? `, ${m.retrievalDeduped} deduped` : ""}${m.retrievalLiveFetched > 0 ? `, ${m.retrievalLiveFetched} live-fetched` : ""})`,
+    // `liveFetched` is counted pre-truncation but `retrievalPages` is post-truncation, so
+    // cap the displayed count at the injected page count — a small budget could otherwise
+    // print a self-contradictory "3 pages, 5 live-fetched". (deduped legitimately can
+    // exceed pages — those pages were dropped, not injected — so it is NOT capped.)
+    `## Retrieval (${m.retrievalStatus}, ~${m.retrievalTokens} tok, ${m.retrievalPages.length} pages${m.retrievalDeduped > 0 ? `, ${m.retrievalDeduped} deduped` : ""}${Math.min(m.retrievalLiveFetched, m.retrievalPages.length) > 0 ? `, ${Math.min(m.retrievalLiveFetched, m.retrievalPages.length)} live-fetched` : ""})`,
     m.retrievalPages.length
       ? m.retrievalPages.map((p) => `  · ${p.slug}  (${p.score.toFixed(2)})`).join("\n")
       : (m.retrievalDeduped > 0
