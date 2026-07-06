@@ -74,4 +74,13 @@ export async function buildPsycheFromSource(): Promise<PsycheResult> {
   return { text: parts.join("\n"), source: `${dir} (self-page + essays)`, status: "built" };
 }
 
+/** Page slugs present in an injected psyche block — Glia's ContextBundle format
+ *  writes each page as `*<type> · <slug>*`. Used to dedup retrieval against what
+ *  the psyche already injects. Lowercased for case-insensitive matching. */
+export function psycheSlugs(text: string): Set<string> {
+  const out = new Set<string>();
+  for (const m of text.matchAll(/·\s+([^\s*]+)\s*\*/g)) out.add(m[1].toLowerCase());
+  return out;
+}
+
 export { identityRank };

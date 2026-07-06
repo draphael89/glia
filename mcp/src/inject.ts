@@ -1,5 +1,5 @@
 import { config, estimateTokens, truncateToTokens } from "./config.js";
-import { loadPsyche, type PsycheStatus } from "./psyche.js";
+import { loadPsyche, psycheSlugs, type PsycheStatus } from "./psyche.js";
 import { retrieveContext, formatContext, type RetrievalResult, type RetrievalStatus } from "./gbrain.js";
 
 export type InjectMode = "psyche" | "context" | "both";
@@ -98,7 +98,11 @@ export async function primeContext(
   let contextText = "";
   let retrieval: RetrievalResult = { pages: [], status: "skipped", elapsedMs: 0, cached: false, query: task };
   if (mode === "context" || mode === "both") {
-    retrieval = await retrieveContext(task);
+    // Dedup: don't spend retrieval budget re-injecting pages the psyche already
+    // carries (e.g. a starred essay) — measured ~50% overlap. Only exclude what
+    // was ACTUALLY injected (the truncated psycheText), not the full psyche.
+    const exclude = mode === "both" && psycheText ? psycheSlugs(psycheText) : undefined;
+    retrieval = await retrieveContext(task, { excludeSlugs: exclude });
     const ctx = formatContext(retrieval.pages);
     const ctxBudget = mode === "context" ? budget : budget - estimateTokens(psycheText);
     contextText = ctxBudget > 500 ? truncateToTokens(ctx, ctxBudget) : "";

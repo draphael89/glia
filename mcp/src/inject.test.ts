@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { estimateTokens, truncateToTokens } from "./config.js";
-import { cleanBody, identityRank, buildPsycheFromSource } from "./psyche.js";
+import { cleanBody, identityRank, buildPsycheFromSource, psycheSlugs } from "./psyche.js";
 import { primeContext } from "./inject.js";
-import { _clearRetrievalCache } from "./gbrain.js";
+import { retrieveContext, _clearRetrievalCache } from "./gbrain.js";
 
 // Tests run hermetically via the `test` npm script env:
 //   GLIA_PSYCHE=test-fixtures/psyche.md
@@ -83,4 +83,21 @@ test("buildPsycheFromSource assembles self-page + essays with status 'built'", a
   assert.equal(p.status, "built");
   assert.ok(p.text.includes("FIXTURE-SELF-MARKER"));
   assert.ok(p.text.includes("FIXTURE-ORIGINALS-MARKER"));
+});
+
+test("psycheSlugs parses the ContextBundle page-header format", () => {
+  const text = "## Title\n*person · people-david*\n\nbody\n\n## Other\n*original · originals/telos*\n";
+  const s = psycheSlugs(text);
+  assert.ok(s.has("people-david"));
+  assert.ok(s.has("originals/telos"));
+  assert.equal(s.size, 2);
+});
+
+test("retrieveContext excludes psyche slugs (dedup) before taking topK", async () => {
+  _clearRetrievalCache();
+  // stub returns note-alpha + note-beta; excluding note-alpha leaves only note-beta
+  const r = await retrieveContext("anything", { excludeSlugs: new Set(["note-alpha"]) });
+  assert.equal(r.status, "ok");
+  assert.equal(r.pages.length, 1);
+  assert.equal(r.pages[0].slug, "note-beta");
 });
