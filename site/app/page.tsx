@@ -230,9 +230,27 @@ export default function Home() {
             and dependent on whether retrieval already carries the identity. The exact number was never
             the finding — the conditionality is.
           </p>
+          <h3 style={{ marginTop: 28 }}>Then we tested the thing we actually ship — and it bit back.</h3>
+          <p>
+            Every run above judged a <em>reconstruction</em> of context. So we captured the
+            <em> actually-shipped</em> <code>prime_context</code> output — real header, capped psyche,
+            dedup&apos;d natural-query retrieval — and judged answers built from it (v9). Blind judges,
+            Opus <em>and</em> gpt-5, preferred <span style={{ color: armColor.context }}>retrieval</span>
+            {" "}alone; the injected <span style={{ color: armColor.best }}>both</span> arm did
+            <strong> not</strong> beat it. We had a fix ready — shrink the identity core — and tested it
+            (v10). It made <span style={{ color: armColor.best }}>both</span> <strong>worse</strong>, not
+            better. Prediction refuted, in public.
+          </p>
+          <p>
+            The honest read: this is a <strong>floor</strong>, not a refutation. A psyche-<em>blind</em>
+            judge penalizes real identity specifics it can&apos;t verify (the same effect v6 found), and
+            the one reader who <em>can</em> verify them — you — isn&apos;t in the loop. But the product
+            lesson is real and we&apos;re keeping it: <strong>don&apos;t assume identity injection beats
+            good retrieval for a verification-blind reader.</strong> Test what you ship, not a picture of it.
+          </p>
           <p className="muted">
-            Still a small-n pilot — but one we&apos;ve tried hard, across vendors, a doubled task set, and
-            a context-construction control, to kill. Every time it bent, we wrote down how.
+            Small-n throughout — but tried hard, across vendors, a doubled task set, a construction
+            control, and the real shipped pipeline, to kill. Every time it bent, we wrote down how.
           </p>
         </div>
       </section>
@@ -241,7 +259,7 @@ export default function Home() {
       <section>
         <div className="wrap">
           <h2>How hard we pushed on it</h2>
-          <h3>Eight runs, each trying to break the last.</h3>
+          <h3>Ten runs, each trying to break the last.</h3>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>
             <table>
               <thead>
@@ -256,6 +274,8 @@ export default function Home() {
                 <tr><td className="mono">v6</td><td>a <strong>different vendor</strong> (OpenAI gpt-5) re-judges</td><td><span style={{ color: armColor.best }}>both</span> still wins (beats context 64%, psyche 68%); mechanism holds → not self-preference</td></tr>
                 <tr><td className="mono">v7</td><td><strong>expansion</strong> — 7 fresh pre-registered tasks (→12 total)</td><td>ordering holds, but <span style={{ color: armColor.best }}>both</span>-over-<span style={{ color: armColor.context }}>relevance</span> tempered 71%→59% (n.s.); identity&apos;s edge is conditional on retrieval not already carrying it</td></tr>
                 <tr><td className="mono">v8</td><td><strong>construction control</strong> — rebuild context with natural (production) queries</td><td>edge recovered 33%→60%: v7&apos;s keyword context over-pulled essays; honest range ~55–65%, construction-sensitive</td></tr>
+                <tr><td className="mono">v9</td><td><strong>production pipeline</strong> — the ACTUALLY-shipped injection, not a reconstruction</td><td>blind judges (Opus + gpt-5) prefer <span style={{ color: armColor.context }}>retrieval</span> alone; injected <span style={{ color: armColor.best }}>both</span> doesn&apos;t beat it. A floor — the psyche-blind judge can&apos;t verify the identity (v6)</td></tr>
+                <tr><td className="mono">v10</td><td><strong>rebalance test</strong> — shrink the shipped identity core to recover <span style={{ color: armColor.best }}>both</span></td><td>hypothesis REFUTED: a smaller core made it worse, not better. More psyche helps; the shortfall isn&apos;t a config knob</td></tr>
               </tbody>
             </table>
           </div>

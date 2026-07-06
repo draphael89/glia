@@ -85,9 +85,12 @@ Materials (the psyche + per-task context) are built from a real brain and are
 
 - [FINDINGS.md](FINDINGS.md) — narrative reading of both runs (read this first).
 - [REPORT.md](REPORT.md) / [v2](REPORT-v2.md) / [v3](REPORT-v3.md) / [v4](REPORT-v4.md)
-  / [v5](REPORT-v5.md) / [v6](REPORT-v6.md) / [v7](REPORT-v7.md) / [v8](REPORT-v8.md) — raw
-  metrics per run (Borda, pairwise, rubric, cross-model, dose-response, cross-vendor,
-  **task expansion**, **context-construction control**); aggregate only, no private content.
+  / [v5](REPORT-v5.md) / [v6](REPORT-v6.md) / [v7](REPORT-v7.md) / [v8](REPORT-v8.md)
+  / [v9](REPORT-v9.md) — raw metrics per run (Borda, pairwise, rubric, cross-model,
+  dose-response, cross-vendor, **task expansion**, **context-construction control**,
+  **production-pipeline**); aggregate only, no private content.
+- [REPORT-config-compare.md](REPORT-config-compare.md) — v9 vs v10: shrinking the
+  shipped identity core made the combined arm *worse*, not better (hypothesis refuted).
 - [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md) — robustness: the lift isn't a length
   confound (a shorter arm beats a longer one on content in all three judge pools).
 - [SIGNIFICANCE.md](SIGNIFICANCE.md) — task-clustered uncertainty: direction is
@@ -109,6 +112,17 @@ is identity-specific, not a global "try harder." Trust the ordering and the
 conditionality; treat the exact percentage as ~55–65%, not a single point
 (see [REPORT-v7.md](REPORT-v7.md) / [REPORT-v8.md](REPORT-v8.md) /
 [SIGNIFICANCE.md](SIGNIFICANCE.md) / [VERBOSITY-CHECK.md](VERBOSITY-CHECK.md)).
+
+**The sharpest honesty (v9/v10):** every result above measured a *reconstruction*
+of context. When we tested the **actually-shipped** `prime_context` output
+end-to-end, blind judges (Opus *and* gpt-5) preferred **retrieval-alone** — the
+injected `both` arm did **not** beat it, and shrinking the identity core (v10) made
+it *worse*, not better. That's a real signal — *don't assume identity injection
+beats good retrieval for a verification-blind reader* — but it's a **floor**: a
+psyche-blind judge penalizes the identity's real specifics as unverifiable (v6),
+and the one reader who *can* verify them, the actual user, isn't in the loop. The
+lesson we value most: test what you **ship**, and let it overturn your prediction
+(see [REPORT-v9.md](REPORT-v9.md)).
 
 **What v1 got wrong (kept in the repo on purpose):** the first, *non-blind* run
 claimed psyche *alone* beat the combination and that retrieval *diluted*
