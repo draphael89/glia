@@ -12,7 +12,17 @@ import { validateConfig, renderHealthReport } from "./health.js";
 
 const server = new Server(
   { name: "glia-context", version: "0.1.0" },
-  { capabilities: { tools: {} } },
+  {
+    capabilities: { tools: {} },
+    // Sent to the client at initialize — nudges compliant agents to prime first.
+    instructions:
+      "This server primes you with WHO THE USER IS (their psyche/identity map) plus " +
+      "WHAT'S RELEVANT to their task, from their gbrain. At the START of a substantive " +
+      "session — before answering a request that benefits from knowing them — call " +
+      "`prime_context` with what the user is trying to do, and reason from what it returns " +
+      "so your answer serves this specific person, not a generic user. Use `who_am_i` for " +
+      "identity alone, `recall` for pure retrieval, and `health` to check configuration.",
+  },
 );
 
 const TOOLS = [

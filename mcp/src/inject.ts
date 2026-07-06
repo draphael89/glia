@@ -114,6 +114,11 @@ export async function primeContext(
   const statusLines = buildStatusLines({ mode, psycheStatus, psycheSource, retrieval, injectedPages });
   const degraded = psycheStatus === "empty" || ["timeout", "error", "disabled"].includes(retrieval.status);
 
+  // NB: a visible "how to use this" directive + closing instruction was A/B-tested
+  // (GLIA_NO_DIRECTIVE toggle) and came out a dead 50/50 tie with a strong judge —
+  // a capable model already serves the specific person from the identity+context,
+  // so we DON'T ship the extra tokens. The "call prime_context first / reason from
+  // it" guidance lives at the protocol level via the server `instructions` instead.
   const header = [
     "# Priming context for this session",
     "<!-- Injected by glia-context. Below is who I am, then what's relevant to the task.",
